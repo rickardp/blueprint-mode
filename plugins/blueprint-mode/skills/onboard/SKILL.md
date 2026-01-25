@@ -33,11 +33,14 @@ Set up or continue refining spec-driven development structure for a codebase.
 - Do NOT ask "Would you like to proceed?" or "Should I create the structure?"
 - Do NOT offer options like "Full setup / ADRs only / Skip"
 - Do NOT output questions as plain text - ALWAYS use the AskUserQuestion tool
-- DO present findings and immediately invoke AskUserQuestion for interview
+- Do NOT end your response with an open-ended question - end with AskUserQuestion tool call
+- DO present findings and IMMEDIATELY invoke AskUserQuestion for interview (same response)
 - DO create the structure after gathering rationale
 
 **TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for all structured questions.**
 When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text.
+
+**FLOW: Present findings → Immediately invoke AskUserQuestion for gaps → Never stop with an open question**
 
 ### Step 1: Analyze the Codebase (Automatic)
 
@@ -130,9 +133,11 @@ Present what you discovered from both code AND existing documentation. Show what
 - Success metrics (not documented)"
 ```
 
+**CRITICAL: After presenting findings, IMMEDIATELY invoke AskUserQuestion for gaps. Do NOT ask "Would you like to proceed?" or any open-ended question.**
+
 **If all rationale was found in existing docs:** Skip to Step 5 (Create Structure) - no interview needed.
 
-**If gaps exist:** Proceed to Step 3 (Interview) to fill only the gaps.
+**If gaps exist:** Immediately invoke AskUserQuestion (Step 3) with educated guesses for all gaps. Do NOT wait for user permission.
 
 ### Step 3: Gap-Driven Interview
 
@@ -473,3 +478,9 @@ If user indicates a mistake after creation:
 2. Clarify: "What needs to change?"
 3. Execute: Update or delete as needed
 4. Confirm: "Files have been [updated/removed]"
+
+## Examples
+
+**CORRECT flow (findings + immediate AskUserQuestion in same response):**
+```
+User: /blueprint:onboard
