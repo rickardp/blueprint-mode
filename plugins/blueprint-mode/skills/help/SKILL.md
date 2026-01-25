@@ -2,6 +2,9 @@
 name: blueprint:help
 description: Explain Blueprint Mode plugin and available commands. Use when the user asks about Blueprint features, how to use skills, or needs guidance on spec-driven development workflow.
 argument-hint: "[topic: commands|workflow|specs|adrs|patterns]"
+allowed-tools:
+  - Glob
+  - Read
 ---
 
 # Blueprint Help

@@ -3,6 +3,14 @@ name: blueprint:onboard
 description: Onboard an existing repository to the spec-driven development structure. Can be run multiple times to refine and add to the documentation. Use when setting up or continuing to build docs/specs/, docs/adrs/, and patterns/.
 disable-model-invocation: true
 argument-hint: ""
+allowed-tools:
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - AskUserQuestion
 ---
 
 # Onboard Existing Repository
@@ -24,8 +32,12 @@ Set up or continue refining spec-driven development structure for a codebase.
 **CRITICAL: Running `/blueprint:onboard` signals intent to create/improve Blueprint documentation.**
 - Do NOT ask "Would you like to proceed?" or "Should I create the structure?"
 - Do NOT offer options like "Full setup / ADRs only / Skip"
-- DO present findings and immediately ask interview questions
+- Do NOT output questions as plain text - ALWAYS use the AskUserQuestion tool
+- DO present findings and immediately invoke AskUserQuestion for interview
 - DO create the structure after gathering rationale
+
+**TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for all structured questions.**
+When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text.
 
 ### Step 1: Analyze the Codebase (Automatic)
 
@@ -141,7 +153,9 @@ Before asking any question, check if the answer was already extracted in Step 1b
 
 #### 3b: ADR Questions (ONLY for tech without documented rationale)
 
-For each technology **without documented rationale**, use AskUserQuestion with **contextual educated guesses**:
+For each technology **without documented rationale**, **INVOKE the AskUserQuestion tool** with contextual educated guesses.
+
+**You MUST call the tool, not output text questions.**
 
 **Generate options based on detected context:**
 

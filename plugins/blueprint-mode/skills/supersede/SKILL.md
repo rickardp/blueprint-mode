@@ -3,6 +3,13 @@ name: blueprint:supersede
 description: Replace or deprecate a previous architectural decision. Use when the user wants to change a tech choice, retire a decision, or remove functionality without replacement.
 argument-hint: "[ADR-number]"
 disable-model-invocation: true
+allowed-tools:
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - Edit
+  - AskUserQuestion
 ---
 
 # Supersede or Deprecate Decision
@@ -17,6 +24,9 @@ Replace a previous architectural decision with a new one, or deprecate it entire
 2. **Never block**: Allow skip on optional questions
 3. **History preserved**: Old ADRs are updated, never deleted
 4. **Use globbing**: Find ADRs via file system, no index needed
+
+**TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for all structured questions.**
+When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text or rephrase as plain text questions.
 
 ## Process
 

@@ -3,6 +3,11 @@ name: blueprint:validate
 description: Check code against documented specs, patterns, anti-patterns, and ADR decisions. Use when the user wants to verify consistency, audit the codebase, check spec compliance, or find violations.
 argument-hint: "[scope: all|specs|patterns|adrs|features|directory]"
 disable-model-invocation: true
+allowed-tools:
+  - Glob
+  - Grep
+  - Read
+  - AskUserQuestion
 ---
 
 # Validate Blueprint Compliance
@@ -18,6 +23,9 @@ Check codebase against documented specs, patterns, anti-patterns, and architectu
 3. **Severity-based**: Rank findings by impact (Critical > High > Medium > Low).
 4. **Non-destructive**: Report only, never auto-fix without explicit request.
 
+**TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for scope selection if not specified.**
+When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text or rephrase as plain text questions.
+
 ## Process
 
 ### Step 1: Check Prerequisites
@@ -32,9 +40,28 @@ If none exist: "No Blueprint structure found. Run `/blueprint:onboard` first."
 
 ### Step 2: Scope Selection
 
-If scope unclear, ask: "What should I validate? (all source files / specific directory / recent changes)"
+**If scope not provided in command, use AskUserQuestion:**
 
-Default: All source files, excluding node_modules, dist, build directories.
+```json
+{
+  "questions": [{
+    "question": "What should I validate?",
+    "header": "Scope",
+    "options": [
+      {"label": "All source (Recommended)", "description": "Validate entire codebase excluding node_modules, dist, build"},
+      {"label": "Recent changes", "description": "Only files modified in last commit or uncommitted"},
+      {"label": "Specific directory", "description": "I'll specify a path to validate"}
+    ],
+    "multiSelect": false
+  }]
+}
+```
+
+**Response handling:**
+- "All source" → Validate src/, lib/, etc. excluding node_modules, dist, build
+- "Recent changes" → Use `git diff --name-only` to get changed files
+- "Specific directory" → Ask: "Which directory?" (plain text follow-up)
+- "Other" → Use their text as directory path
 
 ### Step 3: Load Validation Rules
 

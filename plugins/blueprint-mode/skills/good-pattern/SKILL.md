@@ -2,6 +2,13 @@
 name: blueprint:good-pattern
 description: Capture a good code pattern as a reusable example. Use when the user identifies code worth emulating, wants to standardize an approach, or says "this is how we should do it".
 argument-hint: "[file-path or description]"
+allowed-tools:
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - Edit
+  - AskUserQuestion
 ---
 
 # Capture Good Pattern
@@ -16,6 +23,9 @@ Mark code as a good example others should follow.
 2. **Auto-scaffold**: Create patterns/ structure if it doesn't exist.
 3. **Flexible naming**: Use descriptive names, not rigid conventions.
 4. **Capture now, refine later**: Add explanation comments later if needed.
+
+**TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for all structured questions.**
+When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text or rephrase as plain text questions.
 
 ## Process
 

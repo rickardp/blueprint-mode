@@ -731,7 +731,12 @@ If user indicates a mistake after creation ("wait, that was wrong", "I need to c
 <!-- SECTION: interactive-questions -->
 ## Interactive Question Standards
 
-Use Claude Code's `AskUserQuestion` tool for structured user interactions.
+**CRITICAL: You MUST invoke the `AskUserQuestion` tool - do NOT output questions as plain text.**
+
+When this documentation shows JSON examples, they are parameters for the AskUserQuestion tool. You must actually call the tool, not print the JSON or rephrase it as text.
+
+**Wrong:** Outputting "Would you like to: 1) Option A 2) Option B"
+**Right:** Invoking AskUserQuestion tool with the options as parameters
 
 ### When to Use AskUserQuestion vs Plain Text
 

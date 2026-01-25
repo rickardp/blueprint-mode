@@ -2,6 +2,10 @@
 name: blueprint:status
 description: Show overview of project's Blueprint structure including specs, ADRs, and patterns. Use when the user asks about documented decisions, project status, or wants to see what's been captured.
 argument-hint: "[focus: specs|adrs|patterns]"
+allowed-tools:
+  - Glob
+  - Grep
+  - Read
 ---
 
 # Blueprint Status

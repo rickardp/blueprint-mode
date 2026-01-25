@@ -2,6 +2,13 @@
 name: blueprint:bad-pattern
 description: Document a code anti-pattern to avoid. Use when the user identifies problematic code, technical debt, or says "don't do it this way" or "this is wrong".
 argument-hint: "[description]"
+allowed-tools:
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - Edit
+  - AskUserQuestion
 ---
 
 # Mark Anti-Pattern
@@ -16,6 +23,9 @@ Document a code pattern to avoid, with the correct alternative.
 2. **Auto-scaffold**: Create patterns/ structure if it doesn't exist.
 3. **Capture now, refine later**: TODO markers for missing sections.
 4. **Paired patterns**: Always try to document both "don't" and "do instead".
+
+**TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for all structured questions.**
+When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text or rephrase as plain text questions.
 
 ## Process
 
@@ -52,31 +62,83 @@ Check if `patterns/bad/` exists.
 2. Inform: "Created patterns structure. Run `/blueprint:onboard` to add full project context."
 3. Continue with documenting the anti-pattern
 
-### Step 3: Gather Missing Information (Single Batch)
+### Step 3: Gather Missing Information
 
-**Present all remaining questions in a single prompt:**
+**Use AskUserQuestion with contextual educated guesses based on the anti-pattern.**
 
 If description not provided:
-> "What's the anti-pattern?"
+> "What's the anti-pattern?" (plain text question)
 
-Once description is known, present remaining questions together:
+Once description is known, generate contextual options based on detected pattern:
 
+#### 3a: Generate Contextual Options
+
+| Anti-Pattern Type | Suggest These Problems | Suggest These Fixes |
+|-------------------|----------------------|---------------------|
+| **Type Safety** (any, casting, no types) | "Type errors at runtime", "Hard to refactor", "No IDE support" | "Use unknown", "Add proper types", "Use generics" |
+| **SQL/Queries** (inline SQL, string concat) | "SQL injection", "Hard to maintain", "No parameterization" | "Parameterized queries", "Use ORM", "Query builder" |
+| **Error Handling** (catch all, ignore errors) | "Silent failures", "Hard to debug", "Lost context" | "Typed errors", "Error boundaries", "Proper logging" |
+| **State** (global state, mutations) | "Race conditions", "Hard to test", "Unpredictable" | "Immutable patterns", "Local state", "State machines" |
+| **Async** (callback hell, no await) | "Hard to read", "Error handling gaps", "Memory leaks" | "async/await", "Promise chains", "Error boundaries" |
+
+#### 3b: Ask with AskUserQuestion
+
+**Combine questions into batched AskUserQuestion calls:**
+
+```json
+{
+  "questions": [
+    {
+      "question": "What problems does this anti-pattern cause?",
+      "header": "Problems",
+      "options": [
+        {"label": "Type errors", "description": "Runtime type errors that could be caught at compile time"},
+        {"label": "Hard to refactor", "description": "Changes are risky without type safety"},
+        {"label": "No IDE support", "description": "Lose autocomplete and type hints"},
+        {"label": "Skip for now", "description": "I'll document this later"}
+      ],
+      "multiSelect": true
+    },
+    {
+      "question": "What's the correct approach instead?",
+      "header": "Fix",
+      "options": [
+        {"label": "Use unknown", "description": "Type-safe alternative that requires narrowing"},
+        {"label": "Add proper types", "description": "Define explicit types/interfaces"},
+        {"label": "Use generics", "description": "Type parameters for flexibility"},
+        {"label": "Skip for now", "description": "I'll document this later"}
+      ],
+      "multiSelect": false
+    }
+  ]
+}
 ```
-"Documenting anti-pattern: [description]. Quick details (answer any, or 'add now'):
 
-**The Bad:**
-1. Example code? (paste a snippet)
-2. What problems does it cause?
+**Note:** Options are educated guesses based on the detected anti-pattern type. User can always select "Other" to provide their own answer.
 
-**The Fix:**
-3. What's the correct approach?
+#### 3c: Severity (if not obvious)
 
-**Context:** [optional]
-4. Where have you seen this? (file paths)
-5. Severity? (Critical/High/Medium/Low) [default: Medium]
-
-_(Say 'add now' to document with what you've shared)_"
+```json
+{
+  "questions": [{
+    "question": "How severe is this anti-pattern?",
+    "header": "Severity",
+    "options": [
+      {"label": "Critical", "description": "Security vulnerability, data loss, crashes"},
+      {"label": "High", "description": "Performance issues, maintenance burden"},
+      {"label": "Medium (Recommended)", "description": "Code smell, harder to maintain"},
+      {"label": "Low", "description": "Style preference, minor inefficiency"}
+    ],
+    "multiSelect": false
+  }]
+}
 ```
+
+**Response handling:**
+- Selected option → Use as problem/fix for documentation
+- "Skip for now" → Create with `<!-- TODO: Add [section] -->`
+- "Other" → Use their text verbatim
+- Multiple selections (problems) → Include all in documentation
 
 **If user exits early or skips:**
 - Mark missing sections with `<!-- TODO: ... -->`

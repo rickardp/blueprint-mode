@@ -2,6 +2,13 @@
 name: blueprint:decide
 description: Record a technology, framework, or architectural decision as an ADR. Use when the user is making a tech choice, comparing options, or needs to document why a decision was made.
 argument-hint: "[decision-topic]"
+allowed-tools:
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - Edit
+  - AskUserQuestion
 ---
 
 # Record Tech Decision
@@ -16,6 +23,9 @@ Record a technology or framework decision as an Architecture Decision Record (AD
 2. **Never block**: User can skip any question or say "proceed" at any point.
 3. **Auto-scaffold**: Create Blueprint structure if it doesn't exist.
 4. **Capture now, refine later**: Missing sections get "To be documented" markers.
+
+**TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for all structured questions.**
+When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text or rephrase as plain text questions.
 
 ## Process
 

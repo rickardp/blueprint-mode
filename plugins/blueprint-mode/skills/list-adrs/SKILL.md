@@ -2,6 +2,10 @@
 name: blueprint:list-adrs
 description: List all Architecture Decision Records with their status and summaries. Use when the user wants to see all decisions, review ADR history, or find a specific decision.
 argument-hint: "[filter: active|superseded|deprecated|outdated|draft|keyword]"
+allowed-tools:
+  - Glob
+  - Grep
+  - Read
 ---
 
 # List ADRs

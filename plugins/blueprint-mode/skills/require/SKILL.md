@@ -2,6 +2,13 @@
 name: blueprint:require
 description: Add a functional or non-functional requirement. Use when the user wants to document a new feature requirement, acceptance criteria, performance target, or quality standard.
 argument-hint: "[requirement-description]"
+allowed-tools:
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - Edit
+  - AskUserQuestion
 ---
 
 # Add Requirement
@@ -16,6 +23,9 @@ Add a functional (FR) or non-functional (NFR) requirement to the specs.
 2. **Auto-scaffold**: Create structure if it doesn't exist.
 3. **Module path optional**: Use TBD for planned features without known location.
 4. **Capture now, refine later**: TODO markers for missing sections.
+
+**TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for all structured questions.**
+When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text or rephrase as plain text questions.
 
 ## Process
 
@@ -55,33 +65,87 @@ Check if `docs/specs/` exists.
 2. Inform: "Created Blueprint specs structure. Run `/blueprint:onboard` to add full project context."
 3. Continue with recording the requirement
 
-### Step 3: Gather Missing Information (Single Batch)
+### Step 3: Gather Missing Information
 
-**Present all remaining questions based on detected type.**
+**Use AskUserQuestion with contextual educated guesses based on requirement type.**
 
-#### For Functional Requirements:
+#### 3a: Generate Contextual Options
 
+| Requirement Type | Suggest These User Types | Suggest These Benefits |
+|------------------|--------------------------|------------------------|
+| **Auth/Login** | "End user", "Admin", "API consumer" | "Security", "Convenience", "Compliance" |
+| **UI/Display** | "End user", "Mobile user", "Accessibility" | "Usability", "Engagement", "Accessibility" |
+| **API/Data** | "Developer", "System", "Integration" | "Performance", "Reliability", "Scalability" |
+| **Admin/Config** | "Admin", "Operator", "Support" | "Control", "Efficiency", "Visibility" |
+
+#### 3b: For Functional Requirements (use AskUserQuestion)
+
+```json
+{
+  "questions": [
+    {
+      "question": "Who is this feature for?",
+      "header": "User",
+      "options": [
+        {"label": "End user", "description": "Regular users of the application"},
+        {"label": "Admin", "description": "Administrative users with elevated access"},
+        {"label": "Developer", "description": "API consumers or integrators"},
+        {"label": "Skip for now", "description": "I'll specify later"}
+      ],
+      "multiSelect": false
+    },
+    {
+      "question": "What's the main benefit?",
+      "header": "Benefit",
+      "options": [
+        {"label": "Convenience", "description": "Makes a task easier or faster"},
+        {"label": "Security", "description": "Protects data or access"},
+        {"label": "Engagement", "description": "Improves user experience"},
+        {"label": "Skip for now", "description": "I'll specify later"}
+      ],
+      "multiSelect": false
+    }
+  ]
+}
 ```
-"Adding feature requirement: [description]. Quick details (answer any, or 'add now'):
 
-1. Feature name? [if not obvious from description]
-2. User story? (As a [user], I want [X] so that [Y])
-3. Module location? (e.g., src/auth/) [default: TBD]
+**Note:** Options are educated guesses based on detected requirement type. User can always select "Other" to provide their own answer.
 
-_(Say 'add now' to create with what you've shared)_"
+#### 3c: For Non-Functional Requirements (use AskUserQuestion)
+
+```json
+{
+  "questions": [
+    {
+      "question": "What category does this requirement belong to?",
+      "header": "Category",
+      "options": [
+        {"label": "Performance", "description": "Latency, throughput, response time"},
+        {"label": "Availability", "description": "Uptime, recovery, failover"},
+        {"label": "Security", "description": "Auth, encryption, audit"},
+        {"label": "Scalability", "description": "Users, data volume, load"}
+      ],
+      "multiSelect": false
+    },
+    {
+      "question": "How should this be measured?",
+      "header": "Metric",
+      "options": [
+        {"label": "P95 latency", "description": "95th percentile response time"},
+        {"label": "Uptime %", "description": "Availability percentage"},
+        {"label": "Error rate", "description": "Percentage of failed requests"},
+        {"label": "Skip for now", "description": "I'll define metrics later"}
+      ],
+      "multiSelect": false
+    }
+  ]
+}
 ```
 
-#### For Non-Functional Requirements:
-
-```
-"Adding non-functional requirement: [description]. Quick details (answer any, or 'add now'):
-
-1. Category? (Performance/Security/Scalability/Availability) [auto-detected: X]
-2. How to measure this?
-3. Target threshold?
-
-_(Say 'add now' to create with what you've shared)_"
-```
+**Response handling:**
+- Selected option → Use in requirement spec
+- "Skip for now" → Create with `<!-- TODO: Add [section] -->`
+- "Other" → Use their text verbatim
 
 **If user exits early or skips:**
 - Mark missing sections with `<!-- TODO: ... -->`

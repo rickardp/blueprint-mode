@@ -3,6 +3,14 @@ name: blueprint:setup-repo
 description: Set up a new repository with spec-driven development structure from scratch. Use when creating a new project and the user wants to establish specs, ADRs, and patterns from the beginning.
 disable-model-invocation: true
 argument-hint: ""
+allowed-tools:
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - AskUserQuestion
 ---
 
 # Set Up New Repository
@@ -18,6 +26,9 @@ Create a new project with spec-driven development structure from scratch.
 3. **Early exit always available**: User can say "proceed" at any point.
 4. **Unit tests from the start**: Every project gets a testing setup.
 5. **Conservative dependencies**: Only add packages if explicitly requested or de facto standard.
+
+**TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for all structured questions.**
+When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text or rephrase as plain text questions.
 
 ## Process
 
