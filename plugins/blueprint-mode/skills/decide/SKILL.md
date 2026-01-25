@@ -55,40 +55,158 @@ Check if `docs/adrs/` exists using Glob.
 
 **Get next ADR number:** Count existing `docs/adrs/*.md` files (excluding any index files).
 
-### Step 3: Check for Existing Draft
+### Step 3: Check for Existing ADRs
+
+#### 3a: Check for Draft on Same Topic
 
 Check for existing Draft ADR on the same topic.
 
 If found:
-> "I found a Draft ADR on this topic (ADR-NNN). Would you like to refine it or create a new one?"
+```json
+{
+  "questions": [{
+    "question": "Found Draft ADR-NNN on this topic. What would you like to do?",
+    "header": "Existing",
+    "options": [
+      {"label": "Refine it", "description": "Complete the existing draft ADR"},
+      {"label": "Create new", "description": "Start fresh with a new ADR"}
+    ],
+    "multiSelect": false
+  }]
+}
+```
+
+#### 3b: Check for Conflicting Decision (CRITICAL)
+
+**Detect when new decision contradicts an existing Active ADR.**
+
+| New Decision | Conflicts With |
+|--------------|----------------|
+| DynamoDB | Existing "PostgreSQL as database" ADR |
+| React | Existing "Vue as frontend framework" ADR |
+| Bun | Existing "Node.js as runtime" ADR |
+| Auth0 | Existing "Cognito as auth" ADR |
+
+**Detection logic:**
+1. Read existing ADRs in `docs/adrs/`
+2. Extract the decision category (database, runtime, framework, auth, etc.)
+3. Check if new decision is in the same category as an existing Active ADR
+4. If conflict found, ask user:
+
+```json
+{
+  "questions": [{
+    "question": "ADR-003 already documents PostgreSQL as database. Is DynamoDB replacing it?",
+    "header": "Conflict",
+    "options": [
+      {"label": "Yes, supersede", "description": "Mark PostgreSQL ADR as superseded, create DynamoDB ADR"},
+      {"label": "No, additional", "description": "This is a separate use case (e.g., caching vs primary DB)"},
+      {"label": "No, mistake", "description": "I didn't mean to conflict, cancel this"}
+    ],
+    "multiSelect": false
+  }]
+}
+```
+
+**Response handling:**
+- "Yes, supersede" → Use `/blueprint:supersede` flow: create new ADR, mark old as Superseded
+- "No, additional" → Create new ADR with clarifying context (ask: "What's this database for?")
+- "No, mistake" → Cancel, don't create anything
+
+**Category detection patterns:**
+
+| Category | Keywords in ADR Title/Decision |
+|----------|-------------------------------|
+| Database | PostgreSQL, MySQL, DynamoDB, MongoDB, Redis, SQLite |
+| Runtime | Node.js, Bun, Deno, Python, Go, Rust |
+| Framework | React, Vue, Angular, Next.js, Express, FastAPI, SST |
+| Auth | Cognito, Auth0, Firebase Auth, Clerk, custom JWT |
+| Hosting | Vercel, AWS, GCP, Azure, Cloudflare |
+| ORM | Prisma, Drizzle, TypeORM, Sequelize |
 
 ### Step 4: Gather Missing Information
 
-**Present all remaining questions in a single batch.**
+**Use AskUserQuestion with contextual educated guesses based on the decision.**
 
 If decision not provided:
 > "What technology or approach did you decide on?"
 
-Once decision is known, present remaining questions together:
+Once decision is known, use AskUserQuestion with **educated guesses based on the tech**:
 
+#### 4a: Generate Contextual Options
+
+| Decision Type | Suggest These Rationales |
+|---------------|--------------------------|
+| **Databases** | |
+| PostgreSQL | "ACID compliance", "Team expertise", "Complex queries" |
+| DynamoDB | "Serverless fit", "AWS native", "Scale requirements" |
+| MongoDB | "Schema flexibility", "Document model fit", "Rapid iteration" |
+| Redis | "Caching needs", "Session storage", "Real-time features" |
+| **Frameworks** | |
+| React | "Team expertise", "Ecosystem/libraries", "Component model" |
+| Next.js | "SSR/SEO needs", "Full-stack simplicity", "Vercel deployment" |
+| Express | "Simplicity", "Team expertise", "Flexibility" |
+| SST/Serverless | "AWS native", "Pay-per-use", "Managed infra" |
+| **Runtimes** | |
+| Node.js | "Team expertise", "Ecosystem", "Hiring pool" |
+| Bun | "Performance", "Modern DX", "Native TypeScript" |
+| Deno | "Security model", "Modern standards", "TypeScript native" |
+| **Auth** | |
+| Cognito | "AWS native", "Managed service", "Mobile SDK" |
+| Auth0 | "Feature-rich", "Easy integration", "Social logins" |
+| Custom JWT | "Full control", "No vendor lock-in", "Simple needs" |
+
+#### 4b: Ask with AskUserQuestion
+
+```json
+{
+  "questions": [
+    {
+      "question": "Why was PostgreSQL chosen?",
+      "header": "PostgreSQL",
+      "options": [
+        {"label": "Team expertise", "description": "Team has strong PostgreSQL experience"},
+        {"label": "ACID compliance", "description": "Need transactional guarantees"},
+        {"label": "Complex queries", "description": "Advanced SQL features needed"},
+        {"label": "Skip for now", "description": "I'll document this later"}
+      ],
+      "multiSelect": false
+    }
+  ]
+}
 ```
-"Recording ADR for [decision]. Quick questions (answer any, or 'create now'):
 
-**Context:**
-1. What problem does this solve?
-2. What alternatives did you consider?
+**Note:** Options are educated guesses based on common reasons for choosing that technology. User can always select "Other" to provide their own rationale.
 
-**Rationale:**
-3. Why this choice over alternatives?
-4. Any tradeoffs or downsides? [optional]
+#### 4c: Follow-up Questions (only if needed)
 
-_(Say 'create now' to proceed with what you've shared)_"
+If rationale was provided but context/alternatives are missing, ask:
+
+```json
+{
+  "questions": [
+    {
+      "question": "What alternatives were considered?",
+      "header": "Alternatives",
+      "options": [
+        {"label": "MySQL", "description": "Another relational option"},
+        {"label": "DynamoDB", "description": "NoSQL alternative"},
+        {"label": "No others", "description": "This was the obvious choice"},
+        {"label": "Skip for now", "description": "I'll document this later"}
+      ],
+      "multiSelect": true
+    }
+  ]
+}
 ```
 
-**Shortcuts to accept:**
-- "team knows it" / "team preference" → Use "Team familiarity with [technology]"
-- "industry standard" / "best practice" → Use "De facto industry standard"
-- "we need X" → Use as context directly
+**Note:** Alternative suggestions are based on the decision category (database → other databases).
+
+**Response handling:**
+- Selected option → Use as rationale/alternatives for ADR
+- "Skip for now" → Create ADR with `status: Draft` and `<!-- TODO: Add rationale -->`
+- "Other" → Use their text verbatim
+- "No others" → Note "No formal alternatives evaluation" in ADR
 
 **If user exits early or skips:**
 - Mark missing sections with `<!-- TODO: ... -->`
@@ -198,30 +316,64 @@ Use `/blueprint:supersede [ADR]` instead, which will:
 
 ## Examples
 
-**Full input:**
+**Full input (no questions needed):**
 ```
-/blueprint:decide Use PostgreSQL because the team has 5 years experience with it and we need ACID compliance
+User: /blueprint:decide Use PostgreSQL because the team has 5 years experience with it and we need ACID compliance
+Assistant: [Creates Active ADR immediately - rationale was provided]
 ```
-→ Creates Active ADR immediately
 
-**Minimal input:**
+**Minimal input (uses AskUserQuestion):**
 ```
-/blueprint:decide Use Redis for caching
+User: /blueprint:decide Use Redis for caching
+Assistant: [Uses AskUserQuestion:
+  Question: "Why was Redis chosen for caching?"
+  Options: "Performance" | "Simplicity" | "Team expertise" | "Skip for now"]
+User: [Selects "Performance"]
+Assistant: [Creates Active ADR with rationale "High performance caching with sub-millisecond latency"]
 ```
-→ Asks for rationale, creates Draft if skipped
 
-**Interactive:**
+**Interactive with educated guesses:**
 ```
-User: /blueprint:decide
-Assistant: "What technology or approach did you decide on?"
-User: We're going with GraphQL
-Assistant: "What problem does this solve?"
-User: skip
-Assistant: "What alternatives did you consider?"
-User: REST, but we wanted better client flexibility
-Assistant: "Why GraphQL specifically over REST?"
-User: Clients can request exactly what they need, reduces over-fetching
-Assistant: [Creates Active ADR with context marked TODO]
+User: /blueprint:decide GraphQL
+Assistant: [Uses AskUserQuestion:
+  Question: "Why was GraphQL chosen?"
+  Options: "Client flexibility" | "Reduce over-fetching" | "Type safety" | "Skip for now"]
+User: [Selects "Client flexibility"]
+Assistant: [Uses AskUserQuestion:
+  Question: "What alternatives were considered?"
+  Options: "REST" | "gRPC" | "No others" | "Skip for now"]
+User: [Selects "REST"]
+Assistant: [Creates Active ADR with GraphQL chosen over REST for client flexibility]
+```
+
+**User provides custom rationale:**
+```
+User: /blueprint:decide DynamoDB
+Assistant: [Uses AskUserQuestion with educated guesses]
+User: [Selects "Other" and types: "We needed single-digit millisecond latency at any scale"]
+Assistant: [Creates Active ADR with user's custom rationale]
+```
+
+**Conflict detection (supersede flow):**
+```
+User: /blueprint:decide DynamoDB
+Assistant: [Detects existing ADR-003 "PostgreSQL as database"]
+Assistant: [Uses AskUserQuestion:
+  Question: "ADR-003 already documents PostgreSQL as database. Is DynamoDB replacing it?"
+  Options: "Yes, supersede" | "No, additional" | "No, mistake"]
+User: [Selects "Yes, supersede"]
+Assistant: [Creates ADR-007 for DynamoDB, marks ADR-003 as Superseded with reference to ADR-007]
+```
+
+**Conflict detection (additional use case):**
+```
+User: /blueprint:decide Redis
+Assistant: [Detects existing ADR-003 "PostgreSQL as database"]
+Assistant: [Uses AskUserQuestion about conflict]
+User: [Selects "No, additional"]
+Assistant: "What's Redis for in this project?"
+User: Caching API responses
+Assistant: [Creates ADR for "Redis as caching layer" - no conflict with PostgreSQL as primary DB]
 ```
 
 ## Error Recovery
