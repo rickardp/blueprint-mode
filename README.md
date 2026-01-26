@@ -57,6 +57,27 @@ claude --plugin-dir ./blueprint-mode/plugins/blueprint-mode
 | `/blueprint:validate` | Check code against documented patterns and decisions |
 | `/blueprint:help` | Explain Blueprint features and available commands |
 
+## Onboarding an existing codebase
+
+```
+/plan
+/blueprint:onboard
+````
+
+It is important that you run this in *plan* mode, otherwise Claude tends to race to implementation too early. Also, the onboarding
+pushes the limits for what a skill can really do, so best results are usually had by running onboarding several times.
+
+
+## Setting up a new repo
+
+```
+/plan
+/blueprint:setup-repo
+````
+
+It is important that you run this in *plan* mode, otherwise Claude tends to race to implementation too early. Note that this
+functionality is in its early stages.
+
 ## What Gets Created
 
 ```
