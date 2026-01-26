@@ -4,19 +4,37 @@
   <img src="./assets/logo-s.png" />
 </p>
 
-Spec-first development for AI-assisted coding.
+Blueprint Mode is an attempt at creating a stable source of truth in the era of vibe coding and agentic AI assistants.
 
-> When code *is* the spec, AI rewrites your source of truth at will.
-> Blueprint Mode keeps humans in control of system design — for maintainable AI-assisted development.
+It attempts to solve the problem if maintainability in code repositories with large amounts of AI code while trying to
+stay out of the way. The following axioms are what Blueprint Mode is built on:
+
+> When code *is* the spec, AI rewrites your source of truth at will. We need a high level ground truth that is not changed on a whim.
+> We want to keep humans in control of system design while letting AI deal with the details of the bulk of the code
+> More time is spent *maintaining* a code base than writing the first version
 
 ## The Problem
 
-If AI can rewrite code freely, you lose stability:
+### Code as the source of truth
+
+This is what you typically get from vibe coding platforms like Lovable or Cursor (out of the box). Documentation is usually
+in the form of a README file and code comments.
 
 - **Lost intent** — you can't tell if code reflects a conscious decision or AI just picking *something*
 - **Lost memory** — AI forgets why you chose PostgreSQL over MongoDB last week
 - **Lost consistency** — different architectural choices each session
-- **Lost boundaries** — AI doesn't know your team's constraints and banned patterns
+- **Lost boundaries** — difficult to set up constraints and coding practices
+
+### Spec driven development and similar approaches
+
+Traditional spec-driven development tries to solve the "code as truth" problem by creating detailed specifications before writing code. But this introduces its own set of problems:
+
+- **Premature detail** — you are forced to focus on details that is not yet on top of your mind
+- **High friction** — updating specs is tedious, so developers skip it or stop reading them entirely
+- **Spec drift** — specifications become outdated as code evolves, creating a second source of truth that contradicts the first
+- **Wrong abstraction level** — specs either become too detailed (duplicating code in English) or too vague (unhelpful)
+- **No context for decisions** — specs say *what* but rarely *why* - this is important to know when they are outdated
+
 
 ## How It Works
 
