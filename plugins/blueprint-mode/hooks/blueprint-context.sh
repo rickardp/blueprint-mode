@@ -19,6 +19,7 @@ BLUEPRINT SKILL EXECUTION RULES (MANDATORY):
 1. PLAN BEFORE ACTION - Analyze in plan mode and gather information
 2. DO NOT ASK FOR SCOPE - User invoked a Blueprint skill, assume user want it fully implemented
 3. NO NUMBERED OPTIONS - Never offer "1. Full setup 2. Partial 3. Other"
+4. ASK FOR CLARIFICATION - Especially on rationale gaps or requirement gaps. Use AskUserQuestion and suggest alternatives. Accept TBD answers.
 4. CREATE FILES NOW - Analyze the repo and create Blueprint structure
 5. USE TBD MARKERS - For missing information, write "TBD" instead of asking
 
