@@ -78,23 +78,19 @@ claude --plugin-dir ./blueprint-mode/plugins/blueprint-mode
 ## Onboarding an existing codebase
 
 ```
-/plan
 /blueprint:onboard
 ````
 
-It is important that you run this in *plan* mode, otherwise Claude tends to race to implementation too early. Also, the onboarding
-pushes the limits for what a skill can really do, so best results are usually had by running onboarding several times.
+Also, the onboarding pushes the limits for what a skill can really do, so on more complex cases it may be worth running the onboarding multiple times (it will fill in gaps if it skipped over some files in the first run).
 
 
 ## Setting up a new repo
 
 ```
-/plan
 /blueprint:setup-repo
 ````
 
-It is important that you run this in *plan* mode, otherwise Claude tends to race to implementation too early. Note that this
-functionality is in its early stages.
+Note that this functionality is in its early stages.
 
 ## What Gets Created
 
