@@ -2,6 +2,7 @@
   "name": "blueprint-mode",
   "description": "Spec-driven development with documented decision rationale: specs, ADRs, patterns, and requirements",
   "version": "1.0.0",
+  "hooks": "../hooks/hooks.json",
   "author": {
     "name": "rickardp"
   },

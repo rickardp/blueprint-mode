@@ -8,6 +8,8 @@ allowed-tools:
   - Grep
   - Read
   - AskUserQuestion
+  - EnterPlanMode
+  - ExitPlanMode
 ---
 
 # Validate Blueprint Compliance
@@ -27,6 +29,8 @@ Check codebase against documented specs, patterns, anti-patterns, and architectu
 When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text or rephrase as plain text questions.
 
 ## Process
+
+**FIRST ACTION: Enter plan mode by calling the `EnterPlanMode` tool.** This enables proper interactive questioning.
 
 ### Step 1: Check Prerequisites
 
@@ -79,6 +83,7 @@ If none exist: "No Blueprint structure found. Run `/blueprint:onboard` first."
 - Glob `docs/specs/features/*.md` to find all feature specs
 - For each feature spec, extract from frontmatter: status, module path, related ADRs
 - Track: Active, Planned, Deprecated features
+- **Graceful fallback**: If frontmatter fields are missing, skip that check and note "incomplete spec" in report
 
 **Non-Functional Requirements (`docs/specs/non-functional/`):**
 - Glob `docs/specs/non-functional/*.md` to find all NFR files

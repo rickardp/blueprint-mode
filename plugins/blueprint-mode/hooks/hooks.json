@@ -1,0 +1,15 @@
+{
+  "description": "Blueprint Mode hooks - inject context for skill execution",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/blueprint-context.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

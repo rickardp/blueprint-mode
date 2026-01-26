@@ -10,6 +10,8 @@ allowed-tools:
   - Write
   - Edit
   - AskUserQuestion
+  - EnterPlanMode
+  - ExitPlanMode
 ---
 
 # Supersede or Deprecate Decision
@@ -29,6 +31,8 @@ Replace a previous architectural decision with a new one, or deprecate it entire
 When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text or rephrase as plain text questions.
 
 ## Process
+
+**FIRST ACTION: Enter plan mode by calling the `EnterPlanMode` tool.** This enables proper interactive questioning.
 
 ### Step 1: Find the ADR
 

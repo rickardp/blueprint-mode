@@ -2,6 +2,48 @@
 
 These templates are used by multiple skills. When creating files, use the appropriate template and fill in the placeholders.
 
+---
+
+## Skill Design Principle: Simplicity Over Specification
+
+**Short, imperative skills > long, conditional skills.**
+
+More instructions doesn't mean better compliance. Keep skills under 100 lines with:
+
+1. **COMMAND framing** - "Do X" not "Consider whether to X"
+2. **Single execution path** - No conditions, no "if user prefers"
+3. **Direct steps** - 1. Read 2. Create 3. Report
+4. **TBD for gaps** - Missing info = TBD marker, not blocking questions
+
+**Skill structure:**
+```markdown
+---
+name: blueprint:skillname
+description: One line
+allowed-tools: [Glob, Grep, Read, Write, Edit]
+---
+
+# Skill Name
+
+**COMMAND:** [What this does. No questions about scope.]
+
+## Execute
+
+1. [Direct step]
+2. [Direct step]
+3. [Direct step]
+
+## Output
+
+[Exact format]
+```
+
+**Questions are only allowed about CONTENT, never about SCOPE:**
+- "Why was X chosen?" - content (allowed)
+- "What would you like to create?" - scope (forbidden)
+
+---
+
 ## Quick Reference (Section Markers)
 
 **For selective reading, use these section markers:**
@@ -259,7 +301,7 @@ Rules can be scoped to specific modules when needed:
 
 Status is read from each ADR's frontmatter (`status: Active|Draft|Outdated|Superseded|Deprecated`).
 
-Use `/blueprint:list-adrs` to see all decisions grouped by status.
+To list all ADRs, read files in `docs/adrs/*.md` and check the `status` field in each file's frontmatter.
 
 ---
 
@@ -341,7 +383,7 @@ We chose **[CHOICE]** because [primary motivation].
 
 ### Refining Draft ADRs
 
-Running `/blueprint:decide` on an existing Draft ADR will prompt to fill in missing sections and upgrade status to Active.
+To complete a Draft ADR: fill in the `<!-- TODO: -->` sections, then change `status: Draft` to `status: Active` in the frontmatter.
 
 ---
 
@@ -353,7 +395,30 @@ Running `/blueprint:decide` on an existing Draft ADR will prompt to fill in miss
 
 Common mistakes to avoid in this codebase.
 
-Use `/blueprint:bad-pattern [description]` to add anti-patterns.
+## How to Add Anti-Patterns
+
+Add a new section below following this format:
+
+## [Category]: [Description]
+
+**Severity:** Critical | High | Medium | Low
+
+### Don't Do This
+```[language]
+[bad code example]
+```
+
+**Problems:**
+- [Issue 1]
+
+### Do This Instead
+```[language]
+[correct code example]
+```
+
+**Why:** [Explanation]
+
+---
 ```
 
 ---
@@ -402,11 +467,10 @@ Use `/blueprint:bad-pattern [description]` to add anti-patterns.
 
 [Project description]
 
-## Tech Stack
+## Architecture Decisions
 
-- **Runtime**: [CHOICE]
-- **Framework**: [CHOICE]
-- **Database**: [CHOICE]
+All tech choices and their rationale are documented in `docs/adrs/`.
+See `docs/specs/tech-stack.md` for a summary table.
 
 ## CRITICAL: Pre-Edit Checklist
 
@@ -415,7 +479,7 @@ Use `/blueprint:bad-pattern [description]` to add anti-patterns.
 1. **Check Feature Specs**
    - If implementing a documented feature, READ `docs/specs/features/[feature].md` FIRST
    - Look for `related_adrs` field - these ADRs MUST be followed
-   - If no spec exists for a significant feature, ask: "Should I create a spec first with `/blueprint:require`?"
+   - If no spec exists for a significant feature, ask: "Should I create a feature spec first?" (see Creating Documentation below)
 
 2. **Check Boundaries**
    - Read `docs/specs/boundaries.md` before ANY code changes
@@ -428,8 +492,8 @@ Use `/blueprint:bad-pattern [description]` to add anti-patterns.
    - Follow existing patterns in the codebase
 
 4. **Traceability**
-   - When implementing an ADR decision, add: `// ADR-NNN: [brief note]`
-   - Keep comments brief - the ADR contains the full rationale
+   - When implementing a decision, add: `// ADR-NNN: [brief note]`
+   - Keep it short - the ADR has the full rationale
 
 **BOUNDARY VIOLATIONS**
 
@@ -452,28 +516,135 @@ See [docs/specs/boundaries.md](docs/specs/boundaries.md) for agent guardrails (A
 
 ## Code Comments
 
-**Traceability**: Link code to decisions when relevant:
+Reference ADRs with a brief note - the ADR has the full rationale:
+
 ```typescript
-// ADR-003: Using repository pattern for data access
-// See: docs/adrs/003-repository-pattern.md
+// ADR-003: Repository pattern
+// ADR-007: Rate limiting
 ```
 
-**Keep comments brief**: Document intent in specs, not inline prose.
-- DO: `// ADR-007: Rate limiting per user`
-- DON'T: Long explanations of why we chose this approach (put that in the ADR)
-
-Only add comments when:
-1. Tracing back to an ADR or spec
-2. Explaining non-obvious behavior that can't be captured elsewhere
-3. Warning about edge cases or gotchas
+**Don't duplicate full rationale in comments:**
+```typescript
+// Bad: Using repository pattern because it abstracts data access and makes testing easier
+// Good: // ADR-003: Repository pattern
+```
 
 ## Pattern Discovery
 
 When the user corrects or discourages a code pattern during development:
-- If they show a better way → Suggest: "Should I capture this as a good pattern? `/blueprint:good-pattern`"
-- If they say "don't do X" → Suggest: "Should I document this as an anti-pattern? `/blueprint:bad-pattern`"
+- If they show a better way → Suggest: "Should I capture this as a good pattern?" (see Creating Documentation below)
+- If they say "don't do X" → Suggest: "Should I document this as an anti-pattern?" (see Creating Documentation below)
 
 This captures lessons learned organically during development.
+
+## Creating Documentation
+
+This section explains how to create and update documentation without any plugins.
+
+### Adding a New ADR
+
+**Naming:** `docs/adrs/NNN-[slug].md` (e.g., `004-redis-caching.md`)
+
+**Find next number:** Check existing files in `docs/adrs/` and use the next sequential number.
+
+**Template:**
+```markdown
+---
+status: Active
+date: YYYY-MM-DD
+---
+
+# ADR-NNN: [Choice] for [Purpose]
+
+## Context
+[What problem are we solving? What constraints exist?]
+
+## Decision
+We chose **[choice]** because [primary motivation].
+
+## Consequences
+**Positive:**
+- [benefit]
+
+**Negative:**
+- [tradeoff]
+```
+
+**Status values:** `Draft` (incomplete), `Active` (current), `Superseded` (replaced), `Deprecated` (retired)
+
+### Adding a Feature Spec
+
+**Location:** `docs/specs/features/[feature-slug].md`
+
+**Template:**
+```markdown
+---
+status: Active
+module: src/[module-path]/
+related_adrs: []
+---
+
+# [Feature Name]
+
+## Overview
+[1-2 sentence description]
+
+## User Stories
+- As a [user type], I want [capability] so that [benefit]
+
+## Requirements
+- [Requirement 1]
+- [Requirement 2]
+```
+
+### Adding a Good Pattern
+
+**Location:** `patterns/good/[descriptive-name].[ext]`
+
+**Template:**
+```
+/**
+ * [Pattern Name]
+ *
+ * USE THIS PATTERN WHEN:
+ * - [Situation 1]
+ * - [Situation 2]
+ *
+ * KEY ELEMENTS:
+ * 1. [Important aspect]
+ * 2. [Important aspect]
+ *
+ * Related ADRs: ADR-NNN
+ */
+
+// --- Example Implementation ---
+[actual code example]
+```
+
+### Adding an Anti-Pattern
+
+**Location:** Edit `patterns/bad/anti-patterns.md` and add a new section:
+
+```markdown
+## [Category]: [Brief Description]
+
+**Severity:** Critical | High | Medium | Low
+
+### Don't Do This
+```[language]
+[bad code example]
+```
+
+**Problems:**
+- [Issue]
+
+### Do This Instead
+```[language]
+[correct code example]
+```
+
+**Why:** [Explanation]
+```
 
 ## Commands
 
@@ -555,258 +726,48 @@ If the user said "because the team knows it", do NOT ask "Why this choice?" - th
 ---
 
 <!-- SECTION: interview -->
-## Interview Standards
+## Interview Standards (Simplified)
 
-All skills with user interviews should follow these patterns for consistency.
+### Core Principle: Create First, Refine Later
 
-### Core Principle: Low Friction
+**Don't block on missing information. Use TBD markers and let users run the skill again.**
 
-**Accept what users give, ask only for what's missing.**
+1. Parse input for any provided information
+2. Create artifact immediately with what you have
+3. Mark missing sections with `<!-- TODO: ... -->` or "TBD"
+4. Report what was created and what needs refinement
 
-Before asking any questions:
-1. **Parse first:** Extract all information from input using the patterns above
-2. **Skip answered:** Never ask for information already provided (even in different words)
-3. **Batch questions:** Present remaining questions together, not one-at-a-time
-4. **Show exit:** Every prompt must show how to proceed with partial info
+### Questions: Content Only, Never Scope
 
-### Batched Questions Format
+**Allowed questions** (about content gaps):
+- "Why was X chosen?" - to fill TBD rationale
+- "Who are the users?" - if not found in docs
 
-**Present all remaining questions in a single categorized prompt:**
+**Forbidden questions** (about scope):
+- "What would you like to create?"
+- "Full setup or partial?"
+- "Which artifacts should I generate?"
 
-```markdown
-"Recording [artifact] for [topic]. Quick questions (answer any, or 'create now'):
+### TBD Markers
 
-**Context:**
-1. What problem does this solve?
-2. What alternatives did you consider?
-
-**Rationale:**
-3. Why this choice?
-
-_(Say 'create now' to proceed with what you've shared)_"
-```
-
-**Batching rules:**
-- Group related questions under category headers (Context, Rationale, Details, etc.)
-- Number all questions sequentially across categories
-- Always end with the exit hint in italics
-- Never ask questions one-at-a-time across multiple turns
-
-### Exit Visibility
-
-**Every prompt that asks questions MUST end with an explicit exit option:**
+Missing information → TBD marker, not blocking question:
 
 ```markdown
-_(Say 'create now' to proceed with what you've shared)_
+## Rationale
+TBD - edit this section to add rationale
 ```
-
-**Accepted exit phrases** (all equivalent):
-- "create now", "proceed", "continue", "done", "that's enough"
-- "just do it", "skip", "later", "create", "go ahead"
-
-**Format by prompt type:**
-- Multi-question: `_(Say 'create now' to proceed with what you've shared)_`
-- Single question: `"Why this choice? [skip to proceed]"`
-- Confirmation: `"Proceed? [yes / change something]"`
-
-### Handling "Later" Responses
-
-When user says "I'll add this later", "not sure", "skip this", or similar:
-- Create the artifact with `<!-- TODO: ... -->` markers for missing sections
-- Use `status: Draft` for ADRs with incomplete sections
-- Inform user: "Created with TODO markers. Run the command again to refine."
-
-**TODO markers are the source of truth** for what's missing - no need to track in frontmatter.
-
-### Completion Criteria
-
-**For full interviews (5+ questions):**
 
 ```markdown
-### Interview Completion
-
-Continue asking questions until:
-- You are confident the user's intent is fully captured, OR
-- The user explicitly says "done", "that's all", "I'll add more later", or similar, OR
-- You've completed the structured questions above
-
-**If user wants to proceed with partial info, create with TODO markers.**
+<!-- TODO: Add user stories -->
 ```
 
-**For short interviews (2-3 questions):**
+### After Creation
 
 ```markdown
-Ask for missing info. If user says "I'll add this later", proceed with TODO markers.
+Created [artifact] at [path]
+
+TBD sections can be filled by running [command] again.
 ```
-
-**For minimal interviews (1 question):**
-
-```markdown
-Proceed once the user answers or indicates they'll add details later.
-```
-
-### Confirmation Before Action
-
-**For additive actions (new ADR, new pattern, new requirement):**
-Skip confirmation. User invoking the skill = intent to create.
-
-**For destructive/complex actions (supersede, deprecate, delete):**
-Summarize and confirm.
-
-**For confirmations with clear choices, use AskUserQuestion:**
-
-See `<!-- SECTION: interactive-questions -->` for tool format and guidelines.
-
-**For open-ended follow-up after confirmation, use plain text:**
-
-```markdown
-"What needs to change?"
-```
-
-### Preview Before Create (Inferred Values)
-
-When creating artifacts with inferred or default values, show what will be created:
-
-```markdown
-"Creating with:
-- Name: TaskAPI ← provided
-- Runtime: Node.js ← provided
-- Framework: Express ← inferred (Node default)
-- Testing: Vitest ← inferred (Node default)
-
-Proceed? [yes / change something]"
-```
-
-**When to preview:**
-- `setup-repo`: Always (many inferences possible)
-- `decide`: Only if rationale was inferred from shorthand ("team knows")
-- `require`: Only if type (FR/NFR) was auto-detected
-- Other skills: When 2+ values were inferred or defaulted
-
-**Skip preview when:**
-- User said "just create" / "proceed" during questions
-- All values were explicitly provided
-- Only 1 simple default applied
-
-### After Action Section
-
-Use consistent verbs for post-action communication:
-
-```markdown
-## After Creation
-
-1. Confirm: "[Artifact] created at [path]"
-2. Inform: "[Relevant context about the artifact]"
-3. Suggest: "[Related actions user might want to take]"
-4. Remind: "PR merge = approved"
-```
-
-**Verb meanings:**
-- `Confirm:` - State what was done
-- `Inform:` - Provide additional context
-- `Suggest:` - Offer next actions
-- `Remind:` - Important policies or workflow notes
-
-### Error Recovery
-
-If user indicates a mistake after creation ("wait, that was wrong", "I need to change that"):
-
-```markdown
-## Error Recovery
-
-1. Acknowledge: "I can update or remove the [artifact]"
-2. Clarify: "What needs to change?"
-3. Execute: Update or delete as needed
-4. Confirm: "[Artifact] has been [updated/removed]"
-```
-
-**Guidelines:**
-- Never require the user to manually fix skill-created artifacts
-- Offer both edit and delete options when appropriate
-- For ADRs: updating is preferred over deleting (preserves history)
-- For patterns: simple replacement is fine
-
----
-
-<!-- SECTION: interactive-questions -->
-## Interactive Question Standards
-
-**CRITICAL: You MUST invoke the `AskUserQuestion` tool - do NOT output questions as plain text.**
-
-When this documentation shows JSON examples, they are parameters for the AskUserQuestion tool. You must actually call the tool, not print the JSON or rephrase it as text.
-
-**Wrong:** Outputting "Would you like to: 1) Option A 2) Option B"
-**Right:** Invoking AskUserQuestion tool with the options as parameters
-
-### When to Use AskUserQuestion vs Plain Text
-
-| Scenario | Use AskUserQuestion | Keep Plain Text |
-|----------|---------------------|-----------------|
-| Binary confirmation (yes/no) | Yes | - |
-| 2-4 discrete choices | Yes | - |
-| Multi-select from options | Yes | - |
-| Open-ended rationale/context | - | Yes |
-| File paths or descriptions | - | Yes |
-| Freeform answers | - | Yes |
-
-**Rationale:** Use structured UI when it reduces cognitive load, but avoid forcing users into predefined boxes when they need to express nuanced information.
-
-### AskUserQuestion Format
-
-```json
-{
-  "questions": [{
-    "question": "Clear question text ending with ?",
-    "header": "ShortHdr",
-    "options": [
-      {"label": "Option 1", "description": "When to choose this"},
-      {"label": "Option 2", "description": "When to choose this"}
-    ],
-    "multiSelect": false
-  }]
-}
-```
-
-**Constraints:**
-- `header`: Max 12 characters
-- `options`: 2-4 options per question
-- `multiSelect`: Set `true` when choices aren't mutually exclusive
-- Users can always select "Other" to provide custom text
-
-### Header Guidelines
-
-Keep headers under 12 characters:
-- `Confirm` (7) - for confirmations
-- `Action` (6) - for choosing what to do
-- `Select` (6) - for picking from options
-- `Create` (6) - for creation confirmations
-- `File` (4) - for file selection
-
-### Option Design
-
-- **Label**: Short, actionable (1-3 words)
-- **Description**: Explains when/why to choose this option
-- First option should be the most common/recommended choice
-
-### Response Handling
-
-After using AskUserQuestion:
-
-```markdown
-**Response handling:**
-- "[Option 1 label]" → [What to do]
-- "[Option 2 label]" → [What to do]
-- "Other" → Treat their text as if question was asked in plain text
-```
-
-**Always handle "Other"**: Users can provide custom text. Parse it for intent signals and continue the flow accordingly.
-
-### When to Skip AskUserQuestion
-
-Skip structured questions if:
-- User already said "create now" / "proceed" / "just do it"
-- Intent was clearly expressed in initial input
-- Only 1 simple default applies
 
 ---
 

@@ -11,6 +11,8 @@ allowed-tools:
   - Edit
   - Bash
   - AskUserQuestion
+  - EnterPlanMode
+  - ExitPlanMode
 ---
 
 # Set Up New Repository
@@ -30,7 +32,38 @@ Create a new project with spec-driven development structure from scratch.
 **TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for all structured questions.**
 When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text or rephrase as plain text questions.
 
+## CLAUDE.md / AGENTS.md Handling
+
+When setting up a new project, check if the directory already has agent instruction files. **CRITICAL: Check for symlinks FIRST.**
+
+**Step 1: Check for symlinks FIRST**
+```bash
+ls -la CLAUDE.md AGENTS.md 2>/dev/null
+```
+
+Look for `->` in the output which indicates a symlink (e.g., `CLAUDE.md -> AGENTS.md`).
+
+**Step 2: Determine action (priority order)**
+
+| Priority | Scenario | Action |
+|----------|----------|--------|
+| 1 | **Symlink exists** | **Update the TARGET file only. NEVER delete either file.** |
+| 2 | Neither exists | Create CLAUDE.md (default) |
+| 3 | Only CLAUDE.md exists | Update CLAUDE.md |
+| 4 | Only AGENTS.md exists | Update AGENTS.md |
+| 5 | Both exist independently | Update both with same content |
+
+**⚠️ CRITICAL:** If a symlink exists, NEVER delete or recreate either file - use Edit on the target.
+
+**Step 3: Include in preview**
+Show which file will be created/updated in the preview:
+```
+- Agent instructions: CLAUDE.md ← [default | existing | symlink target]
+```
+
 ## Process
+
+**FIRST ACTION: Enter plan mode by calling the `EnterPlanMode` tool.** This enables proper interactive questioning.
 
 ### Step 1: Parse Input
 
@@ -156,7 +189,7 @@ _(Say 'create now' anytime - I'll infer defaults for anything not specified)_"
 │       └── anti-patterns.md
 ├── tests/
 │   └── example.test.[ext]             # Initial test file
-├── CLAUDE.md
+├── CLAUDE.md (or AGENTS.md)           # Agent instructions - see detection above
 └── [standard project files]
 ```
 
@@ -164,16 +197,99 @@ _(Say 'create now' anytime - I'll infer defaults for anything not specified)_"
 
 ## File Templates
 
-Use templates from [`_templates/TEMPLATES.md`](./../_templates/TEMPLATES.md).
+**Source of truth:** `_templates/TEMPLATES.md`
 
-| File | Source |
-|------|--------|
-| `docs/specs/product.md` | Interview answers + defaults |
-| `docs/specs/tech-stack.md` | Tech choices (provided or inferred) |
-| `docs/specs/boundaries.md` | User answers + sensible defaults |
-| `docs/adrs/NNN-*.md` | One per tech decision |
-| `patterns/bad/anti-patterns.md` | Empty template |
-| `CLAUDE.md` | Full template with Pre-Edit Checklist |
+### ADR Template (inline for non-interactive execution)
+
+```markdown
+---
+status: Active
+date: YYYY-MM-DD
+---
+
+# ADR-NNN: [Choice] as [CATEGORY]
+
+## Context
+[What problem are we solving?]
+
+## Options Considered
+### Option 1: [Alternative]
+- Pro: [advantage]
+- Con: [disadvantage]
+
+## Decision
+We chose **[CHOICE]** because [primary motivation].
+
+## Consequences
+**Positive:**
+- [benefit]
+
+**Negative:**
+- [tradeoff]
+
+## Related
+- Tech stack: [docs/specs/tech-stack.md](../specs/tech-stack.md)
+```
+
+### product.md Template
+
+```markdown
+---
+last_updated: YYYY-MM-DD
+---
+
+# [PROJECT_NAME]
+
+## Vision
+[1-2 sentence description]
+
+## Users
+### [User Type 1]
+- [What they need]
+
+## Success Metrics
+- [Metric 1]
+
+## Features
+See `docs/specs/features/` for detailed specifications.
+
+## Quality Standards
+- Run `[lint command]` before committing
+- Run `[test command]` for verification
+```
+
+### boundaries.md Template
+
+```markdown
+# Agent Boundaries
+
+## Always Do
+- Run quality commands before commits
+- Follow existing code patterns
+- Read ADRs before implementing features
+
+## Ask First
+### Architecture
+- Adding new services or packages
+### Breaking Changes
+- Removing/renaming API fields
+- Changing database schemas
+
+## Never Do
+### Security
+- Commit secrets or credentials
+- Disable authentication
+### Code
+- Commit with type errors
+```
+
+### Other Templates
+
+| File | Section in TEMPLATES.md |
+|------|-------------------------|
+| `tech-stack.md` | `<!-- SECTION: tech-stack -->` |
+| `CLAUDE.md` | `<!-- SECTION: claude-md -->` |
+| `anti-patterns.md` | `<!-- SECTION: bad-patterns -->` |
 
 ### Applying Templates
 
@@ -184,7 +300,7 @@ Use templates from [`_templates/TEMPLATES.md`](./../_templates/TEMPLATES.md).
    - If user gave rationale → Use it
    - If user said "team preference" → Use "Team familiarity and industry standard"
    - If user skipped → Use "Team preference" as default
-5. **CLAUDE.md**: Use full template from `_templates/TEMPLATES.md` (section: `<!-- SECTION: claude-md -->`). Include Pre-Edit Checklist.
+5. **CLAUDE.md / AGENTS.md**: Use full template from `_templates/TEMPLATES.md` (section: `<!-- SECTION: claude-md -->`). Include Pre-Edit Checklist. See "CLAUDE.md / AGENTS.md Handling" above for which file to create.
 
 ### Default Boundaries (if not specified)
 
