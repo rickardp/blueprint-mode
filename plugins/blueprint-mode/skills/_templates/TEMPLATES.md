@@ -269,6 +269,11 @@ category: Performance | Security | Scalability | Reliability
 - Adding new packages
 - Upgrading major versions
 
+### Blueprint
+- Adding or editing ADRs in docs/adrs/
+- Adding or editing specs in docs/specs/
+- Modifying boundaries.md
+
 ## Never Do
 
 ### Security
@@ -279,6 +284,11 @@ category: Performance | Security | Scalability | Reliability
 ### Code
 - Commit with type errors
 - [Project-specific items]
+
+### Documentation
+- Create ad-hoc README/markdown files outside the docs/ structure without prior agreement
+- Add excessive comments (code should be self-documenting)
+- Write long or boilerplate-heavy file header comments instead of concise summaries
 
 ## Scoped Rules (Optional)
 

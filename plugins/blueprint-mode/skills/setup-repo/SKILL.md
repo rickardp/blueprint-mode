@@ -274,6 +274,10 @@ See `docs/specs/features/` for detailed specifications.
 ### Breaking Changes
 - Removing/renaming API fields
 - Changing database schemas
+### Blueprint
+- Adding or editing ADRs in docs/adrs/
+- Adding or editing specs in docs/specs/
+- Modifying boundaries.md
 
 ## Never Do
 ### Security
@@ -281,6 +285,10 @@ See `docs/specs/features/` for detailed specifications.
 - Disable authentication
 ### Code
 - Commit with type errors
+### Documentation
+- Create ad-hoc README/markdown files outside the docs/ structure without prior agreement
+- Add excessive comments (code should be self-documenting)
+- Write long or boilerplate-heavy file header comments instead of concise summaries
 ```
 
 ### Other Templates
@@ -315,6 +323,7 @@ See `docs/specs/features/` for detailed specifications.
 - Major dependency additions
 - Database schema changes
 - Authentication changes
+- Adding or editing Blueprint docs (ADRs, specs, boundaries)
 ```
 
 ## After Creation
