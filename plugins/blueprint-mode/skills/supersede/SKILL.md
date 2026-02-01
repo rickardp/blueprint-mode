@@ -22,7 +22,7 @@ Replace a previous architectural decision with a new one, or deprecate it entire
 
 ## Principles
 
-1. **Three options**: Replace, Mark Outdated (decide replacement later), or Deprecate
+1. **Two options**: Replace or Deprecate (if outdated, delete file - git history is the archive)
 2. **Never block**: Allow skip on optional questions
 3. **History preserved**: Old ADRs are updated, never deleted
 4. **Use globbing**: Find ADRs via file system, no index needed
@@ -49,7 +49,6 @@ If no ADRs exist: "No ADRs found. Use `/blueprint:decide` to create your first d
 | User says | Intent detected |
 |-----------|-----------------|
 | "replace with [X]" / "switching to [X]" | Replace → extract new choice |
-| "outdated" / "wrong" / "not sure yet" | Mark outdated |
 | "removing" / "deprecated" / "gone" / "no longer needed" | Deprecate |
 
 **If intent unclear, use AskUserQuestion:**
@@ -61,7 +60,6 @@ If no ADRs exist: "No ADRs found. Use `/blueprint:decide` to create your first d
     "header": "Action",
     "options": [
       {"label": "Replace", "description": "Switching to a new technology"},
-      {"label": "Outdated", "description": "This is wrong, replacement TBD"},
       {"label": "Deprecate", "description": "Removing entirely, no replacement"}
     ],
     "multiSelect": false
@@ -71,7 +69,6 @@ If no ADRs exist: "No ADRs found. Use `/blueprint:decide` to create your first d
 
 **Response handling:**
 - "Replace" → Replacement Flow
-- "Outdated" → Outdated Flow
 - "Deprecate" → Deprecation Flow
 - "Other" → Parse text for intent signals (e.g., "switching to [X]" = Replace), ask clarifying question if still unclear
 
@@ -149,42 +146,6 @@ We will use **[new choice]** because [reason].
 
 ---
 
-## Outdated Flow (New)
-
-Use when the decision is outdated but replacement isn't decided yet.
-
-### 1. Ask for context (optional)
-
-> "Why is this outdated? (skip if you want to add this later)"
-
-### 2. Update ADR frontmatter
-
-```yaml
----
-status: Outdated
-date: [original date]
-outdated_date: [TODAY]
-outdated_reason: [reason or "To be documented"]
-replacement: TBD
----
-```
-
-### 3. Add notice to ADR body
-
-```markdown
-> **Marked outdated on [TODAY]:** [Reason or "Replacement pending"]
->
-> This decision needs to be replaced. See replacement ADR when created.
-```
-
-### After marking outdated
-
-1. Confirm: "ADR-NNN marked as Outdated"
-2. Inform: "Run `/blueprint:supersede [NNN]` again when you're ready to create the replacement"
-3. Suggest: "Or use `/blueprint:decide` to create a new decision that supersedes this one"
-
----
-
 ## Deprecation Flow
 
 Use when retiring a decision without replacement (removing the capability entirely).
@@ -221,42 +182,35 @@ deprecated_reason: [reason]
 **Replace:**
 ```
 User: /blueprint:supersede ADR-002
-Assistant: "Replace, mark outdated, or deprecate?"
+Assistant: "Replace or deprecate?"
 User: Replace with GraphQL
 Assistant: "Why the change from REST?"
 User: Better client flexibility
-Assistant: [Creates new ADR, updates old one]
-```
-
-**Mark outdated:**
-```
-User: /blueprint:supersede ADR-003
-Assistant: "Replace, mark outdated, or deprecate?"
-User: Mark outdated - we know Redis isn't right but haven't picked the replacement
-Assistant: [Marks as Outdated with replacement: TBD]
+Assistant: [Creates new ADR, updates old one, checks for code references, suggests deletion if none]
 ```
 
 **Deprecate:**
 ```
 User: /blueprint:supersede ADR-005
-Assistant: "Replace, mark outdated, or deprecate?"
+Assistant: "Replace or deprecate?"
 User: Deprecate - we removed caching entirely
-Assistant: [Marks as Deprecated]
+Assistant: [Marks as Deprecated, offers to help find code to remove]
 ```
 
 ## After Completion
 
 **For Replacement:**
 1. Confirm: "ADR-[NEW] created, ADR-[OLD] marked as Superseded"
-2. Inform: "Old ADR preserved for history"
-
-**For Outdated:**
-1. Confirm: "ADR-[NNN] marked as Outdated"
-2. Inform: "Create replacement with `/blueprint:decide` when ready"
+2. Check: Search codebase for references to the old ADR
+3. If no code references → Suggest: "No code references ADR-[OLD]. Delete it? Git history is the archive."
+4. If code references exist → Keep: "ADR-[OLD] still referenced in [files]. Keeping for context."
 
 **For Deprecation:**
 1. Confirm: "ADR-[NNN] marked as Deprecated"
 2. Suggest: "Should I help identify related code to remove?"
+3. After code removal → Suggest: "Delete ADR-[NNN]? Git history is the archive."
+
+**Cleanup principle:** ADRs should reflect current state. Superseded/Deprecated ADRs with no code references should be deleted. Git history preserves the record.
 
 Remind: "PR merge = approved"
 

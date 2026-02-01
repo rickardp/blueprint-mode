@@ -309,7 +309,7 @@ Rules can be scoped to specific modules when needed:
 
 **ADRs are discovered via globbing** `docs/adrs/*.md` - no index file required.
 
-Status is read from each ADR's frontmatter (`status: Active|Draft|Outdated|Superseded|Deprecated`).
+Status is read from each ADR's frontmatter (`status: Active|Draft|Superseded|Deprecated`).
 
 To list all ADRs, read files in `docs/adrs/*.md` and check the `status` field in each file's frontmatter.
 

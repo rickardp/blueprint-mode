@@ -1,5 +1,5 @@
 {
-  "description": "Blueprint Mode hooks - inject context for skill execution",
+  "description": "Blueprint Mode hooks - inject context for skill execution and auto-fix formats",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -7,6 +7,17 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/blueprint-context.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-fix.sh"
           }
         ]
       }

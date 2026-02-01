@@ -144,7 +144,7 @@ We chose **[CHOICE]** because [primary motivation].
 - Tech stack: [docs/specs/tech-stack.md](../specs/tech-stack.md)
 ```
 
-**Status values:** Draft, Active, Superseded, Outdated, Deprecated
+**Status values:** Draft, Active, Superseded, Deprecated
 
 ### ADR Format Enforcement (CRITICAL)
 

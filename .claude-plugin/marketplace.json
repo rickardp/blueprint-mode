@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Spec-first development for AI-assisted coding",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -13,7 +13,7 @@
       "name": "blueprint-mode",
       "source": "./plugins/blueprint-mode",
       "description": "Spec-driven development with documented decision rationale: specs, ADRs, patterns, and requirements",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "author": {
         "name": "rickardp"
       }

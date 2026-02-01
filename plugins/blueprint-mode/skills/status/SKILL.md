@@ -68,7 +68,7 @@ Run these checks in parallel (single glob + batch file reads):
 - `CLAUDE.md` - Agent instructions
 
 **In one batch read:**
-1. Read each `docs/adrs/*.md` file - parse frontmatter for status (Active/Superseded/Deprecated/Outdated/Draft)
+1. Read each `docs/adrs/*.md` file - parse frontmatter for status (Active/Superseded/Deprecated/Draft)
 2. Read `patterns/bad/anti-patterns.md` - count `## ` headings
 3. Read `CLAUDE.md` - check for "Pre-Edit Checklist" section
 
@@ -84,7 +84,6 @@ Run these checks in parallel (single glob + batch file reads):
 | ADRs | Active count | ADR files with `status: Active` |
 | ADRs | Superseded count | ADR files with `status: Superseded` |
 | ADRs | Deprecated count | ADR files with `status: Deprecated` |
-| ADRs | Outdated count | ADR files with `status: Outdated` |
 | ADRs | Draft count | ADR files with `status: Draft` |
 | ADRs | Most recent | highest number in Active ADRs |
 | Patterns | Good count | glob (exclude .gitkeep) |
@@ -106,9 +105,8 @@ Run these checks in parallel (single glob + batch file reads):
 ### ADRs
 - Active: [count]
 - Draft: [count] (needs refinement)
-- Outdated: [count] (replacement pending)
-- Superseded: [count]
-- Deprecated: [count]
+- Superseded: [count] (consider deleting if no code references)
+- Deprecated: [count] (consider deleting if no code references)
 - Recent: ADR-[NNN] "[title]" ([date])
 
 ### Patterns

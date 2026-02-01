@@ -53,10 +53,22 @@ Traditional spec-driven development tries to solve the "code as truth" problem b
 <details>
 <summary>Local development</summary>
 
+To run a locally checked out version of the plugin (useful during development):
+
 ```bash
 git clone https://github.com/rickardp/blueprint-mode.git
-claude --plugin-dir ./blueprint-mode/plugins/blueprint-mode
+cd blueprint-mode
+claude --plugin-dir ./plugins/blueprint-mode
 ```
+
+The `--plugin-dir` flag loads the plugin directly from the specified directory, **overriding any installed version** with the same name. This allows you to test changes immediately without reinstalling.
+
+You can also use an absolute path:
+
+```bash
+claude --plugin-dir /path/to/blueprint-mode/plugins/blueprint-mode
+```
+
 </details>
 
 ## Commands
