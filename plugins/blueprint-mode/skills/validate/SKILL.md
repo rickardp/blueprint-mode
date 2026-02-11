@@ -4,6 +4,7 @@ description: Check code against documented specs, patterns, anti-patterns, and A
 argument-hint: "[scope: all|specs|patterns|adrs|features|directory]"
 disable-model-invocation: true
 allowed-tools:
+  - Bash
   - Glob
   - Grep
   - Read
@@ -44,7 +45,29 @@ If none exist: "No Blueprint structure found. Run `/blueprint:onboard` first."
 
 ### Step 2: Scope Selection
 
-**If scope not provided in command, use AskUserQuestion:**
+**Branch Detection (before asking scope):**
+1. Run `git branch --show-current` to get the current branch name
+2. If branch is NOT `main` or `master`, run `git diff --name-only main...HEAD 2>/dev/null || git diff --name-only master...HEAD 2>/dev/null` to detect branch-specific changes
+3. Use the appropriate scope question below based on the result
+
+**If on a feature branch with changes vs main/master, use AskUserQuestion:**
+
+```json
+{
+  "questions": [{
+    "question": "You're on branch '[branch-name]' with [N] changed files vs main. What should I validate?",
+    "header": "Scope",
+    "options": [
+      {"label": "Branch changes (Recommended)", "description": "Only validate files changed on this branch vs main/master"},
+      {"label": "All source", "description": "Validate entire codebase excluding node_modules, dist, build"},
+      {"label": "Specific directory", "description": "I'll specify a path to validate"}
+    ],
+    "multiSelect": false
+  }]
+}
+```
+
+**If on main/master or no branch changes detected, use AskUserQuestion:**
 
 ```json
 {
@@ -62,6 +85,7 @@ If none exist: "No Blueprint structure found. Run `/blueprint:onboard` first."
 ```
 
 **Response handling:**
+- "Branch changes" → Use `git diff --name-only main...HEAD` (or master) to get the file list
 - "All source" → Validate src/, lib/, etc. excluding node_modules, dist, build
 - "Recent changes" → Use `git diff --name-only` to get changed files
 - "Specific directory" → Ask: "Which directory?" (plain text follow-up)
