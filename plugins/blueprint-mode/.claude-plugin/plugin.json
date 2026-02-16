@@ -1,7 +1,7 @@
 {
   "name": "blueprint-mode",
   "description": "Spec-driven development with documented decision rationale: specs, ADRs, patterns, and requirements",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "author": {
     "name": "rickardp"
   },
