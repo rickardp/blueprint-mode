@@ -1,13 +1,14 @@
 ---
 name: blueprint:validate
 description: Check code against documented specs, patterns, anti-patterns, and ADR decisions. Use when the user wants to verify consistency, audit the codebase, check spec compliance, or find violations.
-argument-hint: "[scope: all|specs|patterns|adrs|features|directory]"
+argument-hint: "[scope: all|specs|patterns|adrs|features|docs|directory]"
 disable-model-invocation: true
 allowed-tools:
   - Bash
   - Glob
   - Grep
   - Read
+  - Task
   - AskUserQuestion
   - EnterPlanMode
   - ExitPlanMode
@@ -15,43 +16,81 @@ allowed-tools:
 
 # Validate Blueprint Compliance
 
-Check codebase against documented specs, patterns, anti-patterns, and architectural decisions.
+Check codebase against documented specs, patterns, anti-patterns, and architectural decisions using parallel sub-agents.
 
 **Invoked by:** `/blueprint:validate`
 
 ## Principles
 
-1. **Parallel scanning**: Batch Grep calls by validation category.
-2. **Progressive disclosure**: For large result sets, summarize first, drill down on request.
+1. **Discover first, scan second**: Build a structural map before diving into details.
+2. **Parallel sub-agents**: Launch one Task agent per validation domain — they run concurrently in the background.
 3. **Severity-based**: Rank findings by impact (Critical > High > Medium > Low).
 4. **Non-destructive**: Report only, never auto-fix without explicit request.
 
 **TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for scope selection if not specified.**
-When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text or rephrase as plain text questions.
+When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool — invoke it, don't output the JSON as text.
 
 ## Process
 
-**FIRST ACTION: Enter plan mode by calling the `EnterPlanMode` tool.** This enables proper interactive questioning.
+**FIRST ACTION: Enter plan mode by calling the `EnterPlanMode` tool.**
 
-### Step 1: Check Prerequisites
+### Step 1: Discovery
 
-Required files (at least one):
-- `docs/specs/` - Spec compliance (tech-stack.md, product.md, boundaries.md)
-- `docs/adrs/*.md` - ADR compliance (discovered via globbing)
-- `patterns/bad/anti-patterns.md` - Anti-pattern checks
-- `patterns/good/` - Pattern compliance (optional)
+Gather repo structure and blueprint inventory in parallel. Use Glob and Read directly (not sub-agents) — this should be fast.
 
-If none exist: "No Blueprint structure found. Run `/blueprint:onboard` first."
+**1a. Blueprint inventory** (parallel Glob calls):
+- `docs/specs/*.md` and `docs/specs/**/*.md` — specs (tech-stack, product, boundaries, features, NFRs)
+- `docs/adrs/*.md` — architecture decision records
+- `patterns/bad/**/*.md` and `patterns/good/**/*.md` — documented patterns
+
+If no blueprint files exist: "No Blueprint structure found. Run `/blueprint:onboard` first." and stop.
+
+**1b. Repo structure** (parallel Glob calls):
+- `**/*.md` — all markdown files (for documentation drift detection)
+- `.github/workflows/*.yml` or `.gitlab-ci.yml` or `Jenkinsfile` or `bitbucket-pipelines.yml` — CI/CD
+- `infra/**/*` or `terraform/**/*` or `cdk/**/*` or `pulumi/**/*` or `sst.config.*` or `Dockerfile*` or `docker-compose*` — infrastructure
+- `package.json` or `requirements.txt` or `go.mod` or `Cargo.toml` or `pyproject.toml` — dependency manifests
+- Top-level source directories (e.g., `src/`, `lib/`, `app/`, `functions/`, `common/`)
+
+**1c. Read blueprint files**: Read all discovered spec, ADR, boundary, and pattern files. Extract key validation rules into a structured context block:
+
+```
+=== BLUEPRINT CONTEXT ===
+
+TECH STACK (from docs/specs/tech-stack.md):
+- Runtime: [X]
+- Framework: [X]
+- Database: [X]
+- Commands: install=[X], dev=[X], test=[X], lint=[X]
+
+BOUNDARIES (from docs/specs/boundaries.md):
+- Always: [rule1], [rule2], ...
+- Never: [rule1], [rule2], ...
+- Ask First: [rule1], [rule2], ...
+
+ADR DECISIONS:
+- ADR-001 [title]: Chose [X], rejected [Y, Z]
+- ADR-002 [title]: Chose [X], rejected [Y, Z]
+- ...
+
+PATTERNS:
+- Anti-patterns: [name1: description], [name2: description], ...
+- Good patterns: [name1: key elements], ...
+
+FEATURES (from docs/specs/features/):
+- [name] (status: Active|Planned|Deprecated, module: path, ADRs: [...])
+- ...
+
+=== END CONTEXT ===
+```
 
 ### Step 2: Scope Selection
 
-**Branch Detection (before asking scope):**
-1. Run `git branch --show-current` to get the current branch name
-2. If branch is NOT `main` or `master`, run `git diff --name-only main...HEAD 2>/dev/null || git diff --name-only master...HEAD 2>/dev/null` to detect branch-specific changes
-3. Use the appropriate scope question below based on the result
+**Branch Detection:**
+1. Run `git branch --show-current`
+2. If NOT `main`/`master`, run `git diff --name-only main...HEAD 2>/dev/null || git diff --name-only master...HEAD 2>/dev/null`
 
-**If on a feature branch with changes vs main/master, use AskUserQuestion:**
-
+**If on a feature branch with changes, use AskUserQuestion:**
 ```json
 {
   "questions": [{
@@ -67,8 +106,7 @@ If none exist: "No Blueprint structure found. Run `/blueprint:onboard` first."
 }
 ```
 
-**If on main/master or no branch changes detected, use AskUserQuestion:**
-
+**If on main/master or no branch changes:**
 ```json
 {
   "questions": [{
@@ -84,168 +122,137 @@ If none exist: "No Blueprint structure found. Run `/blueprint:onboard` first."
 }
 ```
 
-**Response handling:**
-- "Branch changes" → Use `git diff --name-only main...HEAD` (or master) to get the file list
-- "All source" → Validate src/, lib/, etc. excluding node_modules, dist, build
-- "Recent changes" → Use `git diff --name-only` to get changed files
-- "Specific directory" → Ask: "Which directory?" (plain text follow-up)
-- "Other" → Use their text as directory path
+### Step 3: Launch Parallel Sub-Agents
 
-### Step 3: Load Validation Rules
+Based on discovery results, launch **one Task agent per validation domain** — all in a **single message** so they run concurrently. Use `subagent_type: "Explore"` and `run_in_background: true` for each.
 
-#### From Specs
+Every agent prompt MUST include:
+1. The full **Blueprint Context** block from Step 1c
+2. The **scope** (file list or directory) from Step 2
+3. Domain-specific scan instructions (below)
+4. Instruction to return findings as a structured list with severity, location, description, and blueprint source
 
-**Tech Stack (`docs/specs/tech-stack.md`):**
-- Extract declared Runtime, Framework, Database, Auth technologies
-- Extract expected commands (install, dev, test, lint)
+#### Agent: Source Code
 
-**Product (`docs/specs/product.md`):**
-- Extract Quality Standards commands
-- Extract Success Metrics for tracking
+**Launch when:** Source directories exist.
 
-**Features (`docs/specs/features/`):**
-- Glob `docs/specs/features/*.md` to find all feature specs
-- For each feature spec, extract from frontmatter: status, module path, related ADRs
-- Track: Active, Planned, Deprecated features
-- **Graceful fallback**: If frontmatter fields are missing, skip that check and note "incomplete spec" in report
+Prompt must instruct the agent to:
+1. **Tech stack compliance**: Read dependency manifests, compare against declared tech stack. Flag undeclared dependencies, missing declared tech, version mismatches.
+2. **Boundary violations**: For each "Never Do" rule, Grep source files for violations. For "Always Do" rules, verify compliance. For "Ask First" items, warn if detected.
+3. **Anti-pattern scan**: For each documented anti-pattern, Grep source files for matching code.
+4. **ADR compliance**: For each ADR's chosen approach, verify source follows it. For rejected alternatives, Grep for their usage.
+5. **Undocumented patterns**: Note consistent code patterns (repeated 3+ times) not captured in `patterns/good/`.
 
-**Non-Functional Requirements (`docs/specs/non-functional/`):**
-- Glob `docs/specs/non-functional/*.md` to find all NFR files
-- Extract metrics and targets for validation
-- Categories: performance, security, scalability, reliability
+#### Agent: Features
 
-**Boundaries (`docs/specs/boundaries.md`):**
-- Extract "Always Do" rules as required compliance checks
-- Extract "Never Do" rules as violation searches
-- Extract "Ask First" items as warnings when detected
+**Launch when:** `docs/specs/features/*.md` exist.
 
-#### From Patterns
+Prompt must instruct the agent to:
+1. For each feature spec, verify declared module path exists.
+2. Check for test files in each feature's module.
+3. Verify status matches reality (Active features should have code, Deprecated should not be actively developed).
+4. Flag orphaned modules — source directories with no corresponding feature spec.
+5. Verify related ADRs referenced by features are still Active.
 
-1. **Anti-patterns**: Parse `## ` sections from `patterns/bad/anti-patterns.md` for searchable patterns
-2. **Good patterns**: Extract key elements from `patterns/good/*` files
+#### Agent: Documentation Drift
 
-#### From ADRs
+**Launch when:** Markdown files exist outside `docs/specs/`, `docs/adrs/`, `patterns/`.
 
-3. **ADRs**: Extract enforceable rules (chosen dependencies, mandated patterns, banned alternatives)
+Prompt must instruct the agent to:
+1. Find all `.md` files outside the Blueprint structure (CLAUDE.md, README.md, guides, `.claude/*.md`, etc.).
+2. Cross-reference against tech stack: Grep for superseded/banned alternatives (e.g., `npm install` when ADR chose Bun).
+3. Cross-reference against ADR decisions: Grep for rejected alternatives being recommended.
+4. Cross-reference against deprecated features: Grep for references to Deprecated features as if active.
+5. Flag stale instructions in CLAUDE.md/AGENTS.md — these are **High severity** because agents follow them directly.
 
-### Step 4: Scan Codebase
+#### Agent: CI/CD
 
-**Tool Preferences:**
-- **File reading**: Use Claude's Read tool (not `cat`)
-- **File finding**: Use Claude's Glob tool (not `find` or `ls`)
-- **Content search**: Use Claude's Grep tool (not `grep` or `rg`)
+**Launch when:** CI/CD config files detected (`.github/workflows/`, `.gitlab-ci.yml`, etc.).
 
-**Performance Constraints:**
-- **Batch size**: Maximum 5-8 parallel Grep calls at once
-- **Result limits**: Use `head_limit: 20` per search to avoid context overflow
-- **Progressive disclosure**: If total issues > 50, present summary by category first, then offer to drill down
-- **Large codebases**: For repos with >500 source files, validate one category at a time
+Prompt must instruct the agent to:
+1. Read CI/CD config files.
+2. Verify pipeline uses declared commands from tech stack (correct install, test, lint commands).
+3. Check that quality gates match "Always Do" boundary rules.
+4. Flag pipelines using tools/commands that contradict ADR decisions.
+5. Check for secrets or credentials committed in pipeline configs (**Critical** severity).
 
-Search using parallel Grep calls grouped by validation category. Stream findings as discovered.
+#### Agent: Infrastructure
 
-#### Spec Compliance Scans
+**Launch when:** Infrastructure files detected (`infra/`, `terraform/`, `Dockerfile`, `sst.config.*`, etc.).
 
-**Tech Stack Validation:**
-1. Read `package.json` (or equivalent: `requirements.txt`, `go.mod`, `Cargo.toml`, etc.)
-2. Compare against declared tech in `docs/specs/tech-stack.md`
-3. Flag: undeclared dependencies, version mismatches, missing declared tech
+Prompt must instruct the agent to:
+1. Read infrastructure config files.
+2. Verify infrastructure choices match ADR decisions (e.g., if ADR chose DynamoDB, check IaC isn't provisioning PostgreSQL).
+3. Check that declared cloud services match tech stack.
+4. Flag infrastructure patterns that contradict documented anti-patterns.
+5. Verify environment/stage patterns match any documented deployment specs.
 
-**Feature Coverage:**
-1. Glob `docs/specs/features/*.md` to find all feature specs
-2. For each feature spec:
-   - Verify declared module path exists (e.g., `src/auth/`)
-   - Check for corresponding test files in the module
-   - Verify status matches reality (Active features should have code)
-   - Check module path contains implementation
-   - Verify related ADRs are still Active (glob `docs/adrs/*.md` and check frontmatter)
-3. Flag: features with no apparent implementation, orphaned modules not in features/
+### Step 4: Collect Results
 
-**Boundary Violations:**
-1. For each "Never Do" rule, search for violations (secrets, disabled auth, etc.)
-2. For "Always Do" rules, verify compliance (e.g., ADR comments exist, quality commands configured)
-3. For "Ask First" items, warn if detected without documentation
+Read the output from each background agent using the Read tool on their output files. Collect all findings into a unified list.
 
-#### Pattern and ADR Scans
+### Step 5: Report
 
-Run pattern and ADR scans in parallel with spec scans.
-
-### Step 5: Report Findings
-
-Present findings ranked by severity:
+Present findings in a unified report ranked by severity:
 
 | Severity | Description |
 |----------|-------------|
-| Critical | Security vulnerabilities, data loss, boundary "Never Do" violations |
-| High | Tech stack mismatches, missing capabilities, performance issues |
-| Medium | Code smells, pattern inconsistencies, undeclared dependencies |
-| Low | Style preferences, minor drift |
+| Critical | Security vulnerabilities, boundary "Never Do" violations, secrets in config |
+| High | Tech stack mismatches, stale agent instructions (CLAUDE.md), ADR violations |
+| Medium | Pattern inconsistencies, undeclared dependencies, doc drift in guides |
+| Low | Style preferences, minor terminology drift, missing test coverage |
 
 **Report format:**
 ```markdown
 ## Blueprint Validation Report
 
-### Spec Compliance
+### Source Code
+**Tech Stack:** [findings]
+**Boundary Compliance:** [findings]
+**Pattern Violations:** [findings]
+**ADR Compliance:** [findings]
 
-**Tech Stack:**
-- [✓] Runtime: Node.js 20 matches declared
-- [✗] Framework: Declared Express, found Fastify in package.json
-- [!] Undeclared: lodash (not in tech-stack.md)
-
+### Features
 **Feature Coverage:**
 | Feature | Spec Status | Module | Evidence |
 |---------|-------------|--------|----------|
-| User Auth | Active | src/auth/ | ✓ Module exists, 5 test files |
-| Data Export | Planned | src/export/ | ? Module exists, no tests |
-| Analytics | Active | src/analytics/ | ✗ Module missing |
+| ... | ... | ... | ... |
 
-**Orphaned Modules** (code without feature specs):
-- src/legacy/ - Not documented in features/
+**Orphaned Modules:** [findings]
 
-**Boundary Compliance:**
-- [✓] ADR references found in code (15 occurrences)
-- [✗] "Never Do" violation: hardcoded secret in config.ts:42
-- [!] "Ask First" detected: New dependency 'axios' added without ADR
+### Documentation Drift
+| File | Issue | Severity | Blueprint Source |
+|------|-------|----------|-----------------|
+| ... | ... | ... | ... |
 
-### Pattern Violations
+### CI/CD
+[findings if agent was launched, otherwise "No CI/CD config detected"]
 
-1. **[Anti-pattern name]** (Critical)
-   - Location: file:line
-   - Fix: [recommendation]
-
-### ADR Compliance
-
-- [✓] ADR-001: PostgreSQL - using pg driver as specified
-- [✗] ADR-003: Repository pattern - direct DB calls found in handlers/
+### Infrastructure
+[findings if agent was launched, otherwise "No infrastructure config detected"]
 
 ### Summary
 - Critical: [N] | High: [N] | Medium: [N] | Low: [N]
-- Spec compliance: [N]/[total] checks passed
-- Pattern compliance: [N]/[total] patterns followed
+- Agents run: [list of domains scanned]
+- Domains skipped: [list not applicable to this repo]
 ```
-
-### Step 6: Surface Undocumented Patterns
-
-Note any consistent code patterns (repeated 3+ times) not yet captured in `patterns/good/`.
-
-Also flag significant code/features not documented in any spec (potential spec drift).
 
 ## After Validation
 
 - **Spec drift found**: Suggest updating specs or creating ADRs for undocumented changes
 - **Tech stack mismatch**: Suggest `/blueprint:decide` to document the actual choice
-- **Missing capabilities**: Flag for product review - is this intentional or missing?
 - **Boundary violations**: Highlight critical issues requiring immediate attention
+- **Documentation drift found**: Suggest updating stale docs (especially CLAUDE.md — agents follow it directly)
 - **Undocumented patterns found**: Suggest `/blueprint:good-pattern`
 - **No violations**: Confirm codebase consistency with specs
 
 ## Examples
 
-- `/blueprint:validate` → Full validation (specs + patterns + ADRs)
-- `/blueprint:validate specs` → Focus on spec compliance only
-- `/blueprint:validate features` → Focus on feature coverage
-- "Check if code matches our specs" → Spec compliance check
-- "Validate the auth module" → Scoped to `src/auth/`
-- "Check for anti-patterns" → Focus on anti-pattern violations
-- "Are we following our tech stack?" → Tech stack compliance check
-- "Check feature coverage" → Verify features have implementations
-- "Find orphaned code" → Identify modules without feature specs
+- `/blueprint:validate` → Full validation (all domains in parallel)
+- `/blueprint:validate specs` → Source code + features agents only
+- `/blueprint:validate docs` → Documentation drift agent only
+- `/blueprint:validate features` → Features agent only
+- `/blueprint:validate adrs` → ADR compliance checks across all domains
+- "Check if code matches our specs" → Full validation
+- "Is CLAUDE.md up to date?" → Documentation drift agent
+- "Validate the auth module" → All agents scoped to `src/auth/`
