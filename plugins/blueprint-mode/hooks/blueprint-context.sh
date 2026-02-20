@@ -101,4 +101,18 @@ If this is a new skill, update hooks/blueprint-context.sh to include it.
 EOF
 fi
 
+# =============================================================================
+# Auto-detect: Inject howto when working with blueprint artifacts
+# Triggers on blueprint-related terms in prompts that are NOT slash commands
+# =============================================================================
+
+if ! echo "$PROMPT" | grep -qE '/blueprint:'; then
+  if echo "$PROMPT" | grep -qiE '\bblueprint\b|\badrs?\b|architecture.decision|docs/specs|docs/adrs|patterns/(good|bad)|boundaries\.md|tech-stack\.md|feature.spec|anti-pattern'; then
+    HOWTO_FILE="$AGENTS_DIR/howto.md"
+    if [ -f "$HOWTO_FILE" ]; then
+      cat "$HOWTO_FILE"
+    fi
+  fi
+fi
+
 exit 0
