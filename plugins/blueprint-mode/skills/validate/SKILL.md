@@ -154,9 +154,9 @@ Prompt must instruct the agent to:
 4. Flag orphaned modules — source directories with no corresponding feature spec.
 5. Verify related ADRs referenced by features are still Active.
 
-#### Agent: Documentation Drift
+#### Agent: Documentation Drift & Content Classification
 
-**Launch when:** Markdown files exist outside `docs/specs/`, `docs/adrs/`, `patterns/`.
+**Launch when:** Markdown files exist outside `docs/specs/`, `docs/adrs/`, `patterns/` **OR** any blueprint files exist.
 
 Prompt must instruct the agent to:
 1. Find all `.md` files outside the Blueprint structure (CLAUDE.md, README.md, guides, `.claude/*.md`, etc.).
@@ -164,6 +164,13 @@ Prompt must instruct the agent to:
 3. Cross-reference against ADR decisions: Grep for rejected alternatives being recommended.
 4. Cross-reference against deprecated features: Grep for references to Deprecated features as if active.
 5. Flag stale instructions in CLAUDE.md/AGENTS.md — these are **High severity** because agents follow them directly.
+6. **Content classification audit** — check if information is in the wrong document type:
+   - ADRs containing functional requirements (user stories, feature behaviors, UI specs) → should be in `docs/specs/features/`
+   - ADRs containing NFR targets (latency metrics, uptime SLAs, scalability numbers) → should be in `docs/specs/non-functional/`
+   - Feature specs containing architectural rationale (tech choice trade-offs, "we chose X over Y") → should be ADRs in `docs/adrs/`
+   - NFR files containing architectural decisions (tool/service choices) → should be ADRs
+   - Product spec containing detailed feature requirements → should be feature specs
+   Flag misplaced content as **Medium** severity with a suggestion to move it to the correct location.
 
 #### Agent: CI/CD
 
@@ -199,7 +206,7 @@ Present findings in a unified report ranked by severity:
 |----------|-------------|
 | Critical | Security vulnerabilities, boundary "Never Do" violations, secrets in config |
 | High | Tech stack mismatches, stale agent instructions (CLAUDE.md), ADR violations |
-| Medium | Pattern inconsistencies, undeclared dependencies, doc drift in guides |
+| Medium | Pattern inconsistencies, undeclared dependencies, doc drift in guides, misclassified content (e.g., requirements in ADRs, architectural decisions in feature specs) |
 | Low | Style preferences, minor terminology drift, missing test coverage |
 
 **Report format:**
@@ -225,6 +232,11 @@ Present findings in a unified report ranked by severity:
 |------|-------|----------|-----------------|
 | ... | ... | ... | ... |
 
+### Content Classification
+| File | Misplaced Content | Should Be In | Severity |
+|------|-------------------|--------------|----------|
+| ... | ... | ... | ... |
+
 ### CI/CD
 [findings if agent was launched, otherwise "No CI/CD config detected"]
 
@@ -243,6 +255,7 @@ Present findings in a unified report ranked by severity:
 - **Tech stack mismatch**: Suggest `/blueprint:decide` to document the actual choice
 - **Boundary violations**: Highlight critical issues requiring immediate attention
 - **Documentation drift found**: Suggest updating stale docs (especially CLAUDE.md — agents follow it directly)
+- **Misclassified content found**: Suggest moving content to correct document type (e.g., extract requirements from ADR into feature spec, extract tech rationale from feature spec into ADR)
 - **Undocumented patterns found**: Suggest `/blueprint:good-pattern`
 - **No violations**: Confirm codebase consistency with specs
 
