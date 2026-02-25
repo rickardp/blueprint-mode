@@ -8,6 +8,8 @@ allowed-tools:
   - Glob
   - Grep
   - Read
+  - Write
+  - Edit
   - Task
   - AskUserQuestion
   - EnterPlanMode
@@ -194,6 +196,21 @@ Prompt must instruct the agent to:
 4. Flag infrastructure patterns that contradict documented anti-patterns.
 5. Verify environment/stage patterns match any documented deployment specs.
 
+#### Agent: Requirements Gaps
+
+**Launch when:** Source directories exist.
+
+Prompt must instruct the agent to:
+1. **Unspecified implementations**: Find source modules/directories with no corresponding feature spec in `docs/specs/features/`. Code that implements user-facing behavior should trace to a feature requirement, not only to an ADR. ADRs capture *why* a technical choice was made, but the *what* (functional behavior) belongs in a feature spec.
+2. **ADR-only features**: Scan ADRs for functional language (user stories, UI behavior, workflow descriptions, endpoint contracts). If an ADR describes *what the system does* rather than *why a technical choice was made*, flag that the functional requirements should be extracted into a feature spec with `related_adrs` linking back.
+3. **Feature spec completeness**: For each existing feature spec, check for:
+   - Missing or empty `## User Stories` section
+   - Missing or empty `## Requirements` section
+   - `<!-- TODO: -->` or "TBD" markers indicating incomplete sections
+   - Missing `related_adrs` when the feature clearly depends on architectural decisions
+4. **NFR coverage gaps**: Check whether `docs/specs/non-functional/` exists and covers key categories (performance, security, scalability, reliability). Flag missing categories as **Low** if the codebase is small, **Medium** if infrastructure or deployment configs exist.
+5. **Cross-cutting gaps**: Identify areas where code touches multiple concerns (auth, payments, data pipelines) but no NFR or feature spec addresses the integration points.
+
 ### Step 4: Collect Results
 
 Read the output from each background agent using the Read tool on their output files. Collect all findings into a unified list.
@@ -206,8 +223,8 @@ Present findings in a unified report ranked by severity:
 |----------|-------------|
 | Critical | Security vulnerabilities, boundary "Never Do" violations, secrets in config |
 | High | Tech stack mismatches, stale agent instructions (CLAUDE.md), ADR violations |
-| Medium | Pattern inconsistencies, undeclared dependencies, doc drift in guides, misclassified content (e.g., requirements in ADRs, architectural decisions in feature specs) |
-| Low | Style preferences, minor terminology drift, missing test coverage |
+| Medium | Pattern inconsistencies, undeclared dependencies, doc drift in guides, misclassified content (e.g., requirements in ADRs, architectural decisions in feature specs), ADR-only features lacking a feature spec, missing NFR categories (when infra exists) |
+| Low | Style preferences, minor terminology drift, missing test coverage, incomplete feature spec sections (TBD markers), missing NFR categories (small codebase) |
 
 **Report format:**
 ```markdown
@@ -243,11 +260,93 @@ Present findings in a unified report ranked by severity:
 ### Infrastructure
 [findings if agent was launched, otherwise "No infrastructure config detected"]
 
+### Requirements Gaps
+**Unspecified Implementations:**
+| Module | Has Feature Spec | Has ADR Only | Suggested Action |
+|--------|-----------------|--------------|------------------|
+| ... | ... | ... | ... |
+
+**Incomplete Feature Specs:**
+| Feature | Missing Section | Severity |
+|---------|----------------|----------|
+| ... | ... | ... |
+
+**NFR Coverage:**
+| Category | Status |
+|----------|--------|
+| Performance | Documented / Missing |
+| Security | Documented / Missing |
+| Scalability | Documented / Missing |
+| Reliability | Documented / Missing |
+
 ### Summary
 - Critical: [N] | High: [N] | Medium: [N] | Low: [N]
 - Agents run: [list of domains scanned]
 - Domains skipped: [list not applicable to this repo]
 ```
+
+### Step 6: Requirements Gap Interview
+
+**If the Requirements Gaps agent found gaps, interview the user using AskUserQuestion.**
+
+For each unspecified implementation or ADR-only feature found, present a batch (up to 5 at a time):
+
+```json
+{
+  "questions": [{
+    "question": "These modules have no feature spec. Which ones should get one?",
+    "header": "Unspecified Implementations",
+    "options": [
+      {"label": "[module1]", "description": "Currently only referenced by ADR-NNN"},
+      {"label": "[module2]", "description": "No blueprint reference at all"},
+      {"label": "Skip for now", "description": "I'll handle these later"}
+    ],
+    "multiSelect": true
+  }]
+}
+```
+
+For selected modules, create feature specs using the template from `_templates/TEMPLATES.md` with TBD markers for unknown sections. Link any related ADRs in the `related_adrs` frontmatter field.
+
+For incomplete feature specs (missing user stories, requirements, or acceptance criteria), ask:
+
+```json
+{
+  "questions": [{
+    "question": "[Feature] is missing [sections]. Want to fill these in now?",
+    "header": "Incomplete Feature Specs",
+    "options": [
+      {"label": "Yes, interview me", "description": "I'll answer questions to complete the spec"},
+      {"label": "Add TBD markers", "description": "Mark sections as TODO for later"},
+      {"label": "Skip", "description": "Leave as-is for now"}
+    ],
+    "multiSelect": false
+  }]
+}
+```
+
+If the user chooses "Yes, interview me", ask targeted content questions about user stories, requirements, and acceptance criteria for that feature. Create or update the spec with their answers.
+
+For missing NFR categories, ask:
+
+```json
+{
+  "questions": [{
+    "question": "No NFR specs found for these categories. Which should I create?",
+    "header": "Missing Non-Functional Requirements",
+    "options": [
+      {"label": "Performance", "description": "Latency, throughput, response times"},
+      {"label": "Security", "description": "Auth, encryption, data protection"},
+      {"label": "Scalability", "description": "Load handling, growth capacity"},
+      {"label": "Reliability", "description": "Uptime, recovery, fault tolerance"},
+      {"label": "Skip for now", "description": "I'll handle NFRs later"}
+    ],
+    "multiSelect": true
+  }]
+}
+```
+
+For selected NFR categories, create files in `docs/specs/non-functional/` using the template with TBD markers.
 
 ## After Validation
 
@@ -256,6 +355,7 @@ Present findings in a unified report ranked by severity:
 - **Boundary violations**: Highlight critical issues requiring immediate attention
 - **Documentation drift found**: Suggest updating stale docs (especially CLAUDE.md — agents follow it directly)
 - **Misclassified content found**: Suggest moving content to correct document type (e.g., extract requirements from ADR into feature spec, extract tech rationale from feature spec into ADR)
+- **Requirements gaps found**: Interview user to create missing feature specs, complete incomplete specs, or create NFR documents
 - **Undocumented patterns found**: Suggest `/blueprint:good-pattern`
 - **No violations**: Confirm codebase consistency with specs
 
