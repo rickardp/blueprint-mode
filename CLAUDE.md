@@ -52,7 +52,7 @@ If a user request would violate a "Never Do" boundary:
 | Directory | Purpose |
 |-----------|---------|
 | `docs/specs/` | Product requirements, tech decisions, boundaries |
-| `docs/specs/features/` | Feature specifications with requirements |
+| `docs/specs/features/` | Feature specs with requirements, maturity, and implementation state |
 | `docs/adrs/` | Architecture Decision Records - the "why" behind choices |
 | `patterns/good/` | Approved code examples to follow |
 | `patterns/bad/` | Anti-patterns to avoid |

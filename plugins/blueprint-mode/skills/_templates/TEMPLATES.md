@@ -163,9 +163,12 @@ See `docs/specs/features/` for detailed feature specifications (discovered via g
 
 Features are discovered via globbing `docs/specs/features/*.md` - no index file required.
 
+Everything is a work-in-progress. The `maturity` field tracks how evolved a feature is — there are no separate "WIP" documents.
+
 ```markdown
 ---
 status: Active
+maturity: Exploring | Building | Hardening | Stable
 module: src/[module]/
 related_adrs: []
 ---
@@ -181,10 +184,36 @@ related_adrs: []
 ## Requirements
 [Start high-level, refine iteratively as needed]
 
+## Implementation State
+<!-- Update this section as work progresses. It is the "living" part of the spec. -->
+
+**Current focus:** [What's being worked on now, or "None" if idle]
+
+| Milestone | Status |
+|-----------|--------|
+| [milestone 1] | Done / In Progress / Not Started |
+
+**Open questions:**
+- [Unresolved decision or unknown that blocks progress]
+
+**Constraints:**
+- [Active constraint affecting implementation]
+
 ## Acceptance Criteria (optional)
 [Add when ready for test automation]
 - Given [context], when [action], then [outcome]
 ```
+
+### Maturity Levels
+
+| Level | Meaning | Typical state |
+|-------|---------|---------------|
+| Exploring | Idea or early investigation | Sparse spec, many TODOs, no/little code |
+| Building | Active development | Requirements solidifying, code in progress |
+| Hardening | Feature complete, stabilizing | Tests, edge cases, polish |
+| Stable | Production-ready, low churn | Complete spec, full test coverage |
+
+Maturity can go backwards (e.g., Stable → Building when a major rework begins).
 
 ---
 
@@ -318,9 +347,13 @@ To list all ADRs, read files in `docs/adrs/*.md` and check the `status` field in
 <!-- SECTION: adr-template -->
 ## docs/adrs/NNN-[slug].md (ADR Template)
 
-ADRs support two statuses:
-- **Draft**: Incomplete ADR with TODO markers. Can be refined later.
-- **Active**: Complete ADR ready for use.
+ADRs are meant to evolve. Start as Draft and iterate toward Active — don't wait for a perfect decision before writing it down.
+
+ADR statuses:
+- **Draft**: Emerging decision. Has TODO markers, options may still be open. Iterate freely.
+- **Active**: Decision is settled and being followed.
+- **Superseded**: Replaced by a newer ADR.
+- **Deprecated**: No longer relevant.
 
 ### Minimal ADR (Draft)
 
@@ -517,7 +550,7 @@ If a user request would violate a "Never Do" boundary:
 | Directory | Purpose |
 |-----------|---------|
 | `docs/specs/` | Product requirements, tech decisions, boundaries |
-| `docs/specs/features/` | Feature specifications with requirements and acceptance criteria |
+| `docs/specs/features/` | Feature specs with requirements, maturity, and implementation state |
 | `docs/adrs/` | Architecture Decision Records - the "why" behind choices |
 | `patterns/good/` | Approved code examples to follow |
 | `patterns/bad/` | Anti-patterns to avoid |
@@ -590,6 +623,7 @@ We chose **[choice]** because [primary motivation].
 ```markdown
 ---
 status: Active
+maturity: Exploring | Building | Hardening | Stable
 module: src/[module-path]/
 related_adrs: []
 ---
@@ -605,6 +639,17 @@ related_adrs: []
 ## Requirements
 - [Requirement 1]
 - [Requirement 2]
+
+## Implementation State
+
+**Current focus:** [What's being worked on now]
+
+| Milestone | Status |
+|-----------|--------|
+| [milestone] | Done / In Progress / Not Started |
+
+**Open questions:**
+- [Unresolved decisions]
 ```
 
 ### Adding a Good Pattern

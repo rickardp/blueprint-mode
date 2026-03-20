@@ -1,7 +1,8 @@
 ---
 status: Active
+maturity: Stable
 module: plugins/blueprint-mode/
-related_adrs: []
+related_adrs: [4]
 ---
 
 # Decision Capture (Not Spec Generation)
@@ -54,6 +55,24 @@ Senior developers juggle Claude (planning), Cursor (multi-file edits), and Copil
 
 - "We use PostgreSQL because the team knows it" travels across any tool
 - "Implement database layer per schema.sql lines 1-50" doesn't
+
+## Implementation State
+
+**Current focus:** None (stable)
+
+| Milestone | Status |
+|-----------|--------|
+| `/decide` skill with input triage | Done |
+| Draft → Active ADR workflow | Done |
+| `/capture` command for chat → docs | Done |
+| Maturity tracking in feature specs | Done |
+| Implementation state in feature specs | Done |
+
+**Open questions:**
+- None
+
+**Constraints:**
+- Zero-dependency: capture must work with just file reads/writes
 
 ## References
 

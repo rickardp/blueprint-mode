@@ -95,7 +95,9 @@ We chose **[CHOICE]** because [primary motivation].
 - Tech stack: [docs/specs/tech-stack.md](../specs/tech-stack.md)
 ```
 
-**Status values:** Draft (incomplete, has TODO markers), Active (complete)
+**Status values:** Draft (emerging, iterate freely), Active (settled), Superseded (replaced), Deprecated (retired)
+
+**Prefer Draft first.** When the user is still exploring options or rationale is thin, create as Draft. Don't force a premature Active status — ADRs are meant to evolve.
 
 ### ADR Format Enforcement (CRITICAL)
 

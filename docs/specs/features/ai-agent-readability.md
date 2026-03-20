@@ -1,5 +1,6 @@
 ---
 status: Active
+maturity: Stable
 module: plugins/blueprint-mode/
 related_adrs: []
 ---
@@ -75,6 +76,20 @@ Blueprint Mode relies on PR reviews instead:
 - No duplication between PR and ADR
 
 This works for teams with PR-based workflows. Teams requiring formal audit trails may need the explicit section.
+
+## Implementation State
+
+**Current focus:** None (stable)
+
+| Milestone | Status |
+|-----------|--------|
+| Simplified ADR status flow | Done |
+| Git-as-archive deletion policy | Done |
+| PR reviews as advice | Done |
+| Maturity field in feature specs | Done |
+
+**Open questions:**
+- None
 
 ## References
 

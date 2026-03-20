@@ -80,7 +80,7 @@ PATTERNS:
 - Good patterns: [name1: key elements], ...
 
 FEATURES (from docs/specs/features/):
-- [name] (status: Active|Planned|Deprecated, module: path, ADRs: [...])
+- [name] (status: Active|Planned|Deprecated, maturity: Exploring|Building|Hardening|Stable, module: path, ADRs: [...])
 - ...
 
 === END CONTEXT ===
@@ -153,8 +153,16 @@ Prompt must instruct the agent to:
 1. For each feature spec, verify declared module path exists.
 2. Check for test files in each feature's module.
 3. Verify status matches reality (Active features should have code, Deprecated should not be actively developed).
-4. Flag orphaned modules — source directories with no corresponding feature spec.
-5. Verify related ADRs referenced by features are still Active.
+4. Verify maturity matches reality:
+   - `Exploring` with substantial code and tests → suggest advancing to Building/Hardening
+   - `Stable` with many open TODOs or missing tests → flag as inconsistent
+   - Missing `maturity` field → flag as needing update
+5. Check Implementation State section:
+   - Missing entirely → flag (Medium severity)
+   - Has stale "Current focus" that doesn't match recent git activity → flag (Low severity)
+   - Has open questions that appear resolved in code → flag (Low severity)
+6. Flag orphaned modules — source directories with no corresponding feature spec.
+7. Verify related ADRs referenced by features are still Active.
 
 #### Agent: Documentation Drift & Content Classification
 

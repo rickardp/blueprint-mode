@@ -41,6 +41,7 @@ allowed-tools:
 ```markdown
 ---
 status: Active
+maturity: Exploring
 module: src/[module]/
 related_adrs: []
 ---
@@ -55,6 +56,13 @@ related_adrs: []
 
 ## Requirements
 - [Requirement 1]
+
+## Implementation State
+
+**Current focus:** TBD
+
+**Open questions:**
+- <!-- TODO: Add open questions -->
 
 ## Acceptance Criteria
 <!-- TODO: Add when ready for test automation -->
