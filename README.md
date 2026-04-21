@@ -38,17 +38,27 @@ Traditional spec-driven development tries to solve the "code as truth" problem b
 
 ## How It Works
 
-1. **Interview** — Claude asks about your project, tech choices, and *why* you made them
+1. **Interview** — Your AI assistant asks about your project, tech choices, and *why* you made them
 2. **Document** — Decisions become ADRs, patterns get captured, boundaries get set
 3. **Develop** — AI follows your documented decisions consistently
 4. **Evolve** — Update decisions with `/blueprint:decide` or `/blueprint:supersede`
 
 ## Quick Start
 
+### Claude Code
+
 ```bash
 /plugin marketplace add rickardp/blueprint-mode
 /plugin install blueprint-mode
 ```
+
+### Codex
+
+Codex reads repo-local plugin marketplaces from `.agents/plugins/marketplace.json`.
+This repo now includes one that points at `plugins/blueprint-mode`.
+
+After cloning the repo, restart Codex and enable the `Blueprint Mode` plugin from the
+repo marketplace.
 
 <details>
 <summary>Local development</summary>
@@ -71,6 +81,28 @@ claude --plugin-dir /path/to/blueprint-mode/plugins/blueprint-mode
 
 </details>
 
+<details>
+<summary>Codex local development</summary>
+
+Codex loads repo-local plugins from `$REPO_ROOT/.agents/plugins/marketplace.json`.
+This repo ships a marketplace entry for `plugins/blueprint-mode`, so local development is:
+
+```bash
+git clone https://github.com/rickardp/blueprint-mode.git
+cd blueprint-mode
+# Restart Codex, then enable Blueprint Mode from the repo marketplace
+```
+
+Codex installs the plugin into its local cache and loads the installed copy from there,
+so restart Codex after changing plugin metadata or skill files.
+
+Codex currently reuses the shared `SKILL.md` files only. The existing
+`plugins/blueprint-mode/agents/` directory remains Claude-oriented reference material for
+now because Codex documents custom agents as repo/user configuration rather than as a
+plugin-bundled surface.
+
+</details>
+
 ## Commands
 
 | Command | Purpose |
@@ -86,6 +118,10 @@ claude --plugin-dir /path/to/blueprint-mode/plugins/blueprint-mode
 | `/blueprint:status` | Show overview of project's Blueprint structure |
 | `/blueprint:validate` | Check code against documented patterns and decisions |
 | `/blueprint:help` | Explain Blueprint features and available commands |
+
+These Blueprint skills are now packaged for both Claude Code and Codex. Claude keeps the
+native slash-command UX; Codex currently reuses the same `SKILL.md` files via the plugin
+manifest and marketplace wiring added in this repo.
 
 ## Onboarding an existing codebase
 

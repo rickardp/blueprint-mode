@@ -7,9 +7,14 @@ Documentation for developers and maintainers of the Blueprint Mode plugin.
 ```
 blueprint-mode/
 ├── .claude-plugin/
-│   └── marketplace.json          # Marketplace definition
+│   └── marketplace.json          # Claude marketplace definition
+├── .agents/
+│   └── plugins/
+│       └── marketplace.json      # Codex repo marketplace definition
 ├── plugins/
 │   └── blueprint-mode/
+│       ├── .codex-plugin/
+│       │   └── plugin.json       # Codex plugin manifest
 │       ├── .claude-plugin/
 │       │   └── plugin.json       # Plugin manifest
 │       └── skills/
@@ -48,6 +53,26 @@ The `.claude-plugin/marketplace.json` defines the marketplace:
 }
 ```
 
+Codex uses the repo-local `.agents/plugins/marketplace.json`:
+
+```json
+{
+  "name": "blueprint-mode-local",
+  "interface": { "displayName": "Blueprint Mode Local" },
+  "plugins": [
+    {
+      "name": "blueprint-mode",
+      "source": { "source": "local", "path": "./plugins/blueprint-mode" },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Coding"
+    }
+  ]
+}
+```
+
 ## Plugin Manifest
 
 Each plugin has `.claude-plugin/plugin.json`:
@@ -59,6 +84,14 @@ Each plugin has `.claude-plugin/plugin.json`:
   "version": "1.0.0"
 }
 ```
+
+Codex packaging lives alongside it at `.codex-plugin/plugin.json` and points at the
+existing `skills/` directory instead of introducing a second skill tree.
+
+The existing `plugins/blueprint-mode/agents/` directory is not currently wired into the
+Codex plugin package. Current Codex docs describe custom agents as project/user config
+under `.codex/agents/` or `~/.codex/agents/`, not as a documented plugin-bundled
+component, so these files remain Claude-oriented/shared reference material for now.
 
 ## Skill File Format
 
@@ -102,9 +135,14 @@ git clone https://github.com/rickardp/blueprint-mode.git
 claude --plugin-dir ./blueprint-mode/plugins/blueprint-mode
 ```
 
+### Codex Local Development
+
+Codex reads the repo-local `.agents/plugins/marketplace.json`, copies the plugin from
+`./plugins/blueprint-mode`, and loads the installed copy from its plugin cache after a restart.
+
 ## Verification
 
-After installation, skills appear as:
+After installation, Claude skills appear as:
 
 ```
 /blueprint:setup-repo
@@ -120,12 +158,16 @@ After installation, skills appear as:
 /blueprint:help
 ```
 
+In Codex, the same bundled `skills/` directory is exposed through the plugin rather than
+through Claude slash commands.
+
 ## Updating Skills
 
 1. Edit the relevant `SKILL.md` file in `plugins/blueprint-mode/skills/`
 2. Test locally with `claude --plugin-dir ./plugins/blueprint-mode`
-3. Bump version in `plugins/blueprint-mode/.claude-plugin/plugin.json`
-4. Commit and push changes
+3. Restart Codex to validate that the repo marketplace still loads the plugin cleanly
+4. Bump version in both `plugins/blueprint-mode/.claude-plugin/plugin.json` and `plugins/blueprint-mode/.codex-plugin/plugin.json`
+5. Commit and push changes
 
 ## Skills Reference
 

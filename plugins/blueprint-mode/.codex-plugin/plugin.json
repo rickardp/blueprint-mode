@@ -1,0 +1,42 @@
+{
+  "name": "blueprint-mode",
+  "version": "1.3.0",
+  "description": "Spec-driven development with documented decision rationale: specs, ADRs, patterns, and requirements",
+  "author": {
+    "name": "rickardp",
+    "url": "https://github.com/rickardp"
+  },
+  "homepage": "https://github.com/rickardp/blueprint-mode",
+  "repository": "https://github.com/rickardp/blueprint-mode",
+  "license": "MIT",
+  "keywords": [
+    "specs",
+    "adr",
+    "architecture-decisions",
+    "maintainability",
+    "patterns",
+    "requirements",
+    "spec-driven"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Blueprint Mode",
+    "shortDescription": "Keep ADRs, specs, and patterns as a stable source of truth",
+    "longDescription": "Blueprint Mode helps teams document architecture decisions, requirements, boundaries, and good and bad code patterns so AI-assisted development stays consistent over time.",
+    "developerName": "rickardp",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/rickardp/blueprint-mode",
+    "privacyPolicyURL": "https://github.com/rickardp/blueprint-mode",
+    "termsOfServiceURL": "https://github.com/rickardp/blueprint-mode",
+    "defaultPrompt": [
+      "Onboard this repo into Blueprint Mode",
+      "Record an ADR for this architecture choice",
+      "Show the current Blueprint docs in this repo"
+    ],
+    "screenshots": []
+  }
+}

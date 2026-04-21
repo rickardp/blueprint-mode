@@ -46,10 +46,11 @@ The plugin marketplace enables one-command installation (`/plugin marketplace ad
 - No runtime dependencies beyond Claude Code
 
 **Negative:**
-- Only works with Claude Code (not Cursor, Copilot, etc.)
-- Users must have Claude Code installed
+- Tied to the Claude Code ecosystem for the Claude workflow
+- Users who want the Claude workflow must have Claude Code installed
 - Feature set limited by plugin API capabilities
 
 ## Related
 
 - Tech stack overview: [docs/specs/tech-stack.md](../specs/tech-stack.md)
+- See also: [ADR-005: Dual Claude Code and Codex Plugin Packaging](005-dual-runtime-plugin-packaging.md)
