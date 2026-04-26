@@ -1,6 +1,6 @@
 ---
 name: blueprint:onboard-design
-description: Opt-in. Add the design/UX tree to a Blueprint repo. Interviews the user, ingests external artifacts (Figma, Storybook, design docs), and seeds UX decisions. Run again any time to refine.
+description: Opt-in. Add the design/UX tree to a Blueprint repo. Scaffolds design/ux-decisions/ and design/sources.md and records external artifact URLs (Figma, Storybook, design docs). Run again any time to add more sources.
 argument-hint: ""
 disable-model-invocation: true
 allowed-tools:
@@ -19,7 +19,7 @@ allowed-tools:
 
 **OPT-IN:** This skill is the only way the `design/` tree gets created. Other Blueprint skills do not auto-scaffold it. Run this when the repo has UX/design artifacts worth capturing.
 
-**COMMAND:** Scaffold `design/` (UX decisions), record external design sources, and interview the user to seed initial content.
+**COMMAND:** Scaffold `design/ux-decisions/` and `design/sources.md`, then record external design source URLs (Figma, Storybook, etc.). UX decisions themselves are captured later, on demand, via `/blueprint:decide` — this skill does NOT seed them.
 
 ## DO NOT ASK FOR SCOPE
 
@@ -69,7 +69,10 @@ Detected UI signals:
 After scaffolding I will interview you about:
 - External design tools (Figma, Sketch, Penpot, Storybook URLs, etc.)
 - External documentation (design system docs, brand guidelines, research repos)
-- Initial UX decisions to record (with rationale)
+
+UX decisions themselves are captured later, on demand, via /blueprint:decide.
+This skill does not seed them — backfilling decisions ahead of need is
+explicitly out of scope.
 
 Skip any question with "skip" — TBD markers are fine.
 
@@ -106,43 +109,25 @@ Use `AskUserQuestion`. Allow skip on every question. Batch up to 4 source types 
 
 For each selected option, ask for the URL (plain text question allowed, since this is content, not scope). Record into `design/sources.md`.
 
-### Step 6: Interview — Seed UX Decisions
-
-```json
-{
-  "questions": [{
-    "question": "Are there UX decisions the team has already made and should record?",
-    "header": "UX Decisions",
-    "options": [
-      {"label": "Yes, list a few", "description": "I'll capture them as Draft UX decisions"},
-      {"label": "Skip for now", "description": "Capture later with /blueprint:decide"}
-    ],
-    "multiSelect": false
-  }]
-}
-```
-
-If "Yes": ask for a short title and one-line rationale per decision. Create each as a Draft UX decision in `design/ux-decisions/NNN-[slug].md` using the template from `_templates/TEMPLATES.md` (`<!-- SECTION: ux-decision-template -->`). Use TBD markers for missing context/options/consequences.
-
-### Step 7: Update CLAUDE.md / AGENTS.md
+### Step 6: Update CLAUDE.md / AGENTS.md
 
 Detect the agent instructions file (same logic as `/blueprint:onboard` — check symlinks first). Add or update the design tree section so future agent sessions know the tree exists. Keep it brief; reference don't duplicate.
 
 If a Documentation table exists in CLAUDE.md, add the design tree rows. If not, append a section.
 
-### Step 8: Report
+### Step 7: Report
 
 ```
 Design tree set up:
-- design/ux-decisions/         [N seeds, M TBD]
+- design/ux-decisions/         (empty — populate with /blueprint:decide)
 - design/sources.md            [N external sources recorded]
 
 Updated CLAUDE.md (or AGENTS.md) with design tree references.
 
 Next steps:
-- /blueprint:decide [topic]    Record a UX decision (now triages tech vs UX)
+- /blueprint:decide [topic]    Record a UX decision (skill now triages tech vs UX)
 
-Run /blueprint:onboard-design again any time to add more seeds or sources.
+Run /blueprint:onboard-design again any time to add more sources to design/sources.md.
 ```
 
 ---
@@ -189,8 +174,7 @@ External design assets and documentation referenced by this design system. Updat
 Running this skill again on a repo that already has `design/`:
 - Does NOT recreate or overwrite existing files
 - DOES add new sources to `design/sources.md`
-- DOES create new seed UX decisions based on the interview
-- DOES NOT delete TBD markers — those persist until the user fills them in
+- DOES NOT touch existing UX decisions (those are captured by `/blueprint:decide`)
 
 ## Error Recovery
 

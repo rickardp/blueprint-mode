@@ -406,7 +406,7 @@ This skill:
 - Records external design tool URLs (Figma, Storybook, etc.) in `design/sources.md`
 - Updates `CLAUDE.md` / `AGENTS.md` to point at the design tree
 
-You can run it again any time to add more sources or seeds.
+You can run it again any time to add more sources to `design/sources.md`.
 
 If you don't run this skill, no other skill will create the design tree for you. `/blueprint:decide` will detect strong UX signals and warn you before filing the content as an ADR.
 
