@@ -1,6 +1,6 @@
 ---
 name: blueprint:validate
-description: Check code against documented specs, patterns, anti-patterns, and ADR decisions. Use when the user wants to verify consistency, audit the codebase, check spec compliance, or find violations.
+description: Check code against documented specs, patterns, anti-patterns, ADRs, UX decisions, and design patterns. Use when the user wants to verify consistency, audit the codebase, check spec compliance, or find violations.
 argument-hint: "[scope: all|specs|patterns|adrs|features|docs|directory]"
 disable-model-invocation: true
 allowed-tools:
@@ -40,12 +40,18 @@ When you see JSON examples in this skill, they are parameters for the AskUserQue
 
 Gather repo structure and blueprint inventory in parallel. Use Glob and Read directly (not sub-agents) — this should be fast.
 
-**1a. Blueprint inventory** (parallel Glob calls):
+**1a. Blueprint inventory** (parallel Glob calls — code tree AND design tree):
+
+Code / architecture tree:
 - `docs/specs/*.md` and `docs/specs/**/*.md` — specs (tech-stack, product, boundaries, features, NFRs)
 - `docs/adrs/*.md` — architecture decision records
-- `patterns/bad/**/*.md` and `patterns/good/**/*.md` — documented patterns
+- `patterns/bad/**/*.md` and `patterns/good/**/*.md` — documented code patterns
 
-If no blueprint files exist: "No Blueprint structure found. Run `/blueprint:onboard` first." and stop.
+Design / UX tree:
+- `design/ux-decisions/*.md` — UX decisions
+- `design/patterns/bad/**/*.md` and `design/patterns/good/**/*.md` — documented UI patterns
+
+If no blueprint files exist in either tree: "No Blueprint structure found. Run `/blueprint:onboard` first." and stop.
 
 **1b. Repo structure** (parallel Glob calls):
 - `**/*.md` — all markdown files (for documentation drift detection)
@@ -54,7 +60,7 @@ If no blueprint files exist: "No Blueprint structure found. Run `/blueprint:onbo
 - `package.json` or `requirements.txt` or `go.mod` or `Cargo.toml` or `pyproject.toml` — dependency manifests
 - Top-level source directories (e.g., `src/`, `lib/`, `app/`, `functions/`, `common/`)
 
-**1c. Read blueprint files**: Read all discovered spec, ADR, boundary, and pattern files. Extract key validation rules into a structured context block:
+**1c. Read blueprint files**: Read all discovered spec, ADR, boundary, pattern, and UX decision files. Extract key validation rules into a structured context block:
 
 ```
 === BLUEPRINT CONTEXT ===
@@ -75,13 +81,21 @@ ADR DECISIONS:
 - ADR-002 [title]: Chose [X], rejected [Y, Z]
 - ...
 
-PATTERNS:
-- Anti-patterns: [name1: description], [name2: description], ...
+CODE PATTERNS:
+- Anti-patterns: [name1: description], ...
 - Good patterns: [name1: key elements], ...
 
 FEATURES (from docs/specs/features/):
-- [name] (status: Active|Planned|Deprecated, maturity: Exploring|Building|Hardening|Stable, module: path, ADRs: [...])
+- [name] (status, maturity, module, ADRs)
 - ...
+
+UX DECISIONS (from design/ux-decisions/):
+- UX-001 [title]: Chose [X], rejected [Y, Z]
+- ...
+
+UI PATTERNS:
+- Anti-patterns: [name: description], ...
+- Good patterns: [name: key elements], ...
 
 === END CONTEXT ===
 ```
@@ -166,20 +180,25 @@ Prompt must instruct the agent to:
 
 #### Agent: Documentation Drift & Content Classification
 
-**Launch when:** Markdown files exist outside `docs/specs/`, `docs/adrs/`, `patterns/` **OR** any blueprint files exist.
+**Launch when:** Markdown files exist outside `docs/specs/`, `docs/adrs/`, `patterns/`, `design/` **OR** any blueprint files exist.
 
 Prompt must instruct the agent to:
 1. Find all `.md` files outside the Blueprint structure (CLAUDE.md, README.md, guides, `.claude/*.md`, etc.).
 2. Cross-reference against tech stack: Grep for superseded/banned alternatives (e.g., `npm install` when ADR chose Bun).
 3. Cross-reference against ADR decisions: Grep for rejected alternatives being recommended.
-4. Cross-reference against deprecated features: Grep for references to Deprecated features as if active.
-5. Flag stale instructions in CLAUDE.md/AGENTS.md — these are **High severity** because agents follow them directly.
-6. **Content classification audit** — check if information is in the wrong document type:
+4. Cross-reference against UX decisions: Grep for UI patterns that contradict an Active UX decision.
+5. Cross-reference against deprecated features: Grep for references to Deprecated features as if active.
+6. Flag stale instructions in CLAUDE.md/AGENTS.md — these are **High severity** because agents follow them directly.
+7. **Content classification audit** — check if information is in the wrong document type or wrong tree:
    - ADRs containing functional requirements (user stories, feature behaviors, UI specs) → should be in `docs/specs/features/`
    - ADRs containing NFR targets (latency metrics, uptime SLAs, scalability numbers) → should be in `docs/specs/non-functional/`
-   - Feature specs containing architectural rationale (tech choice trade-offs, "we chose X over Y") → should be ADRs in `docs/adrs/`
-   - NFR files containing architectural decisions (tool/service choices) → should be ADRs
+   - ADRs containing UX rationale (modal vs page, copy/voice, interaction model) → should be in `design/ux-decisions/`
+   - UX decisions containing tech rationale (library choice, infra) → should be ADRs in `docs/adrs/`
+   - Feature specs containing architectural rationale ("we chose X over Y" technical) → should be ADRs
+   - NFR files containing architectural decisions → should be ADRs
    - Product spec containing detailed feature requirements → should be feature specs
+   - Code patterns under `patterns/` that are actually UI patterns (`.tsx`/`.css`/component-shaped) → should move to `design/patterns/`
+   - UI patterns under `design/patterns/` that are actually server/data code → should move to `patterns/`
    Flag misplaced content as **Medium** severity with a suggestion to move it to the correct location.
 
 #### Agent: CI/CD
@@ -203,6 +222,15 @@ Prompt must instruct the agent to:
 3. Check that declared cloud services match tech stack.
 4. Flag infrastructure patterns that contradict documented anti-patterns.
 5. Verify environment/stage patterns match any documented deployment specs.
+
+#### Agent: Design (UX decisions and UI patterns)
+
+**Launch when:** `design/` tree exists (any of `design/ux-decisions/`, `design/patterns/`).
+
+Prompt must instruct the agent to:
+1. **UX decision compliance**: For each Active UX decision, Grep UI source code for violations of the rejected alternative. Example: UX-002 chose modal-based confirmation; flag inline `window.confirm(...)` calls as a violation.
+2. **UI anti-pattern scan**: For each UI anti-pattern in `design/patterns/bad/anti-patterns.md`, Grep UI source for matching code or markup.
+3. **Cross-tree leakage**: Flag any UX decision filed under `docs/adrs/` (wrong tree) or any ADR filed under `design/ux-decisions/`.
 
 #### Agent: Requirements Gaps
 
@@ -251,6 +279,11 @@ Present findings in a unified report ranked by severity:
 | ... | ... | ... | ... |
 
 **Orphaned Modules:** [findings]
+
+### Design (UX & UI)
+**UX Decision Compliance:** [findings]
+**UI Anti-Pattern Violations:** [findings]
+**Cross-Tree Leakage:** [findings — UX in docs/adrs/, ADRs in design/, etc.]
 
 ### Documentation Drift
 | File | Issue | Severity | Blueprint Source |

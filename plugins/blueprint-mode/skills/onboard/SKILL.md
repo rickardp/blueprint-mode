@@ -92,21 +92,31 @@ Specs:
 - docs/specs/tech-stack.md
 - docs/specs/boundaries.md
 
+[If UI signals detected:]
+Design tree NOT created here. UI signals detected ([signal summary]).
+Run /blueprint:onboard-design after this to opt in to the design tree
+(it scaffolds the directories and captures Figma/Storybook references).
+
 [Call ExitPlanMode to proceed]
 ```
 
 ## Files to Create
 
 ```
-docs/
+docs/                            # CODE / ARCHITECTURE TREE
 ├── adrs/
-│   └── 001-[tech].md    # One per major technology
+│   └── 001-[tech].md            # One per major technology
 ├── specs/
-│   ├── product.md       # Vision, users, goals (from README)
-│   ├── tech-stack.md    # All technologies (from dependencies)
-│   └── boundaries.md    # Always/Ask/Never rules
-CLAUDE.md (or AGENTS.md) # Agent instructions - see detection above
+│   ├── product.md               # Vision, users, goals (from README)
+│   ├── tech-stack.md            # All technologies (from dependencies)
+│   └── boundaries.md            # Always/Ask/Never rules
+
+CLAUDE.md (or AGENTS.md)         # Agent instructions - see detection above
 ```
+
+**This skill ONLY scaffolds the code/architecture tree.** The design tree (`design/`) is opt-in and is set up by a separate skill: `/blueprint:onboard-design`. Do NOT auto-create `design/` based on UI detection — even if the repo has React/Vue/Svelte components.
+
+**If UI code is detected, mention `/blueprint:onboard-design` in the final report** so the user knows it's available — but do not run it or scaffold it automatically.
 
 ## Templates
 
@@ -224,6 +234,11 @@ Created Blueprint structure:
 - [CLAUDE.md | AGENTS.md | both] (agent instructions)
 
 TBD sections can be refined by running this skill again.
+
+[If UI signals were detected:]
+UI signals detected ([summary]). The design tree is opt-in.
+Run /blueprint:onboard-design to set it up — it scaffolds the directories
+and records Figma / Storybook / docs URLs.
 ```
 
 ## If Structure Already Exists

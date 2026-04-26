@@ -57,8 +57,13 @@ allowed-tools: [Glob, Grep, Read, Write, Edit]
 | Specs: NFR | `<!-- SECTION: nfr -->` | Creating NFR files |
 | ADRs: discovery | `<!-- SECTION: adr-index -->` | Understanding ADR discovery |
 | ADRs: template | `<!-- SECTION: adr-template -->` | Creating individual ADRs |
-| Patterns: good | `<!-- SECTION: good-patterns -->` | Capturing good patterns |
-| Patterns: bad | `<!-- SECTION: bad-patterns -->` | Documenting anti-patterns |
+| Patterns: good | `<!-- SECTION: good-patterns -->` | Capturing good code patterns |
+| Patterns: bad | `<!-- SECTION: bad-patterns -->` | Documenting code anti-patterns |
+| Design: separation | `<!-- SECTION: design-separation -->` | Understanding code vs design split |
+| Design: UX decisions | `<!-- SECTION: ux-decision-template -->` | Creating UX decisions |
+| Design: good patterns | `<!-- SECTION: design-good-patterns -->` | Capturing UI patterns |
+| Design: bad patterns | `<!-- SECTION: design-bad-patterns -->` | Documenting UI anti-patterns |
+| Triage: code vs design | `<!-- SECTION: triage-design -->` | Routing input to code or design tree |
 | CLAUDE.md | `<!-- SECTION: claude-md -->` | Creating agent instructions |
 | Interview Standards | `<!-- SECTION: interview -->` | Following interview patterns |
 
@@ -99,7 +104,7 @@ allowed-tools: [Glob, Grep, Read, Write, Edit]
 ## Directory Structure
 
 ```
-docs/
+docs/                       # CODE / ARCHITECTURE TREE — engineering audience
 ├── specs/
 │   ├── product.md          # Project vision, users, success metrics
 │   ├── features/           # Feature specifications (discovered via globbing)
@@ -109,14 +114,48 @@ docs/
 │   │   └── [category].md   # Performance, security, scalability, etc.
 │   └── boundaries.md       # Always / Ask / Never rules
 ├── adrs/
-│   └── NNN-[slug].md       # Individual decisions (discovered via globbing)
-patterns/
+│   └── NNN-[slug].md       # Architecture decisions (discovered via globbing)
+patterns/                   # CODE patterns only (engineering audience)
 ├── good/
 │   └── [name].[ext]        # Approved code examples
 └── bad/
-    └── anti-patterns.md    # Anti-patterns to avoid
+    └── anti-patterns.md    # Code anti-patterns to avoid
+
+design/                     # DESIGN / UX TREE — OPT-IN, set up by /blueprint:onboard-design
+├── sources.md              # External design sources (Figma, Storybook, docs URLs)
+├── ux-decisions/
+│   └── NNN-[slug].md       # UX decisions (discovered via globbing)
+└── patterns/               # UI/UX patterns only (design audience)
+    ├── good/
+    │   └── [name].[ext]    # Approved UI examples
+    └── bad/
+        └── anti-patterns.md # UI/UX anti-patterns
+
 CLAUDE.md                   # AI agent instructions
 ```
+
+**The `design/` tree is opt-in.** It is created by `/blueprint:onboard-design` and never auto-scaffolded by other skills. Repos without UI in scope (backend services, libraries, CLIs) typically won't have it. Skills that triage code vs design must check tree existence before producing design output paths.
+
+<!-- SECTION: design-separation -->
+## Code/Architecture vs Design/UX: Strict Separation
+
+**The `docs/` + `patterns/` tree and the `design/` tree are NEVER interchangeable.**
+
+Different audiences review different trees (CODEOWNERS-style routing):
+- `docs/**`, `patterns/**` → engineering reviewers
+- `design/**` → design reviewers (only if the tree exists)
+
+**The design tree is opt-in.** Set it up with `/blueprint:onboard-design`. Until then, triage skills only produce code-tree output and warn the user when they see strong UX/UI signals.
+
+| Concern | Tree | Captured by |
+|---------|------|-------------|
+| Tech/architecture decision (e.g. "Postgres over Mongo") | `docs/adrs/` | `/blueprint:decide` |
+| UX/design decision (e.g. "modal over page for X", "destructive confirm") | `design/ux-decisions/` | `/blueprint:decide` (triages) |
+| Functional or non-functional requirement | `docs/specs/...` | `/blueprint:require` |
+| Code pattern (engineering example) | `patterns/good/` or `patterns/bad/` | `/blueprint:good-pattern` / `/blueprint:bad-pattern` (triages) |
+| UI/UX pattern (design example) | `design/patterns/good/` or `design/patterns/bad/` | `/blueprint:good-pattern` / `/blueprint:bad-pattern` (triages) |
+
+**UX decisions are NOT ADRs** — they live in their own tree with independent numbering even though the document shape is similar.
 
 ---
 
@@ -430,6 +469,186 @@ To complete a Draft ADR: fill in the `<!-- TODO: -->` sections, then change `sta
 
 ---
 
+<!-- SECTION: triage-design -->
+## Triage: Code/Architecture vs Design/UX
+
+Skills that handle both trees (`decide`, `good-pattern`, `bad-pattern`, `capture`, `supersede`) MUST classify the input before writing.
+
+### Decision triage (`/blueprint:decide`)
+
+| Signal in input | Type | Destination |
+|-----------------|------|-------------|
+| Tech choice, library, infra, "[X] over [Y]" technical, design pattern (code), runtime/framework/database | Architectural | `docs/adrs/NNN-[slug].md` |
+| User flow, navigation, "modal vs page", confirmation, copy/voice, empty state, error state, interaction model, layout, visual hierarchy | UX | `design/ux-decisions/NNN-[slug].md` |
+| Functional requirement, user capability | Functional | `docs/specs/features/` (redirect to `/blueprint:require`) |
+| Latency, uptime, encryption, scale targets | Non-functional | `docs/specs/non-functional/` (redirect to `/blueprint:require`) |
+
+### Pattern triage (`/blueprint:good-pattern`, `/blueprint:bad-pattern`)
+
+| Signal in input | Type | Destination |
+|-----------------|------|-------------|
+| File extension `.tsx`/`.jsx`/`.vue`/`.svelte`/`.css`/`.scss`/styled-components | UI | `design/patterns/...` |
+| Description mentions component, layout, form, button, modal, navigation, spacing, typography, color, motion, a11y | UI | `design/patterns/...` |
+| Anything else (server code, data layer, infra, build, scripts) | Code | `patterns/...` |
+
+**When ambiguous (e.g. UI logic in TS without visuals):** ask the user once — "Is this a code pattern or a UI pattern?" — and remember the choice for the rest of the session.
+
+---
+
+<!-- SECTION: ux-decision-template -->
+## design/ux-decisions/NNN-[slug].md (UX Decision Template)
+
+UX decisions document **why** a design/UX choice was made. Same shape as ADRs (Context, Options, Decision, Consequences) but separate file tree, separate numbering, and a design audience.
+
+**Reference style:** `UX-NNN` (e.g. `UX-007`) — parallel to `ADR-NNN`, never conflated.
+
+UX decisions are discovered via globbing `design/ux-decisions/*.md`. Status from frontmatter `status:` field.
+
+### Status Values
+
+- **Draft**: Emerging decision, has TODOs. Iterate freely.
+- **Active**: Decision is settled and being followed.
+- **Superseded**: Replaced by a newer UX decision.
+- **Deprecated**: No longer relevant.
+
+### Minimal UX Decision (Draft)
+
+```markdown
+---
+status: Draft
+date: [TODAY]
+---
+
+# UX-[NNN]: [Choice] for [Context]
+
+## Decision
+
+We chose **[CHOICE]** because [primary motivation].
+
+<!-- TODO: Add context — what user problem or interaction is this solving? -->
+<!-- TODO: Add alternatives considered -->
+<!-- TODO: Add consequences (positive and negative) -->
+```
+
+### Complete UX Decision (Active)
+
+```markdown
+---
+status: Active
+date: [TODAY]
+---
+
+# UX-[NNN]: [Choice] for [Context]
+
+## Context
+
+[What user problem, interaction, or design tension is this solving? Who experiences it?]
+
+## Options Considered
+
+### Option 1: [Alternative A]
+- Pro: [advantage]
+- Con: [disadvantage]
+
+### Option 2: [Alternative B]
+- Pro: [advantage]
+- Con: [disadvantage]
+
+## Decision
+
+We chose **[CHOICE]** because [primary motivation].
+
+[Additional reasoning — user research, heuristics, constraints]
+
+## Consequences
+
+**Positive:**
+- [benefit]
+
+**Negative:**
+- [tradeoff]
+
+## Related
+
+- Related UX decisions: [UX-NNN]
+```
+
+### UX Decision Format Enforcement (CRITICAL)
+
+| DO NOT use | USE instead |
+|------------|-------------|
+| `# ADR-NNN` (this is a UX decision) | `# UX-NNN` |
+| `## Status` with "Accepted" in body | YAML frontmatter `status: Active` |
+| `**Benefits:**` | `**Positive:**` |
+| `**Trade-offs:**` | `**Negative:**` |
+| `## References` | `## Related` |
+| Filing in `docs/adrs/` | File in `design/ux-decisions/` |
+
+---
+
+<!-- SECTION: design-good-patterns -->
+## design/patterns/good/[name].[ext]
+
+Same shape as code good patterns, but for UI/UX examples (component compositions, layouts, motion, a11y patterns). Live in the design tree so design reviewers own them.
+
+```
+/**
+ * [Pattern Name] Example
+ *
+ * USE THIS PATTERN WHEN:
+ * - [UI situation]
+ *
+ * KEY ELEMENTS:
+ * 1. [Important UI/UX aspect]
+ *
+ * Related UX decisions:
+ * - [UX-NNN](../../ux-decisions/NNN-name.md) - [Why this pattern]
+ *
+ * Source: [original file path]
+ */
+
+// --- Example Implementation ---
+
+// UX-NNN: [Brief reference to the decision]
+[extracted UI code or markup]
+```
+
+---
+
+<!-- SECTION: design-bad-patterns -->
+## design/patterns/bad/anti-patterns.md
+
+UI/UX anti-patterns. Same format as code anti-patterns — single file, each entry is a `## Section`. Lives in the design tree.
+
+```markdown
+# UI/UX Anti-Patterns
+
+UI and interaction patterns to avoid.
+
+## [Category]: [Description]
+
+**Severity:** Critical | High | Medium | Low
+
+### Don't Do This
+```[language]
+[bad UI code or markup]
+```
+
+**Problems:**
+- [Issue]
+
+### Do This Instead
+```[language]
+[correct UI code or markup]
+```
+
+**Why:** [Explanation]
+
+---
+```
+
+---
+
 <!-- SECTION: bad-patterns -->
 ## patterns/bad/anti-patterns.md
 
@@ -715,13 +934,20 @@ related_adrs: []
 Skills should reference these templates rather than duplicating them:
 
 ```markdown
-Create files using templates from `_templates/TEMPLATES.md`:
+Code / architecture tree (engineering audience):
 - `docs/specs/product.md` - Project vision, users, success metrics
 - `docs/specs/features/[feature].md` - Feature specifications (discovered via globbing)
 - `docs/specs/tech-stack.md` - Technology decisions and commands
 - `docs/specs/non-functional/[category].md` - NFRs by category (discovered via globbing)
 - `docs/specs/boundaries.md` - Agent guardrails (Always/Ask/Never)
 - `docs/adrs/NNN-*.md` - Individual ADRs (discovered via globbing)
+- `patterns/good/*` - Code patterns to follow
+- `patterns/bad/anti-patterns.md` - Code anti-patterns
+
+Design / UX tree (design audience):
+- `design/ux-decisions/NNN-*.md` - UX decisions (discovered via globbing)
+- `design/patterns/good/*` - UI patterns to follow
+- `design/patterns/bad/anti-patterns.md` - UI anti-patterns
 ```
 
 ---

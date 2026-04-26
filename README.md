@@ -108,15 +108,16 @@ plugin-bundled surface.
 | Command | Purpose |
 |---------|---------|
 | `/blueprint:setup-repo` | Set up new repository with spec structure |
-| `/blueprint:onboard` | Add spec structure to existing codebase |
+| `/blueprint:onboard` | Add spec structure to existing codebase (code/architecture tree only) |
+| `/blueprint:onboard-design` | Opt in to the design tree — interviews user, captures Figma/Storybook refs |
 | `/blueprint:require` | Add functional or non-functional requirements |
-| `/blueprint:decide` | Record technology/architecture decisions as ADRs |
-| `/blueprint:good-pattern` | Capture approved code patterns |
-| `/blueprint:bad-pattern` | Document anti-patterns to avoid |
-| `/blueprint:supersede` | Replace previous decisions with new ones |
+| `/blueprint:decide` | Record decisions — triages tech (ADRs) vs UX (UX decisions, only if design tree exists) |
+| `/blueprint:good-pattern` | Capture approved patterns — triages code vs UI (only if design tree exists) |
+| `/blueprint:bad-pattern` | Document anti-patterns — triages code vs UI (only if design tree exists) |
+| `/blueprint:supersede` | Replace previous decisions with new ones (ADR or UX decision) |
 | `/blueprint:list-adrs` | List all ADRs with status and summaries |
-| `/blueprint:status` | Show overview of project's Blueprint structure |
-| `/blueprint:validate` | Check code against documented patterns and decisions |
+| `/blueprint:status` | Show overview of project's Blueprint structure (both trees if present) |
+| `/blueprint:validate` | Check code against documented patterns, decisions, and design |
 | `/blueprint:help` | Explain Blueprint features and available commands |
 
 These Blueprint skills are now packaged for both Claude Code and Codex. Claude keeps the
@@ -142,28 +143,37 @@ Note that this functionality is in its early stages.
 
 ## What Gets Created
 
+Blueprint splits artifacts into two strictly separate trees so different reviewers (engineering vs design) can own different paths via CODEOWNERS.
+
 ```
 project/
-├── docs/
+├── docs/                          # CODE / ARCHITECTURE TREE
 │   ├── specs/
-│   │   ├── product.md          # What, who, why
-│   │   ├── features/           # Feature specifications (discovered via globbing)
+│   │   ├── product.md             # What, who, why
+│   │   ├── features/              # Feature specifications (discovered via globbing)
 │   │   │   └── [feature].md
-│   │   ├── tech-stack.md       # Technology choices
-│   │   ├── non-functional/     # NFRs by category (discovered via globbing)
-│   │   │   └── [category].md   # Performance, security, scalability, etc.
-│   │   └── boundaries.md       # Always / Ask First / Never rules
+│   │   ├── tech-stack.md          # Technology choices
+│   │   ├── non-functional/        # NFRs by category (discovered via globbing)
+│   │   │   └── [category].md      # Performance, security, scalability, etc.
+│   │   └── boundaries.md          # Always / Ask First / Never rules
 │   └── adrs/
 │       ├── 001-runtime-choice.md
-│       ├── 002-framework-choice.md
-│       └── ...                 # One ADR per motivated decision (discovered via globbing)
-├── patterns/
+│       └── ...                    # One ADR per motivated decision
+├── patterns/                      # CODE patterns only
 │   ├── good/
-│   │   └── [name].[ext]        # Approved code examples
+│   │   └── [name].[ext]           # Approved code examples
 │   └── bad/
-│       └── anti-patterns.md    # What NOT to do
-└── CLAUDE.md                   # AI agent instructions
+│       └── anti-patterns.md       # Code anti-patterns
+├── design/                        # DESIGN / UX TREE (OPT-IN — created by /blueprint:onboard-design)
+│   ├── sources.md                 # External design sources (Figma, Storybook, docs URLs)
+│   └── ux-decisions/
+│       └── NNN-[slug].md          # UX decisions (UX-NNN), independent numbering
+└── CLAUDE.md                      # AI agent instructions
 ```
+
+**Tree separation is strict.** UX decisions are NOT ADRs — they live in their own tree with independent numbering even though the document shape is similar.
+
+**The design tree is opt-in.** `/blueprint:onboard` only sets up the code/architecture tree. To capture UX decisions, run `/blueprint:onboard-design` separately — it scaffolds the directories and records external Figma/Storybook references.
 
 ## Comparison
 

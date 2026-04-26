@@ -36,9 +36,13 @@ Key decisions:
    - Check `patterns/bad/anti-patterns.md` to know what to avoid
    - Follow existing patterns in the codebase
 
-4. **Traceability**
-   - When implementing a decision, add: `// ADR-NNN: [brief note]`
-   - Keep it short - the ADR has the full rationale
+4. **For UI work, also check the design tree**
+   - Check `design/ux-decisions/` for UX choices that constrain the work
+
+5. **Traceability**
+   - When implementing an architectural decision, add: `// ADR-NNN: [brief note]`
+   - When implementing a UX decision, add: `// UX-NNN: [brief note]`
+   - Keep it short - the ADR / UX decision has the full rationale
 
 **BOUNDARY VIOLATIONS**
 
@@ -49,23 +53,41 @@ If a user request would violate a "Never Do" boundary:
 
 ## Documentation
 
+Blueprint splits artifacts into two strictly separate trees. Different reviewers (engineering vs design) own different trees — never mix paths.
+
+**Code / architecture tree:**
+
 | Directory | Purpose |
 |-----------|---------|
 | `docs/specs/` | Product requirements, tech decisions, boundaries |
 | `docs/specs/features/` | Feature specs with requirements, maturity, and implementation state |
-| `docs/adrs/` | Architecture Decision Records - the "why" behind choices |
+| `docs/adrs/` | Architecture Decision Records - the "why" behind tech choices |
 | `patterns/good/` | Approved code examples to follow |
-| `patterns/bad/` | Anti-patterns to avoid |
+| `patterns/bad/` | Code anti-patterns to avoid |
+
+**Design / UX tree (opt-in — only present if `/blueprint:onboard-design` was run):**
+
+| Directory | Purpose |
+|-----------|---------|
+| `design/sources.md` | External design sources (Figma, Storybook, docs URLs) |
+| `design/ux-decisions/` | UX decisions (UX-NNN) - the "why" behind UX/design choices |
+
+The design tree is **not** auto-created. Run `/blueprint:onboard-design` once if you want it; the skill scaffolds the directories and records external Figma/Storybook references.
 
 See [docs/specs/boundaries.md](docs/specs/boundaries.md) for agent guardrails (Always/Ask/Never rules).
 
 ## Code Comments
 
-Reference ADRs with a brief note - the ADR has the full rationale:
+Reference ADRs / UX decisions with a brief note - the source doc has the full rationale:
 
 ```bash
 # ADR-003: Shell hooks for zero dependencies
 grep -h "^status:" docs/adrs/*.md
+```
+
+```tsx
+// UX-002: Destructive actions require confirmation
+<ConfirmDialog ... />
 ```
 
 **Don't duplicate full rationale in comments:**

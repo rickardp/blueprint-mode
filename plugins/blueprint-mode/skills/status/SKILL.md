@@ -1,7 +1,7 @@
 ---
 name: blueprint:status
-description: Show overview of project's Blueprint structure including specs, ADRs, and patterns. Use when the user asks about documented decisions, project status, or wants to see what's been captured.
-argument-hint: "[focus: specs|adrs|patterns]"
+description: Show overview of project's Blueprint structure including specs, ADRs, code patterns, UX decisions, and design patterns. Use when the user asks about documented decisions, project status, or wants to see what's been captured.
+argument-hint: "[focus: specs|adrs|patterns|design]"
 allowed-tools:
   - Glob
   - Grep
@@ -33,10 +33,16 @@ Display an overview of the project's spec-driven development structure.
 
 ## Step 1: Check Structure Exists
 
-Look for these directories:
+Look for these directories across both trees:
+
+**Code / architecture tree:**
 - `docs/specs/`
 - `docs/adrs/`
 - `patterns/`
+
+**Design / UX tree:**
+- `design/ux-decisions/`
+- `design/patterns/`
 
 If none exist:
 ```
@@ -44,6 +50,8 @@ No Blueprint structure found.
 
 Run `/blueprint:setup-repo` for a new project, or `/blueprint:onboard` for an existing codebase.
 ```
+
+Both trees are optional independently — a backend-only repo may have no `design/` tree, and a design-system repo may have no `docs/adrs/`. Show only the trees that exist.
 
 ## Step 2: Gather Information
 
@@ -59,18 +67,28 @@ Run these checks in parallel (single glob + batch file reads):
 ```
 
 **Glob patterns to check:**
+
+Code / architecture tree:
 - `docs/specs/{product,tech-stack,boundaries}.md` - Core spec files
 - `docs/specs/features/*.md` - Feature specs (discovered via globbing)
 - `docs/specs/non-functional/*.md` - NFR files (discovered via globbing)
 - `docs/adrs/*.md` - All ADR files (discovered via globbing)
-- `patterns/good/*` - Good pattern files (excluding .gitkeep)
-- `patterns/bad/anti-patterns.md` - Anti-patterns file
+- `patterns/good/*` - Good code pattern files (excluding .gitkeep)
+- `patterns/bad/anti-patterns.md` - Code anti-patterns file
+
+Design / UX tree:
+- `design/ux-decisions/*.md` - UX decisions (discovered via globbing)
+- `design/patterns/good/*` - UI pattern files (excluding .gitkeep)
+- `design/patterns/bad/anti-patterns.md` - UI anti-patterns file
+
+Other:
 - `CLAUDE.md` - Agent instructions
 
 **In one batch read:**
-1. Read each `docs/adrs/*.md` file - parse frontmatter for status (Active/Superseded/Deprecated/Draft)
-2. Read `patterns/bad/anti-patterns.md` - count `## ` headings
-3. Read `CLAUDE.md` - check for "Pre-Edit Checklist" section
+1. Read each `docs/adrs/*.md` file - parse frontmatter for status
+2. Read each `design/ux-decisions/*.md` file - parse frontmatter for status
+3. Read both anti-patterns files - count `## ` headings
+4. Read `CLAUDE.md` - check for "Pre-Edit Checklist" section
 
 ### Information to Extract
 
@@ -81,19 +99,24 @@ Run these checks in parallel (single glob + batch file reads):
 | Specs | boundaries.md exists | glob |
 | Specs | Feature spec count | glob `docs/specs/features/*.md` |
 | Specs | NFR file count | glob `docs/specs/non-functional/*.md` |
-| ADRs | Active count | ADR files with `status: Active` |
-| ADRs | Superseded count | ADR files with `status: Superseded` |
-| ADRs | Deprecated count | ADR files with `status: Deprecated` |
-| ADRs | Draft count | ADR files with `status: Draft` |
+| ADRs | Active/Draft/Superseded/Deprecated counts | frontmatter status |
 | ADRs | Most recent | highest number in Active ADRs |
-| Patterns | Good count | glob (exclude .gitkeep) |
-| Patterns | Bad count | `## ` headings in anti-patterns.md |
+| Code patterns | Good count | glob `patterns/good/*` (exclude .gitkeep) |
+| Code patterns | Bad count | `## ` headings in `patterns/bad/anti-patterns.md` |
+| UX decisions | Active/Draft/Superseded/Deprecated counts | frontmatter status |
+| UX decisions | Most recent | highest number in Active UX decisions |
+| UI patterns | Good count | glob `design/patterns/good/*` (exclude .gitkeep) |
+| UI patterns | Bad count | `## ` headings in `design/patterns/bad/anti-patterns.md` |
 | CLAUDE.md | Exists + has checklist | file check + "Pre-Edit Checklist" search |
 
 ## Step 3: Display Summary
 
+Show the design tree section only if `design/` exists. Show the code tree section only if `docs/` or `patterns/` exists.
+
 ```markdown
 ## Blueprint Status for [Project Name]
+
+## Code / Architecture Tree
 
 ### Specs
 - Product: docs/specs/product.md [exists ? "✓" : "✗ missing"]
@@ -109,15 +132,28 @@ Run these checks in parallel (single glob + batch file reads):
 - Deprecated: [count] (consider deleting if no code references)
 - Recent: ADR-[NNN] "[title]" ([date])
 
-### Patterns
+### Code Patterns
 - Good: [count] examples in patterns/good/
-- Bad: [count] anti-patterns documented
+- Bad: [count] anti-patterns in patterns/bad/anti-patterns.md
 
-### CLAUDE.md
+## Design / UX Tree
+
+### UX Decisions
+- Active: [count]
+- Draft: [count] (needs refinement)
+- Superseded: [count]
+- Deprecated: [count]
+- Recent: UX-[NNN] "[title]" ([date])
+
+### UI Patterns
+- Good: [count] examples in design/patterns/good/
+- Bad: [count] anti-patterns in design/patterns/bad/anti-patterns.md
+
+## CLAUDE.md
 [exists && hasChecklist ? "✓ Pre-Edit Checklist present" : "✗ Missing or incomplete"]
 ```
 
-**Note:** ADRs are discovered via globbing `docs/adrs/*.md` and reading their frontmatter status field.
+**Note:** All artifacts are discovered via globbing — no index files are required. ADRs and UX decisions are numbered independently and never share files.
 
 ## Minimal Output (if structure is sparse)
 
@@ -146,11 +182,16 @@ Offer helpful next actions based on what's missing or incomplete:
 - No onboarding tracking? → "Run `/blueprint:onboard` to set up incremental tracking"
 
 **ADRs:**
-- No ADRs? → "Use `/blueprint:decide` to record your first decision"
+- No ADRs? → "Use `/blueprint:decide` to record your first architectural decision"
 - Draft ADRs? → "These ADRs need refinement: [list]. Run `/blueprint:decide [topic]` to complete them"
 
+**UX decisions:**
+- No UX decisions but design tree exists? → "Use `/blueprint:decide` (it triages — UX inputs land in `design/ux-decisions/`)"
+- Draft UX decisions? → "These UX decisions need refinement: [list]"
+
 **Patterns:**
-- No patterns? → "Use `/blueprint:good-pattern` to capture approved code"
+- No code patterns? → "Use `/blueprint:good-pattern` to capture approved code"
+- No UI patterns but design tree exists? → "Use `/blueprint:good-pattern` on a UI file (it triages into `design/patterns/`)"
 
 **Structure:**
 - No boundaries? → "Consider adding `docs/specs/boundaries.md` with `/blueprint:onboard`"

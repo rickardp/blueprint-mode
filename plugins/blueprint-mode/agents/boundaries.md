@@ -130,6 +130,7 @@ Optional section:
 ### Blueprint
 - Adding or editing ADRs in docs/adrs/
 - Adding or editing specs in docs/specs/
+- Adding or editing UX decisions in design/ux-decisions/
 - Modifying boundaries.md
 
 ## Never Do
