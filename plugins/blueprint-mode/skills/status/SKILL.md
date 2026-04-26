@@ -1,6 +1,6 @@
 ---
 name: blueprint:status
-description: Show overview of project's Blueprint structure including specs, ADRs, code patterns, UX decisions, and design patterns. Use when the user asks about documented decisions, project status, or wants to see what's been captured.
+description: Show overview of project's Blueprint structure including specs, ADRs, patterns, and UX decisions. Use when the user asks about documented decisions, project status, or wants to see what's been captured.
 argument-hint: "[focus: specs|adrs|patterns|design]"
 allowed-tools:
   - Glob
@@ -42,7 +42,6 @@ Look for these directories across both trees:
 
 **Design / UX tree:**
 - `design/ux-decisions/`
-- `design/patterns/`
 
 If none exist:
 ```
@@ -78,8 +77,7 @@ Code / architecture tree:
 
 Design / UX tree:
 - `design/ux-decisions/*.md` - UX decisions (discovered via globbing)
-- `design/patterns/good/*` - UI pattern files (excluding .gitkeep)
-- `design/patterns/bad/anti-patterns.md` - UI anti-patterns file
+- `design/sources.md` - external design sources (Figma, Storybook, docs URLs)
 
 Other:
 - `CLAUDE.md` - Agent instructions
@@ -105,8 +103,6 @@ Other:
 | Code patterns | Bad count | `## ` headings in `patterns/bad/anti-patterns.md` |
 | UX decisions | Active/Draft/Superseded/Deprecated counts | frontmatter status |
 | UX decisions | Most recent | highest number in Active UX decisions |
-| UI patterns | Good count | glob `design/patterns/good/*` (exclude .gitkeep) |
-| UI patterns | Bad count | `## ` headings in `design/patterns/bad/anti-patterns.md` |
 | CLAUDE.md | Exists + has checklist | file check + "Pre-Edit Checklist" search |
 
 ## Step 3: Display Summary
@@ -132,7 +128,7 @@ Show the design tree section only if `design/` exists. Show the code tree sectio
 - Deprecated: [count] (consider deleting if no code references)
 - Recent: ADR-[NNN] "[title]" ([date])
 
-### Code Patterns
+### Patterns
 - Good: [count] examples in patterns/good/
 - Bad: [count] anti-patterns in patterns/bad/anti-patterns.md
 
@@ -144,10 +140,6 @@ Show the design tree section only if `design/` exists. Show the code tree sectio
 - Superseded: [count]
 - Deprecated: [count]
 - Recent: UX-[NNN] "[title]" ([date])
-
-### UI Patterns
-- Good: [count] examples in design/patterns/good/
-- Bad: [count] anti-patterns in design/patterns/bad/anti-patterns.md
 
 ## CLAUDE.md
 [exists && hasChecklist ? "✓ Pre-Edit Checklist present" : "✗ Missing or incomplete"]
@@ -190,8 +182,7 @@ Offer helpful next actions based on what's missing or incomplete:
 - Draft UX decisions? → "These UX decisions need refinement: [list]"
 
 **Patterns:**
-- No code patterns? → "Use `/blueprint:good-pattern` to capture approved code"
-- No UI patterns but design tree exists? → "Use `/blueprint:good-pattern` on a UI file (it triages into `design/patterns/`)"
+- No patterns? → "Use `/blueprint:good-pattern` to capture an approved example (any subject)"
 
 **Structure:**
 - No boundaries? → "Consider adding `docs/specs/boundaries.md` with `/blueprint:onboard`"

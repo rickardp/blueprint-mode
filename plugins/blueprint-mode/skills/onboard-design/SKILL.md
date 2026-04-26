@@ -1,6 +1,6 @@
 ---
 name: blueprint:onboard-design
-description: Opt-in. Add the design/UX tree to a Blueprint repo. Interviews the user, ingests external artifacts (Figma, Storybook, design docs), and seeds UX decisions and design patterns. Run again any time to refine.
+description: Opt-in. Add the design/UX tree to a Blueprint repo. Interviews the user, ingests external artifacts (Figma, Storybook, design docs), and seeds UX decisions. Run again any time to refine.
 argument-hint: ""
 disable-model-invocation: true
 allowed-tools:
@@ -19,7 +19,7 @@ allowed-tools:
 
 **OPT-IN:** This skill is the only way the `design/` tree gets created. Other Blueprint skills do not auto-scaffold it. Run this when the repo has UX/design artifacts worth capturing.
 
-**COMMAND:** Scaffold `design/` (UX decisions, design patterns), record external design sources, and interview the user to seed initial content.
+**COMMAND:** Scaffold `design/` (UX decisions), record external design sources, and interview the user to seed initial content.
 
 ## DO NOT ASK FOR SCOPE
 
@@ -48,7 +48,6 @@ If no UI signals at all and the user hasn't insisted, ask once: *"This repo does
 
 Check for:
 - `design/ux-decisions/`
-- `design/patterns/`
 
 If any of these already exist, the skill is in **refine mode** — don't recreate, just fill gaps and add seeds based on the interview.
 
@@ -59,8 +58,6 @@ I will set up the design tree:
 
 Scaffolding:
 - design/ux-decisions/         (NNN-[slug].md, populated by /blueprint:decide)
-- design/patterns/good/        (UI examples)
-- design/patterns/bad/anti-patterns.md
 - design/sources.md            (external design references)
 
 Detected UI signals:
@@ -73,7 +70,6 @@ After scaffolding I will interview you about:
 - External design tools (Figma, Sketch, Penpot, Storybook URLs, etc.)
 - External documentation (design system docs, brand guidelines, research repos)
 - Initial UX decisions to record (with rationale)
-- Known UI anti-patterns from team experience
 
 Skip any question with "skip" — TBD markers are fine.
 
@@ -84,8 +80,6 @@ Skip any question with "skip" — TBD markers are fine.
 
 Create directories and base files:
 - `design/ux-decisions/.gitkeep`
-- `design/patterns/good/.gitkeep`
-- `design/patterns/bad/anti-patterns.md` (header from `_templates/TEMPLATES.md` `<!-- SECTION: design-bad-patterns -->`)
 - `design/sources.md` (template below)
 
 ### Step 5: Interview — External Sources
@@ -130,44 +124,23 @@ For each selected option, ask for the URL (plain text question allowed, since th
 
 If "Yes": ask for a short title and one-line rationale per decision. Create each as a Draft UX decision in `design/ux-decisions/NNN-[slug].md` using the template from `_templates/TEMPLATES.md` (`<!-- SECTION: ux-decision-template -->`). Use TBD markers for missing context/options/consequences.
 
-### Step 7: Interview — Seed UI Anti-Patterns
-
-```json
-{
-  "questions": [{
-    "question": "Are there UI/UX patterns the team has agreed to avoid?",
-    "header": "UI Anti-Patterns",
-    "options": [
-      {"label": "Yes, list a few", "description": "I'll capture them in design/patterns/bad/anti-patterns.md"},
-      {"label": "Skip for now", "description": "Capture later with /blueprint:bad-pattern"}
-    ],
-    "multiSelect": false
-  }]
-}
-```
-
-If "Yes": for each, ask for a one-line description and the correct alternative. Append to `design/patterns/bad/anti-patterns.md` using the template.
-
-### Step 8: Update CLAUDE.md / AGENTS.md
+### Step 7: Update CLAUDE.md / AGENTS.md
 
 Detect the agent instructions file (same logic as `/blueprint:onboard` — check symlinks first). Add or update the design tree section so future agent sessions know the tree exists. Keep it brief; reference don't duplicate.
 
 If a Documentation table exists in CLAUDE.md, add the design tree rows. If not, append a section.
 
-### Step 9: Report
+### Step 8: Report
 
 ```
 Design tree set up:
 - design/ux-decisions/         [N seeds, M TBD]
-- design/patterns/good/        [empty — add with /blueprint:good-pattern]
-- design/patterns/bad/anti-patterns.md  [N entries]
 - design/sources.md            [N external sources recorded]
 
 Updated CLAUDE.md (or AGENTS.md) with design tree references.
 
 Next steps:
 - /blueprint:decide [topic]    Record a UX decision (now triages tech vs UX)
-- /blueprint:good-pattern [file] Capture a UI pattern (now triages code vs UI)
 
 Run /blueprint:onboard-design again any time to add more seeds or sources.
 ```
@@ -207,7 +180,6 @@ External design assets and documentation referenced by this design system. Updat
 | Artifact | Section in TEMPLATES.md |
 |----------|-------------------------|
 | UX decision (Draft) | `<!-- SECTION: ux-decision-template -->` |
-| UI anti-pattern entry | `<!-- SECTION: design-bad-patterns -->` |
 | Tree separation rules | `<!-- SECTION: design-separation -->` |
 
 ---

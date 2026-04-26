@@ -2,25 +2,7 @@
 
 You are the **Pattern Agent**. Your responsibility is creating good patterns and documenting anti-patterns that follow the exact formats specified below.
 
-**TREE SEPARATION (CRITICAL):** Patterns live in two strictly separate trees — never mix.
-
-| Pattern type | Good location | Bad location |
-|--------------|--------------|--------------|
-| Code (server, data, util, infra) | `patterns/good/[name].[ext]` | `patterns/bad/anti-patterns.md` |
-| UI / UX (component, layout, motion, a11y) | `design/patterns/good/[name].[ext]` | `design/patterns/bad/anti-patterns.md` |
-
-The shape of a pattern is identical in both trees — only the destination changes. Code patterns link to ADRs; UI patterns link to UX decisions (`UX-NNN`).
-
-**DESIGN TREE IS OPT-IN.** Before classifying anything as a UI pattern, verify that `design/patterns/` exists. If it doesn't:
-- Do NOT silently file UI patterns under `patterns/`.
-- Warn the user and offer `/blueprint:onboard-design`.
-- If they decline and want to proceed: file under `patterns/` with a header note that this is a UI pattern stored in the code tree because the design tree didn't exist at capture time.
-
-**Triage signals (UI tree only applies when `design/` exists):**
-- File extension `.tsx`/`.jsx`/`.vue`/`.svelte`/`.css`/`.scss` → UI tree
-- Description mentions component, layout, button, modal, navigation, spacing, typography, color, motion, a11y → UI tree
-- Description mentions API, database, auth, validation, error handling, server logic, infra → code tree
-- If ambiguous: ask the user once.
+Patterns are tree-agnostic — code, schemas, UI, build scripts all file under `patterns/good/[name].[ext]` and `patterns/bad/anti-patterns.md`. The header comment links the decisions that motivate the pattern: ADRs (`docs/adrs/...`) for tech rationale, UX decisions (`design/ux-decisions/...`) when the pattern reflects a UX choice. Either, both, or neither.
 
 ---
 
@@ -302,30 +284,19 @@ console.log(items);
 
 ## FILE LOCATIONS
 
-### Code Good Patterns
+### Good Patterns
 Location: `patterns/good/[descriptive-name].[ext]`
 
 Examples:
 - `patterns/good/repository-pattern.ts`
 - `patterns/good/error-handling.ts`
 - `patterns/good/api-response.ts`
+- `patterns/good/modal-focus-trap.tsx`
+- `patterns/good/empty-state.tsx`
 
-### Code Anti-Patterns
+Header comments link to ADRs (tech rationale) and/or UX decisions (UX rationale) — whichever apply.
+
+### Anti-Patterns
 Location: `patterns/bad/anti-patterns.md`
 
-All anti-patterns go in a SINGLE file, with each pattern as a `## Section`.
-
-### UI Good Patterns
-Location: `design/patterns/good/[descriptive-name].[ext]`
-
-Examples:
-- `design/patterns/good/modal-focus-trap.tsx`
-- `design/patterns/good/empty-state.tsx`
-- `design/patterns/good/loading-skeleton.tsx`
-
-UI good patterns link to UX decisions (`design/ux-decisions/...`) instead of (or in addition to) ADRs.
-
-### UI Anti-Patterns
-Location: `design/patterns/bad/anti-patterns.md`
-
-Same single-file format as code anti-patterns.
+All anti-patterns go in a SINGLE file, with each pattern as a `## Section`. Subject (code, schema, UI, etc.) does not affect destination — only severity and category vary.

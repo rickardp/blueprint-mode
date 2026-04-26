@@ -1,6 +1,6 @@
 ---
 name: blueprint:bad-pattern
-description: Document an anti-pattern to avoid
+description: Document an anti-pattern to avoid (any subject — code, schema, UI, infra)
 argument-hint: "[description] - [correct approach]"
 allowed-tools:
   - Glob
@@ -14,7 +14,7 @@ allowed-tools:
 
 # Document Anti-Pattern
 
-**COMMAND:** Document code to avoid and the correct alternative.
+**COMMAND:** Document something to avoid and the correct alternative. Anti-patterns are tree-agnostic — file all entries in `patterns/bad/anti-patterns.md` regardless of subject (code, database model, UI, infra).
 
 ## Execute
 
@@ -29,6 +29,7 @@ allowed-tools:
 |-------|--------|
 | `/bad-pattern any type - use unknown` | Document with both bad and good |
 | `/bad-pattern inline SQL` | Ask for correct approach |
+| `/bad-pattern modal traps focus on close - return focus to trigger` | UI anti-pattern, same file |
 | `/bad-pattern` | Ask what to document |
 
 ## Anti-Pattern Template
@@ -58,9 +59,9 @@ Add to `patterns/bad/anti-patterns.md`:
 
 ## Severity Guide
 
-- **Critical**: Security, data loss
-- **High**: Performance, maintenance burden
-- **Medium**: Code smell
+- **Critical**: Security, data loss, accessibility violations (WCAG failures), destructive actions without confirmation
+- **High**: Performance, maintenance burden, broken interaction patterns
+- **Medium**: Code smell, inconsistent visual language
 - **Low**: Style preference
 
 ## Output

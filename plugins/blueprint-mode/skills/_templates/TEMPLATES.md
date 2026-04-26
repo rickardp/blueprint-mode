@@ -61,9 +61,7 @@ allowed-tools: [Glob, Grep, Read, Write, Edit]
 | Patterns: bad | `<!-- SECTION: bad-patterns -->` | Documenting code anti-patterns |
 | Design: separation | `<!-- SECTION: design-separation -->` | Understanding code vs design split |
 | Design: UX decisions | `<!-- SECTION: ux-decision-template -->` | Creating UX decisions |
-| Design: good patterns | `<!-- SECTION: design-good-patterns -->` | Capturing UI patterns |
-| Design: bad patterns | `<!-- SECTION: design-bad-patterns -->` | Documenting UI anti-patterns |
-| Triage: code vs design | `<!-- SECTION: triage-design -->` | Routing input to code or design tree |
+| Triage: code vs design | `<!-- SECTION: triage-design -->` | Routing UX vs tech decisions |
 | CLAUDE.md | `<!-- SECTION: claude-md -->` | Creating agent instructions |
 | Interview Standards | `<!-- SECTION: interview -->` | Following interview patterns |
 
@@ -123,13 +121,8 @@ patterns/                   # CODE patterns only (engineering audience)
 
 design/                     # DESIGN / UX TREE — OPT-IN, set up by /blueprint:onboard-design
 ├── sources.md              # External design sources (Figma, Storybook, docs URLs)
-├── ux-decisions/
-│   └── NNN-[slug].md       # UX decisions (discovered via globbing)
-└── patterns/               # UI/UX patterns only (design audience)
-    ├── good/
-    │   └── [name].[ext]    # Approved UI examples
-    └── bad/
-        └── anti-patterns.md # UI/UX anti-patterns
+└── ux-decisions/
+    └── NNN-[slug].md       # UX decisions (discovered via globbing)
 
 CLAUDE.md                   # AI agent instructions
 ```
@@ -152,8 +145,7 @@ Different audiences review different trees (CODEOWNERS-style routing):
 | Tech/architecture decision (e.g. "Postgres over Mongo") | `docs/adrs/` | `/blueprint:decide` |
 | UX/design decision (e.g. "modal over page for X", "destructive confirm") | `design/ux-decisions/` | `/blueprint:decide` (triages) |
 | Functional or non-functional requirement | `docs/specs/...` | `/blueprint:require` |
-| Code pattern (engineering example) | `patterns/good/` or `patterns/bad/` | `/blueprint:good-pattern` / `/blueprint:bad-pattern` (triages) |
-| UI/UX pattern (design example) | `design/patterns/good/` or `design/patterns/bad/` | `/blueprint:good-pattern` / `/blueprint:bad-pattern` (triages) |
+| Pattern (any subject — code, schema, UI) | `patterns/good/` or `patterns/bad/` | `/blueprint:good-pattern` / `/blueprint:bad-pattern` |
 
 **UX decisions are NOT ADRs** — they live in their own tree with independent numbering even though the document shape is similar.
 
@@ -483,15 +475,9 @@ Skills that handle both trees (`decide`, `good-pattern`, `bad-pattern`, `capture
 | Functional requirement, user capability | Functional | `docs/specs/features/` (redirect to `/blueprint:require`) |
 | Latency, uptime, encryption, scale targets | Non-functional | `docs/specs/non-functional/` (redirect to `/blueprint:require`) |
 
-### Pattern triage (`/blueprint:good-pattern`, `/blueprint:bad-pattern`)
+### Patterns
 
-| Signal in input | Type | Destination |
-|-----------------|------|-------------|
-| File extension `.tsx`/`.jsx`/`.vue`/`.svelte`/`.css`/`.scss`/styled-components | UI | `design/patterns/...` |
-| Description mentions component, layout, form, button, modal, navigation, spacing, typography, color, motion, a11y | UI | `design/patterns/...` |
-| Anything else (server code, data layer, infra, build, scripts) | Code | `patterns/...` |
-
-**When ambiguous (e.g. UI logic in TS without visuals):** ask the user once — "Is this a code pattern or a UI pattern?" — and remember the choice for the rest of the session.
+`/blueprint:good-pattern` and `/blueprint:bad-pattern` are **tree-agnostic**: every pattern (code, schema, UI, build script) files under `patterns/good/[name].[ext]` or `patterns/bad/anti-patterns.md`. The header comment can link to ADRs (tech rationale) and/or UX decisions (UX rationale) — whichever apply.
 
 ---
 
@@ -583,69 +569,6 @@ We chose **[CHOICE]** because [primary motivation].
 | `**Trade-offs:**` | `**Negative:**` |
 | `## References` | `## Related` |
 | Filing in `docs/adrs/` | File in `design/ux-decisions/` |
-
----
-
-<!-- SECTION: design-good-patterns -->
-## design/patterns/good/[name].[ext]
-
-Same shape as code good patterns, but for UI/UX examples (component compositions, layouts, motion, a11y patterns). Live in the design tree so design reviewers own them.
-
-```
-/**
- * [Pattern Name] Example
- *
- * USE THIS PATTERN WHEN:
- * - [UI situation]
- *
- * KEY ELEMENTS:
- * 1. [Important UI/UX aspect]
- *
- * Related UX decisions:
- * - [UX-NNN](../../ux-decisions/NNN-name.md) - [Why this pattern]
- *
- * Source: [original file path]
- */
-
-// --- Example Implementation ---
-
-// UX-NNN: [Brief reference to the decision]
-[extracted UI code or markup]
-```
-
----
-
-<!-- SECTION: design-bad-patterns -->
-## design/patterns/bad/anti-patterns.md
-
-UI/UX anti-patterns. Same format as code anti-patterns — single file, each entry is a `## Section`. Lives in the design tree.
-
-```markdown
-# UI/UX Anti-Patterns
-
-UI and interaction patterns to avoid.
-
-## [Category]: [Description]
-
-**Severity:** Critical | High | Medium | Low
-
-### Don't Do This
-```[language]
-[bad UI code or markup]
-```
-
-**Problems:**
-- [Issue]
-
-### Do This Instead
-```[language]
-[correct UI code or markup]
-```
-
-**Why:** [Explanation]
-
----
-```
 
 ---
 
@@ -941,13 +864,12 @@ Code / architecture tree (engineering audience):
 - `docs/specs/non-functional/[category].md` - NFRs by category (discovered via globbing)
 - `docs/specs/boundaries.md` - Agent guardrails (Always/Ask/Never)
 - `docs/adrs/NNN-*.md` - Individual ADRs (discovered via globbing)
-- `patterns/good/*` - Code patterns to follow
-- `patterns/bad/anti-patterns.md` - Code anti-patterns
+- `patterns/good/*` - Patterns to follow (any subject)
+- `patterns/bad/anti-patterns.md` - Anti-patterns to avoid (any subject)
 
 Design / UX tree (design audience):
 - `design/ux-decisions/NNN-*.md` - UX decisions (discovered via globbing)
-- `design/patterns/good/*` - UI patterns to follow
-- `design/patterns/bad/anti-patterns.md` - UI anti-patterns
+- `design/sources.md` - External Figma / Storybook / docs URLs
 ```
 
 ---

@@ -17,13 +17,13 @@ allowed-tools:
 
 ## Execute
 
-1. **Detect tree availability** — Glob for `design/ux-decisions/`. The design tree is **opt-in**. If it doesn't exist, this skill ONLY classifies into the code/architecture tree (ADRs, feature specs, code patterns). UX decisions and UI patterns are skipped — never silently filed under `docs/`.
+1. **Detect tree availability** — Glob for `design/ux-decisions/`. The design tree is **opt-in**. If it doesn't exist, this skill ONLY classifies into the code/architecture tree (ADRs, feature specs, patterns). UX decisions are skipped — never silently filed as ADRs.
 
 2. **Scan** the current conversation for:
    - Architectural decisions (tech choices, code-level approaches, trade-offs)
    - **UX decisions** (only if `design/` exists): interaction model, navigation, modal vs page, copy/voice, empty/error states, motion
    - Requirements discovered or refined during discussion
-   - Patterns agreed upon: code patterns always; UI patterns only if `design/` exists
+   - Patterns agreed upon (any subject — code, schema, UI)
    - Open questions that were resolved
    - Implementation state changes (progress, blockers, new constraints)
 
@@ -34,9 +34,8 @@ allowed-tools:
 5. **Read** existing docs to avoid duplicates:
    - `docs/adrs/*.md` — existing architectural decisions
    - `docs/specs/features/*.md` — existing feature specs
-   - `patterns/good/` and `patterns/bad/anti-patterns.md` — existing code patterns
+   - `patterns/good/` and `patterns/bad/anti-patterns.md` — existing patterns
    - `design/ux-decisions/*.md` — existing UX decisions (if tree exists)
-   - `design/patterns/good/` and `design/patterns/bad/anti-patterns.md` — existing UI patterns (if tree exists)
 
 6. **Classify** each captured item — **respect tree separation**, never file design content under `docs/` or code content under `design/`. Design destinations are only valid when `design/` exists:
 
@@ -49,10 +48,8 @@ allowed-tools:
    | New feature/requirement | `docs/specs/features/slug.md` | Create with maturity: Exploring |
    | Refinement of existing feature | Existing feature spec | Update requirements, implementation state, maturity |
    | Implementation progress | Existing feature spec | Update Implementation State section |
-   | Good code pattern agreed on | `patterns/good/name.ext` | Create pattern file |
-   | Good UI pattern agreed on | `design/patterns/good/name.ext` | Create pattern file |
-   | Code anti-pattern identified | `patterns/bad/anti-patterns.md` | Append section |
-   | UI anti-pattern identified | `design/patterns/bad/anti-patterns.md` | Append section |
+   | Good pattern agreed on (any subject) | `patterns/good/name.ext` | Create pattern file |
+   | Anti-pattern identified (any subject) | `patterns/bad/anti-patterns.md` | Append section |
    | Open question resolved | Existing spec / ADR / UX decision | Remove TODO, fill in answer |
 
 7. **Preview** — Show the user what will be captured before writing. If design content was scanned but skipped due to missing tree, list those skipped items separately:

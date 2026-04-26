@@ -1,6 +1,6 @@
 ---
 name: blueprint:validate
-description: Check code against documented specs, patterns, anti-patterns, ADRs, UX decisions, and design patterns. Use when the user wants to verify consistency, audit the codebase, check spec compliance, or find violations.
+description: Check code against documented specs, patterns, anti-patterns, ADRs, and UX decisions. Use when the user wants to verify consistency, audit the codebase, check spec compliance, or find violations.
 argument-hint: "[scope: all|specs|patterns|adrs|features|docs|directory]"
 disable-model-invocation: true
 allowed-tools:
@@ -49,7 +49,6 @@ Code / architecture tree:
 
 Design / UX tree:
 - `design/ux-decisions/*.md` — UX decisions
-- `design/patterns/bad/**/*.md` and `design/patterns/good/**/*.md` — documented UI patterns
 
 If no blueprint files exist in either tree: "No Blueprint structure found. Run `/blueprint:onboard` first." and stop.
 
@@ -60,7 +59,7 @@ If no blueprint files exist in either tree: "No Blueprint structure found. Run `
 - `package.json` or `requirements.txt` or `go.mod` or `Cargo.toml` or `pyproject.toml` — dependency manifests
 - Top-level source directories (e.g., `src/`, `lib/`, `app/`, `functions/`, `common/`)
 
-**1c. Read blueprint files**: Read all discovered spec, ADR, boundary, pattern, and UX decision files. Extract key validation rules into a structured context block:
+**1c. Read blueprint files**: Read all discovered spec, ADR, boundary, pattern, and UX decision files. Patterns are tree-agnostic (one `patterns/` tree for all subjects). Extract key validation rules into a structured context block:
 
 ```
 === BLUEPRINT CONTEXT ===
@@ -92,10 +91,6 @@ FEATURES (from docs/specs/features/):
 UX DECISIONS (from design/ux-decisions/):
 - UX-001 [title]: Chose [X], rejected [Y, Z]
 - ...
-
-UI PATTERNS:
-- Anti-patterns: [name: description], ...
-- Good patterns: [name: key elements], ...
 
 === END CONTEXT ===
 ```
@@ -197,8 +192,6 @@ Prompt must instruct the agent to:
    - Feature specs containing architectural rationale ("we chose X over Y" technical) → should be ADRs
    - NFR files containing architectural decisions → should be ADRs
    - Product spec containing detailed feature requirements → should be feature specs
-   - Code patterns under `patterns/` that are actually UI patterns (`.tsx`/`.css`/component-shaped) → should move to `design/patterns/`
-   - UI patterns under `design/patterns/` that are actually server/data code → should move to `patterns/`
    Flag misplaced content as **Medium** severity with a suggestion to move it to the correct location.
 
 #### Agent: CI/CD
@@ -223,14 +216,13 @@ Prompt must instruct the agent to:
 4. Flag infrastructure patterns that contradict documented anti-patterns.
 5. Verify environment/stage patterns match any documented deployment specs.
 
-#### Agent: Design (UX decisions and UI patterns)
+#### Agent: UX Decisions
 
-**Launch when:** `design/` tree exists (any of `design/ux-decisions/`, `design/patterns/`).
+**Launch when:** `design/ux-decisions/` exists.
 
 Prompt must instruct the agent to:
 1. **UX decision compliance**: For each Active UX decision, Grep UI source code for violations of the rejected alternative. Example: UX-002 chose modal-based confirmation; flag inline `window.confirm(...)` calls as a violation.
-2. **UI anti-pattern scan**: For each UI anti-pattern in `design/patterns/bad/anti-patterns.md`, Grep UI source for matching code or markup.
-3. **Cross-tree leakage**: Flag any UX decision filed under `docs/adrs/` (wrong tree) or any ADR filed under `design/ux-decisions/`.
+2. **Cross-tree leakage**: Flag any UX decision filed under `docs/adrs/` (wrong tree) or any ADR filed under `design/ux-decisions/`.
 
 #### Agent: Requirements Gaps
 
@@ -280,10 +272,9 @@ Present findings in a unified report ranked by severity:
 
 **Orphaned Modules:** [findings]
 
-### Design (UX & UI)
+### UX Decisions
 **UX Decision Compliance:** [findings]
-**UI Anti-Pattern Violations:** [findings]
-**Cross-Tree Leakage:** [findings — UX in docs/adrs/, ADRs in design/, etc.]
+**Cross-Tree Leakage:** [findings — UX in docs/adrs/, ADRs in design/ux-decisions/]
 
 ### Documentation Drift
 | File | Issue | Severity | Blueprint Source |

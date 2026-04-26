@@ -171,7 +171,7 @@ _(Say 'create now' anytime - I'll infer defaults for anything not specified)_"
 
 ```
 [project-name]/
-├── docs/
+├── docs/                              # CODE / ARCHITECTURE TREE
 │   ├── specs/
 │   │   ├── product.md                 # Vision, users, success metrics
 │   │   ├── features/                  # Feature specifications (empty, discovered via globbing)
@@ -182,7 +182,7 @@ _(Say 'create now' anytime - I'll infer defaults for anything not specified)_"
 │       ├── 001-runtime-choice.md      # Why this runtime
 │       ├── 002-framework-choice.md    # Why this framework (if applicable)
 │       └── 003-database-choice.md     # Why this database (if applicable)
-├── patterns/
+├── patterns/                          # CODE patterns only
 │   ├── good/
 │   │   └── .gitkeep
 │   └── bad/
@@ -192,6 +192,8 @@ _(Say 'create now' anytime - I'll infer defaults for anything not specified)_"
 ├── CLAUDE.md (or AGENTS.md)           # Agent instructions - see detection above
 └── [standard project files]
 ```
+
+**The design tree (`design/`) is NOT created by this skill.** It is opt-in via `/blueprint:onboard-design`. If the user mentions UI, frontend, dashboard, or a UI framework, mention `/blueprint:onboard-design` in the After Creation report — but do NOT scaffold it here.
 
 **Note:** ADRs are discovered via globbing `docs/adrs/*.md`. No index file needed.
 
@@ -344,6 +346,7 @@ See `docs/specs/features/` for detailed specifications.
    - `/blueprint:require` - Add requirements
    - `/blueprint:decide` - Record additional tech decisions
    - `/blueprint:good-pattern` - Capture good patterns
+   - `/blueprint:onboard-design` - Opt in to the design tree (only if the project has UI in scope)
 
 ## Examples
 

@@ -30,8 +30,8 @@ If a specific topic is provided, focus on that area. Otherwise, provide a genera
 - `workflow` - Explain the recommended development workflow
 - `specs` - How to work with specifications
 - `adrs` - How to work with Architecture Decision Records
-- `patterns` - How to work with code and UI patterns
-- `design` - How the design tree works (UX decisions, UI patterns)
+- `patterns` - How to work with patterns (any subject)
+- `design` - How the design tree works (UX decisions)
 
 ### Step 2: Display Help
 
@@ -74,8 +74,8 @@ The two trees are strictly separate so different reviewers (engineering vs desig
 | `/blueprint:onboard-design` | Opt in to the design tree — interviews user, ingests Figma/Storybook refs |
 | `/blueprint:require` | Add functional or non-functional requirements |
 | `/blueprint:decide` | Record decisions — triages tech (ADR) vs UX (UX decision, only if design tree exists) |
-| `/blueprint:good-pattern` | Capture approved patterns — triages code vs UI (only if design tree exists) |
-| `/blueprint:bad-pattern` | Document anti-patterns — triages code vs UI (only if design tree exists) |
+| `/blueprint:good-pattern` | Capture approved patterns (any subject — code, schema, UI) |
+| `/blueprint:bad-pattern` | Document anti-patterns (any subject — code, schema, UI) |
 | `/blueprint:supersede` | Replace or deprecate a previous decision (ADR or UX) |
 | `/blueprint:list-adrs` | List all ADRs with status (architectural only) |
 | `/blueprint:status` | Show overview of Blueprint structure (both trees if present) |
@@ -112,8 +112,8 @@ Run `/blueprint:validate` to check if your code follows documented specs.
 |---------|----------|
 | `/blueprint:require [desc]` | Adding a feature or non-functional requirement (NOT for components) |
 | `/blueprint:decide [topic]` | Making a technology or UX/design choice (skill triages) |
-| `/blueprint:good-pattern [file]` | Capturing code or UI others should emulate (skill triages) |
-| `/blueprint:bad-pattern [desc]` | Documenting code or UI to avoid (skill triages) |
+| `/blueprint:good-pattern [file]` | Capturing examples to emulate (any subject) |
+| `/blueprint:bad-pattern [desc]` | Documenting things to avoid (any subject) |
 | `/blueprint:supersede [ADR\|UX]` | Replacing or retiring a previous ADR or UX decision |
 
 ### Discovery & Validation
@@ -384,9 +384,6 @@ Before writing code:
 2. Check `patterns/bad/anti-patterns.md` for code to avoid
 3. Follow the patterns you find
 
-For UI work, also check the design tree:
-1. Check `design/patterns/good/` for UI examples
-2. Check `design/patterns/bad/anti-patterns.md` for UI to avoid
 ```
 
 #### Design Topic
@@ -405,23 +402,20 @@ The design tree is created by:
 ```
 
 This skill:
-- Scaffolds `design/ux-decisions/`, `design/patterns/`, and `design/sources.md`
-- Interviews you about external design tools (Figma, Storybook, etc.)
-- Captures URL references in `design/sources.md`
-- Optionally seeds initial UX decisions and UI anti-patterns
+- Scaffolds `design/ux-decisions/` and `design/sources.md`
+- Records external design tool URLs (Figma, Storybook, etc.) in `design/sources.md`
 - Updates `CLAUDE.md` / `AGENTS.md` to point at the design tree
 
 You can run it again any time to add more sources or seeds.
 
-If you don't run this skill, no other skill will create the design tree for you. `decide`, `good-pattern`, and `bad-pattern` will detect strong UX/UI signals and warn you before filing the content under the code tree.
+If you don't run this skill, no other skill will create the design tree for you. `/blueprint:decide` will detect strong UX signals and warn you before filing the content as an ADR.
 
 ### Files
 
 | Path | Purpose | Captured by |
 |------|---------|-------------|
+| `design/sources.md` | External design tool URLs (Figma, Storybook, docs) | `/blueprint:onboard-design` |
 | `design/ux-decisions/NNN-*.md` | UX decisions (UX-NNN) — the "why" behind UX choices | `/blueprint:decide` (triages) |
-| `design/patterns/good/*` | Approved UI examples | `/blueprint:good-pattern` (triages) |
-| `design/patterns/bad/anti-patterns.md` | UI anti-patterns | `/blueprint:bad-pattern` (triages) |
 
 ### What goes where
 
@@ -431,14 +425,14 @@ If you don't run this skill, no other skill will create the design tree for you.
 | UX decision (modal vs page, copy/voice, interaction) | `design/ux-decisions/` | `/blueprint:decide` |
 | Functional requirement (user can do X) | `docs/specs/features/` | `/blueprint:require` |
 | Non-functional requirement (latency, uptime) | `docs/specs/non-functional/` | `/blueprint:require` |
-| Code pattern | `patterns/` | `/blueprint:good-pattern` / `/blueprint:bad-pattern` |
-| UI pattern | `design/patterns/` | `/blueprint:good-pattern` / `/blueprint:bad-pattern` |
+| Pattern (any subject — code, schema, UI) | `patterns/` | `/blueprint:good-pattern` / `/blueprint:bad-pattern` |
 
 ### Tree separation rules
 
-- Design content **never** lives under `docs/` or `patterns/`
-- Code content **never** lives under `design/`
-- UX decisions are NOT ADRs — they have their own numbering (UX-NNN)
+- UX decisions live under `design/ux-decisions/`, **never** under `docs/adrs/`
+- ADRs live under `docs/adrs/`, **never** under `design/`
+- UX decisions and ADRs use independent numbering (UX-NNN vs ADR-NNN)
+- Patterns are tree-agnostic — `patterns/good/` and `patterns/bad/` hold any subject (code, schema, UI). The header comment links to ADRs and/or UX decisions, whichever apply.
 
 ### Reference style in code
 

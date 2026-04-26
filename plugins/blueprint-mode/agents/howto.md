@@ -76,8 +76,8 @@ If a task would violate a "Never Do" boundary:
 | `/blueprint:validate` | Check code against documented specs and design |
 | `/blueprint:decide [topic]` | Record decisions — triages tech (ADR) vs UX (UX decision) |
 | `/blueprint:require [desc]` | Add feature or non-functional requirement (NOT for components) |
-| `/blueprint:good-pattern [file]` | Capture approved patterns (any code, schema, UI) |
-| `/blueprint:bad-pattern [desc]` | Document anti-patterns (any code, schema, UI) |
+| `/blueprint:good-pattern [file]` | Capture approved patterns (any subject — code, schema, UI) |
+| `/blueprint:bad-pattern [desc]` | Document anti-patterns (any subject — code, schema, UI) |
 | `/blueprint:supersede [ADR\|UX]` | Replace or deprecate a previous decision |
 | `/blueprint:list-adrs` | List all ADRs with status (architectural only) |
 | `/blueprint:onboard-design` | Opt in to the design tree (run once to set it up) |

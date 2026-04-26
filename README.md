@@ -112,8 +112,8 @@ plugin-bundled surface.
 | `/blueprint:onboard-design` | Opt in to the design tree — interviews user, captures Figma/Storybook refs |
 | `/blueprint:require` | Add functional or non-functional requirements |
 | `/blueprint:decide` | Record decisions — triages tech (ADRs) vs UX (UX decisions, only if design tree exists) |
-| `/blueprint:good-pattern` | Capture approved patterns — triages code vs UI (only if design tree exists) |
-| `/blueprint:bad-pattern` | Document anti-patterns — triages code vs UI (only if design tree exists) |
+| `/blueprint:good-pattern` | Capture approved patterns (any subject — code, schema, UI) |
+| `/blueprint:bad-pattern` | Document anti-patterns (any subject — code, schema, UI) |
 | `/blueprint:supersede` | Replace previous decisions with new ones (ADR or UX decision) |
 | `/blueprint:list-adrs` | List all ADRs with status and summaries |
 | `/blueprint:status` | Show overview of project's Blueprint structure (both trees if present) |
