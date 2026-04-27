@@ -116,7 +116,7 @@ plugin-bundled surface.
 | `/blueprint:bad-pattern` | Document anti-patterns (any subject — code, schema, UI) |
 | `/blueprint:supersede` | Replace previous decisions with new ones (ADR or UX decision) |
 | `/blueprint:list-adrs` | List all ADRs with status and summaries |
-| `/blueprint:status` | Show overview of project's Blueprint structure (both trees if present) |
+| `/blueprint:status` | Show overview of project's Blueprint structure plus adjacent `DESIGN.md` context |
 | `/blueprint:validate` | Check code against documented patterns, decisions, and design |
 | `/blueprint:help` | Explain Blueprint features and available commands |
 
@@ -147,7 +147,7 @@ Blueprint keeps engineering and design intent in distinct repo paths so differen
 
 ```
 project/
-├── DESIGN.md                       # Top-level design context (cross-cutting UI rules, optional)
+├── DESIGN.md                       # Important adjacent design context (optional; not Blueprint structure)
 ├── docs/                          # CODE / ARCHITECTURE TREE
 │   ├── specs/
 │   │   ├── product.md             # What, who, why
@@ -178,7 +178,7 @@ project/
 
 **Deliberate vs coincidental UI.** The repo gives agents the same "is this deliberate?" coverage that ADRs give for architecture. Three layers answer the question for UI: `DESIGN.md` (cross-cutting design rules), `design/ux-decisions/` (per-decision rationale), and `// UX-TBD: [what's unclear]` comments to flag UI that has no governing decision yet — without inventing rationale. Documented UX decisions mean "this was intentional." Undocumented UI code is just implementation state; agents should not infer design rationale from it.
 
-**`DESIGN.md` is the top-level design context.** A short living `DESIGN.md` at the repo root (Google Stitch / awesome-design-md format) holds cross-cutting design rules and prohibitions ("never use more than 3 colours on a screen"). It's a community convention Blueprint stays *compatible with* rather than owning — `/blueprint:onboard-design` can scaffold a minimal stub when the user wants one, agents read it on every UI generation task, and authoring stays conversational. Blueprint avoids duplicating information that belongs in `DESIGN.md`: cross-cutting rules go there, per-decision rationale goes in `design/ux-decisions/`.
+**`DESIGN.md` is the top-level design context, not part of the Blueprint structure.** A short living `DESIGN.md` at the repo root (Google Stitch / awesome-design-md format) holds cross-cutting design rules and prohibitions ("never use more than 3 colours on a screen"). It's a community convention Blueprint stays *compatible with* rather than owning — `/blueprint:onboard-design` can scaffold a minimal stub when the user wants one, agents read it on every UI generation task, and authoring stays conversational. Blueprint avoids duplicating information that belongs in `DESIGN.md`: cross-cutting rules go there, per-decision rationale goes in `design/ux-decisions/`.
 
 ## Comparison
 

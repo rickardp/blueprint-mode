@@ -40,18 +40,20 @@ When you see JSON examples in this skill, they are parameters for the AskUserQue
 
 Gather repo structure and blueprint inventory in parallel. Use Glob and Read directly (not sub-agents) — this should be fast.
 
-**1a. Blueprint inventory** (parallel Glob calls — code tree AND design tree):
+**1a. Blueprint inventory** (parallel Glob calls — code tree, design tree, and important adjacent design context):
 
 Code / architecture tree:
 - `docs/specs/*.md` and `docs/specs/**/*.md` — specs (tech-stack, product, boundaries, features, NFRs)
 - `docs/adrs/*.md` — architecture decision records
 - `patterns/bad/**/*.md` and `patterns/good/**/*.md` — documented code patterns
 
+Important adjacent design context:
+- `DESIGN.md` — top-level design context, if present; important, but not part of the Blueprint structure
+
 Design / UX tree:
-- `DESIGN.md` — top-level design context, if present
 - `design/ux-decisions/*.md` — UX decisions
 
-If no blueprint files exist in either tree: "No Blueprint structure found. Run `/blueprint:onboard` first." and stop.
+If no Blueprint files exist in either tree and no `DESIGN.md` exists: "No Blueprint structure found. Run `/blueprint:onboard` first." and stop. If only `DESIGN.md` exists, run a limited design-context validation and suggest `/blueprint:onboard` or `/blueprint:onboard-design` for full Blueprint coverage.
 
 **1b. Repo structure** (parallel Glob calls):
 - `**/*.md` — all markdown files (for documentation drift detection)
@@ -60,7 +62,7 @@ If no blueprint files exist in either tree: "No Blueprint structure found. Run `
 - `package.json` or `requirements.txt` or `go.mod` or `Cargo.toml` or `pyproject.toml` — dependency manifests
 - Top-level source directories (e.g., `src/`, `lib/`, `app/`, `functions/`, `common/`)
 
-**1c. Read blueprint files**: Read all discovered spec, ADR, boundary, pattern, `DESIGN.md`, and UX decision files. Patterns are tree-agnostic (one `patterns/` tree for all subjects). Extract key validation rules into a structured context block:
+**1c. Read validation context**: Read all discovered spec, ADR, boundary, pattern, `DESIGN.md`, and UX decision files. `DESIGN.md` is an important adjacent repo artifact, not a Blueprint-structure file. Patterns are tree-agnostic (one `patterns/` tree for all subjects). Extract key validation rules into a structured context block:
 
 ```
 === BLUEPRINT CONTEXT ===
@@ -180,10 +182,10 @@ Prompt must instruct the agent to:
 
 #### Agent: Documentation Drift & Content Classification
 
-**Launch when:** Markdown files exist outside `docs/specs/`, `docs/adrs/`, `patterns/`, `design/` **OR** any blueprint files exist.
+**Launch when:** Markdown files exist outside `docs/specs/`, `docs/adrs/`, `patterns/`, `design/` **OR** any Blueprint files or `DESIGN.md` exist.
 
 Prompt must instruct the agent to:
-1. Find all `.md` files outside the Blueprint structure (CLAUDE.md, README.md, guides, `.claude/*.md`, etc.).
+1. Find all `.md` files outside the Blueprint structure (CLAUDE.md, README.md, guides, `.claude/*.md`, etc.). Treat `DESIGN.md` as an important adjacent design-context file, not as stray documentation.
 2. Cross-reference against tech stack: Grep for superseded/banned alternatives (e.g., `npm install` when ADR chose Bun).
 3. Cross-reference against ADR decisions: Grep for rejected alternatives being recommended.
 4. Cross-reference against DESIGN.md: Grep for UI guidance in docs that contradicts cross-cutting design rules.

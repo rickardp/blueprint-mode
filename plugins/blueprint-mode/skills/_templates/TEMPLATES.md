@@ -78,7 +78,7 @@ allowed-tools: [Glob, Grep, Read, Write, Edit]
 - Documenting architectural decisions (ADRs) with rationale
 - Capturing good/bad code patterns with real examples
 - Capturing deliberate UX/design decisions when the opt-in design tree exists
-- Reading and updating repo-root `DESIGN.md` for cross-cutting design rules and prohibitions
+- Reading and updating repo-root `DESIGN.md` for cross-cutting design rules and prohibitions as an important adjacent repo artifact
 - Defining product requirements and feature specs
 - Setting agent boundaries (Always/Ask/Never rules) in `docs/specs/boundaries.md`
 - Validating code against documented specs
@@ -105,9 +105,10 @@ allowed-tools: [Glob, Grep, Read, Write, Edit]
 
 ## Directory Structure
 
-```
-DESIGN.md                   # Top-level design context — optional, cross-cutting UI rules
+Important adjacent repo artifact (not part of the Blueprint structure):
+- `DESIGN.md` — optional top-level design context with cross-cutting UI rules.
 
+```
 docs/                       # CODE / ARCHITECTURE TREE — engineering audience
 ├── specs/
 │   ├── product.md          # Project vision, users, success metrics
@@ -181,7 +182,7 @@ Both layers carry design intent, but at different scopes. Pick by asking *"is th
 
 **Don't duplicate.** A UX decision that derives from or codifies a `DESIGN.md` rule should *reference* the rule, not restate it. If a draft UX decision is really a cross-cutting prohibition with no alternatives, move it to `DESIGN.md` instead.
 
-**On `DESIGN.md` itself:** It's a community convention (Google Stitch / awesome-design-md), not a Blueprint-owned format. Blueprint stays compatible with it — `/blueprint:onboard-design` can scaffold a minimal stub when the user wants one, and Blueprint reads/respects the file when present. The team owns the file's contents; Blueprint avoids duplicating information that belongs there. Authoring stays conversational; never hand-fill it from a template — the same anti-ritual rule that applies to ADRs and UX decisions applies here.
+**On `DESIGN.md` itself:** It's a community convention (Google Stitch / awesome-design-md), not a Blueprint-owned format and not part of the Blueprint structure. Blueprint stays compatible with it — `/blueprint:onboard-design` can scaffold a minimal stub when the user wants one, and Blueprint reads/respects the file when present. The team owns the file's contents; Blueprint avoids duplicating information that belongs there. Authoring stays conversational; never hand-fill it from a template — the same anti-ritual rule that applies to ADRs and UX decisions applies here.
 
 ---
 

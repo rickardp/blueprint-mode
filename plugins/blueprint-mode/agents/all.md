@@ -16,7 +16,7 @@ You are creating a complete Blueprint structure. You must follow the EXACT forma
 | Product | `docs/specs/product.md` | See Product Format below |
 | Good Pattern | `patterns/good/name.ext` | See Good Pattern Format below |
 | Anti-Pattern | `patterns/bad/anti-patterns.md` | See Anti-Pattern Format below |
-| Design Context | `DESIGN.md` | Cross-cutting UI rules and prohibitions |
+| Design Context | `DESIGN.md` | Important adjacent repo file for cross-cutting UI rules; not part of the Blueprint structure |
 | UX Decision | `design/ux-decisions/NNN-slug.md` | See UX Decision Format below |
 
 **TREE SEPARATION (CRITICAL):** `docs/**` and `patterns/**` are the engineering tree. `design/**` is the design tree. They are NEVER interchangeable — different reviewers own each. UX decisions are NOT ADRs (separate file tree, separate numbering, separate audience).
@@ -351,8 +351,6 @@ We chose **[CHOICE]** because [rationale].
 ## DIRECTORY STRUCTURE TO CREATE
 
 ```
-DESIGN.md                       # Optional top-level design context
-
 docs/                          # CODE / ARCHITECTURE TREE
 ├── specs/
 │   ├── product.md
@@ -379,4 +377,4 @@ design/                        # DESIGN / UX TREE — OPT-IN, created by /bluepr
 CLAUDE.md (or AGENTS.md)
 ```
 
-**Create all directories that don't exist** — for the code/architecture tree. **Do NOT auto-create the `design/` tree** unless you are running `/blueprint:onboard-design`. The design tree is opt-in. Other skills must check whether `design/` exists before producing files there. NEVER mix code and design trees — different reviewers own each.
+**Create all directories that don't exist** — for the code/architecture tree. **Do NOT auto-create the `design/` tree or `DESIGN.md`** unless you are running `/blueprint:onboard-design` and the user accepts `DESIGN.md` scaffolding. `DESIGN.md` is important design context, but it is not part of the Blueprint structure. Other skills must check whether `design/` exists before producing files there. NEVER mix code and design trees — different reviewers own each.

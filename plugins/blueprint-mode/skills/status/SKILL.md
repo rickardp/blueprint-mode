@@ -1,6 +1,6 @@
 ---
 name: blueprint:status
-description: Show overview of project's Blueprint structure including specs, ADRs, patterns, DESIGN.md, and UX decisions. Use when the user asks about documented decisions, project status, or wants to see what's been captured.
+description: Show overview of project's Blueprint structure plus important adjacent DESIGN.md context. Use when the user asks about documented decisions, project status, or wants to see what's been captured.
 argument-hint: "[focus: specs|adrs|patterns|design]"
 allowed-tools:
   - Glob
@@ -22,7 +22,7 @@ Display an overview of the project's Blueprint intent-capture structure.
 
 ## Process
 
-1. Check if Blueprint structure exists
+1. Check if Blueprint structure exists, and separately whether `DESIGN.md` exists
 2. Read and summarize all documented artifacts
 3. Display formatted overview
 
@@ -33,25 +33,27 @@ Display an overview of the project's Blueprint intent-capture structure.
 
 ## Step 1: Check Structure Exists
 
-Look for these directories across both trees:
+Look for these paths across the Blueprint trees and adjacent design context:
 
 **Code / architecture tree:**
 - `docs/specs/`
 - `docs/adrs/`
 - `patterns/`
 
-**Design / UX intent:**
-- `DESIGN.md`
+**Important adjacent design context:**
+- `DESIGN.md` (not part of the Blueprint structure)
+
+**Design / UX tree:**
 - `design/ux-decisions/`
 
-If none exist:
+If none of these paths exist:
 ```
 No Blueprint structure found.
 
 Run `/blueprint:setup-repo` for a new project, or `/blueprint:onboard` for an existing codebase.
 ```
 
-Both trees are optional independently — a backend-only repo may have no `design/` tree, and a design-system repo may have no `docs/adrs/`. Show only the trees that exist.
+Both trees are optional independently — a backend-only repo may have no `design/` tree, and a design-system repo may have no `docs/adrs/`. `DESIGN.md` is reported separately as important adjacent design context. Show only the sections that exist.
 
 ## Step 2: Gather Information
 
@@ -76,8 +78,10 @@ Code / architecture tree:
 - `patterns/good/*` - Good code pattern files (excluding .gitkeep)
 - `patterns/bad/anti-patterns.md` - Code anti-patterns file
 
+Important adjacent design context:
+- `DESIGN.md` - top-level design context (cross-cutting UI rules/prohibitions), not part of the Blueprint structure
+
 Design / UX tree:
-- `DESIGN.md` - top-level design context (cross-cutting UI rules/prohibitions)
 - `design/ux-decisions/*.md` - UX decisions (discovered via globbing)
 - `design/sources.md` - external design sources (Figma, Storybook, docs URLs)
 

@@ -24,10 +24,11 @@ allowed-tools:
 3. **Classify** each concern in the input (see Classification below). UX decision classification is only available when the design tree exists. Cross-cutting `DESIGN.md` rules are available when `DESIGN.md` exists, or when the user agrees to scaffold it.
 4. **If strong UX signal but no design tree:** Pause and warn the user (see "Strong UX Signal Without Tree" below). Do NOT silently misfile UX content as an ADR.
 5. **If mixed or misclassified:** Separate concerns into their document types
-6. **Check** the relevant directory for existing decisions (create dir if needed):
+6. **Check** the relevant location for existing decisions (create dir if needed):
    - Architectural → `docs/adrs/`
    - UX (only if `design/` exists) → `design/ux-decisions/`
-7. **Detect** conflicts with existing decisions in the same tree
+   - Cross-cutting design rule → `DESIGN.md` at repo root (read existing if present; offer to scaffold once if absent)
+7. **Detect** conflicts with existing decisions or rules in the same location
 8. **Create** file(s) per concern type
 9. **Report** what was created and where
 

@@ -1,6 +1,6 @@
 ---
 name: blueprint:onboard-design
-description: Opt-in. Add the design/UX tree to a Blueprint repo. Scaffolds design/ux-decisions/ and design/sources.md, records external artifact URLs (Figma, Storybook, design docs), and surfaces a small number of candidate UX decisions found in existing UI/code for the user or designer to confirm.
+description: Opt-in. Add design intent capture to a Blueprint repo. Scaffolds design/ux-decisions/ and design/sources.md, records external artifact URLs (Figma, Storybook, design docs), offers to scaffold a minimal community-format DESIGN.md if absent, and surfaces a small number of candidate UX decisions found in existing UI/code for the user or designer to confirm.
 argument-hint: ""
 disable-model-invocation: true
 allowed-tools:
@@ -117,7 +117,7 @@ For each selected option, ask for the URL (plain text question allowed, since th
 
 ### Step 5b: Top-level `DESIGN.md`
 
-`DESIGN.md` is a community convention (Google Stitch / awesome-design-md), not a Blueprint-owned format. Blueprint stays compatible with it: respects existing files, can scaffold a minimal stub, and avoids duplicating information that belongs there.
+`DESIGN.md` is a community convention (Google Stitch / awesome-design-md), not a Blueprint-owned format and not part of the Blueprint structure. Blueprint stays compatible with it: respects existing files, can scaffold a minimal stub, and avoids duplicating information that belongs there.
 
 If `DESIGN.md` already exists at the repo root: do NOT modify it. Note the file in `design/sources.md` so it's discoverable, and ensure the agent-instructions update in Step 7 includes "read DESIGN.md on UI work."
 

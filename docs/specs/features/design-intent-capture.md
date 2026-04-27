@@ -9,7 +9,7 @@ related_adrs: [4]
 
 ## Overview
 
-Blueprint Mode helps teams distinguish deliberate UX/design choices from expedient fills produced by agents — the two look identical in JSX. The design tree records the WHY behind important UI choices and the top-level design context (`DESIGN.md`) carries cross-cutting rules. Together they form the *why-it-is* layer for UI, sitting next to the code without trying to replace the design canvas as a parallel source of truth for *what-is*.
+Blueprint Mode helps teams distinguish deliberate UX/design choices from expedient fills produced by agents — the two look identical in JSX. The design tree records the WHY behind important UI choices and the top-level design context (`DESIGN.md`) carries cross-cutting rules. `DESIGN.md` is important adjacent repo context, not part of the Blueprint structure. Together they form the *why-it-is* layer for UI, sitting next to the code without trying to replace the design canvas as a parallel source of truth for *what-is*.
 
 ## User Stories
 
@@ -23,7 +23,7 @@ Blueprint Mode helps teams distinguish deliberate UX/design choices from expedie
 - Provide a `// UX-TBD: [what's unclear]` code comment convention so agents can flag UI with no governing decision *without* inventing rationale.
 - Treat undocumented UI code as not-yet-explained implementation, not as design authority.
 - `/blueprint:onboard-design` may run a day-one triage that scans the existing UI/code for a small number (≤5) of patterns and uses them as prompts: it asks the user or designer whether each was a conscious choice and what the rationale was, then captures only those with articulated intent. Code is the prompt, not the source of truth — the human supplies the why.
-- Be compatible with `DESIGN.md` at the repo root as the top-level design context — cross-cutting rules, voice/tone, prohibitions. `DESIGN.md` is a community convention (Google Stitch / awesome-design-md); Blueprint does not own the format. `/blueprint:onboard-design` may scaffold a minimal stub when the user wants one and reference it from agent instructions so it's read on every UI generation task. Authoring stays conversational; the file is never hand-filled.
+- Be compatible with `DESIGN.md` at the repo root as the top-level design context — cross-cutting rules, voice/tone, prohibitions. `DESIGN.md` is a community convention (Google Stitch / awesome-design-md), not part of the Blueprint structure, and Blueprint does not own the format. `/blueprint:onboard-design` may scaffold a minimal stub when the user wants one and reference it from agent instructions so it's read on every UI generation task. Authoring stays conversational; the file is never hand-filled.
 - Maintain a clear delineation: cross-cutting design rules belong in `DESIGN.md`; per-decision rationale (one choice with alternatives considered) belongs in `design/ux-decisions/`. UX decisions reference `DESIGN.md` rules rather than restating them, and a draft UX decision that turns out to be a broad rule with no alternatives is moved to `DESIGN.md` instead.
 - `/blueprint:validate` checks UI code against Active UX decisions and surfaces `// UX-TBD:` flag counts for review.
 - Preserve the research direction: code remains canonical for what exists; Blueprint records why important choices should persist.
@@ -40,7 +40,7 @@ Blueprint Mode helps teams distinguish deliberate UX/design choices from expedie
 | Agent instructions warn against inferring design rationale from undocumented UI | Done |
 | `// UX-TBD:` comment convention documented in CLAUDE.md template + TEMPLATES.md | Done |
 | `/blueprint:validate` checks UX decision compliance and reports UX-TBD flag inventory | Done |
-| `DESIGN.md` treated as community-owned top-level design context — `/blueprint:onboard-design` offers to scaffold a compatible stub and wires it into agent instructions | Done |
+| `DESIGN.md` treated as community-owned top-level design context outside the Blueprint structure — `/blueprint:onboard-design` offers to scaffold a compatible stub and wires it into agent instructions | Done |
 | `DESIGN.md` vs `design/ux-decisions/` delineation documented in TEMPLATES.md and help skill | Done |
 | `/blueprint:decide`, `/blueprint:capture`, `/blueprint:status`, and `/blueprint:validate` treat `DESIGN.md` as a first-class repo artifact | Done |
 
@@ -52,5 +52,5 @@ Blueprint Mode helps teams distinguish deliberate UX/design choices from expedie
 - Do not create a new parallel design source of truth.
 - Do not require designers to hand-fill markdown templates. Authoring is conversational via `/blueprint:onboard-design` triage or `/blueprint:decide`.
 - Never hand-fill `DESIGN.md` from a template. The file is a living artefact maintained conversationally as decisions accumulate, same anti-ritual rule as ADRs and UX decisions.
-- Do not claim ownership of the `DESIGN.md` format. It's a community convention Blueprint stays compatible with — Blueprint reads/respects it, can scaffold a minimal stub, and avoids duplicating information that belongs there.
+- Do not claim ownership of the `DESIGN.md` format or treat it as part of the Blueprint structure. It's a community convention Blueprint stays compatible with — Blueprint reads/respects it, can scaffold a minimal stub, and avoids duplicating information that belongs there.
 - Capture intent, not inferred structure. UX decisions exist for *conscious* choices with a stated rationale; current code shape on its own is not evidence a choice was deliberate. Day-one triage caps candidates at ~5 to keep the conversation focused on choices the human can articulate.

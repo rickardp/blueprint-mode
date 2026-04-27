@@ -56,7 +56,7 @@ If a user request would violate a "Never Do" boundary:
 
 ## Documentation
 
-Blueprint splits artifacts into two strictly separate trees. Different reviewers (engineering vs design) own different trees — never mix paths.
+Blueprint splits owned artifacts into two strictly separate trees. `DESIGN.md` is important adjacent repo context, not part of the Blueprint structure. Different reviewers (engineering vs design) own different paths — never mix ADRs and UX decisions.
 
 **Code / architecture tree:**
 
@@ -68,11 +68,16 @@ Blueprint splits artifacts into two strictly separate trees. Different reviewers
 | `patterns/good/` | Approved code examples to follow |
 | `patterns/bad/` | Code anti-patterns to avoid |
 
-**Design / UX intent (opt-in — only present if `/blueprint:onboard-design` was run or DESIGN.md exists):**
+**Important adjacent design context:**
+
+| Path | Purpose |
+|------|---------|
+| `DESIGN.md` | Top-level design context: cross-cutting UI rules and prohibitions |
+
+**Design / UX tree (opt-in — only present if `/blueprint:onboard-design` was run):**
 
 | Directory | Purpose |
 |-----------|---------|
-| `DESIGN.md` | Top-level design context: cross-cutting UI rules and prohibitions |
 | `design/sources.md` | External design sources (Figma, Storybook, docs URLs) |
 | `design/ux-decisions/` | UX decisions (UX-NNN) - the "why" behind UX/design choices |
 

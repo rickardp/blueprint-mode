@@ -18,9 +18,13 @@ patterns/good/*.[ext]          - Approved code examples
 patterns/bad/anti-patterns.md  - Code anti-patterns (with severity)
 ```
 
-**Design / UX intent (OPT-IN — only present if `/blueprint:onboard-design` was run or DESIGN.md exists):**
+**Important adjacent design context:**
 ```
 DESIGN.md                           - Top-level design context: cross-cutting UI rules
+```
+
+**Design / UX tree (OPT-IN — only present if `/blueprint:onboard-design` was run):**
+```
 design/sources.md                  - External design sources (Figma, Storybook, docs URLs)
 design/ux-decisions/NNN-[slug].md  - UX decisions (UX-NNN) — WHY behind UX choices
 ```
@@ -64,6 +68,7 @@ Before writing or editing ANY code:
 
 - `docs/**` and `patterns/**` = engineering tree (engineering reviewers)
 - `design/**` = design tree (design reviewers, opt-in)
+- `DESIGN.md` = important adjacent design context, not part of the Blueprint structure
 - These are NEVER interchangeable. UX decisions are NOT ADRs (separate tree, separate numbering, `UX-NNN` not `ADR-NNN`).
 
 ## Boundary Violations
@@ -77,7 +82,7 @@ If a task would violate a "Never Do" boundary:
 
 | Command | Purpose |
 |---------|---------|
-| `/blueprint:status` | Overview of Blueprint structure (both trees) |
+| `/blueprint:status` | Overview of Blueprint structure plus adjacent DESIGN.md context |
 | `/blueprint:validate` | Check code against documented specs and design |
 | `/blueprint:decide [topic]` | Record decisions — triages tech (ADR) vs UX (UX decision) |
 | `/blueprint:require [desc]` | Add feature or non-functional requirement (NOT for components) |

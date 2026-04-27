@@ -48,10 +48,11 @@ Blueprint Mode keeps humans in control of system design during AI-assisted devel
 - **Code patterns** - Code examples to follow and avoid (`patterns/`)
 - **Boundaries** - Rules for AI agents (`docs/specs/boundaries.md`)
 
-**Design / UX tree** (design audience):
-- **UX decisions** - The "why" behind UX/design choices (`design/ux-decisions/`)
+**Design / UX intent** (design audience):
+- **DESIGN.md** - Top-level cross-cutting design rules and prohibitions (community-format file at repo root; Blueprint stays compatible with it)
+- **UX decisions** - Per-context choices with alternatives considered (`design/ux-decisions/`)
 
-The two trees are strictly separate so different reviewers (engineering vs design) can own different paths via CODEOWNERS.
+The Blueprint trees are strictly separate so different reviewers (engineering vs design) can own different paths via CODEOWNERS. `DESIGN.md` sits adjacent to the Blueprint structure as important repo-level design context. Cross-cutting rules go in `DESIGN.md`; per-decision rationale goes in `design/ux-decisions/`. Don't duplicate.
 
 ### Getting Started
 
@@ -71,14 +72,14 @@ The two trees are strictly separate so different reviewers (engineering vs desig
 |---------|---------|
 | `/blueprint:setup-repo` | Create new project with spec structure |
 | `/blueprint:onboard` | Add spec structure to existing codebase (code/architecture tree only) |
-| `/blueprint:onboard-design` | Opt in to the design tree — captures sources and confirmed design intent |
+| `/blueprint:onboard-design` | Opt in to design intent capture — design tree, optional `DESIGN.md` stub, day-one triage |
 | `/blueprint:require` | Add functional or non-functional requirements |
-| `/blueprint:decide` | Record decisions — triages tech (ADR) vs UX (UX decision, only if design tree exists) |
+| `/blueprint:decide` | Record decisions — triages tech (ADR), UX (UX decision), and cross-cutting `DESIGN.md` rules |
 | `/blueprint:good-pattern` | Capture approved patterns (any subject — code, schema, UI) |
 | `/blueprint:bad-pattern` | Document anti-patterns (any subject — code, schema, UI) |
 | `/blueprint:supersede` | Replace or deprecate a previous decision (ADR or UX) |
 | `/blueprint:list-adrs` | List all ADRs with status (architectural only) |
-| `/blueprint:status` | Show overview of Blueprint structure (both trees if present) |
+| `/blueprint:status` | Show overview of Blueprint structure plus adjacent DESIGN.md context |
 | `/blueprint:validate` | Check code against documented specs and design |
 | `/blueprint:help` | Show this help |
 
@@ -91,6 +92,7 @@ The two trees are strictly separate so different reviewers (engineering vs desig
 3. Review `docs/specs/boundaries.md` for rules
 4. Check `patterns/good/` for examples to follow
 5. Check `patterns/bad/anti-patterns.md` for what to avoid
+6. For UI work, also read `DESIGN.md` (if present) and `design/ux-decisions/`
 
 Run `/blueprint:validate` to check if your code follows documented specs.
 ```
@@ -105,7 +107,7 @@ Run `/blueprint:validate` to check if your code follows documented specs.
 |---------|----------|
 | `/blueprint:setup-repo` | Starting a brand new project |
 | `/blueprint:onboard` | Adding Blueprint to an existing codebase (code/architecture tree only) |
-| `/blueprint:onboard-design` | Opting in to the design tree (UX decisions) |
+| `/blueprint:onboard-design` | Opting in to design intent capture (UX decisions + optional `DESIGN.md` stub) |
 
 ### Documentation
 | Command | Use When |
