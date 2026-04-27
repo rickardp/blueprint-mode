@@ -16,11 +16,16 @@ You are creating a complete Blueprint structure. You must follow the EXACT forma
 | Product | `docs/specs/product.md` | See Product Format below |
 | Good Pattern | `patterns/good/name.ext` | See Good Pattern Format below |
 | Anti-Pattern | `patterns/bad/anti-patterns.md` | See Anti-Pattern Format below |
+| Design Context | `DESIGN.md` | Cross-cutting UI rules and prohibitions |
 | UX Decision | `design/ux-decisions/NNN-slug.md` | See UX Decision Format below |
 
 **TREE SEPARATION (CRITICAL):** `docs/**` and `patterns/**` are the engineering tree. `design/**` is the design tree. They are NEVER interchangeable — different reviewers own each. UX decisions are NOT ADRs (separate file tree, separate numbering, separate audience).
 
 **DESIGN TREE IS OPT-IN.** The `design/` tree only exists if `/blueprint:onboard-design` has been run. Always check whether `design/ux-decisions/` exists before producing files in it. If a user asks for a UX decision in a repo without the design tree, suggest `/blueprint:onboard-design` first — do NOT silently scaffold it from another skill.
+
+**DELIBERATE VS COINCIDENTAL UI:** `DESIGN.md` and UX decisions record confirmed design intent. Current UI code by itself is not proof that a design choice was deliberate.
+
+**DESIGN.md VS UX DECISIONS:** Cross-cutting rules and prohibitions go in repo-root `DESIGN.md`. Per-context choices with alternatives considered go in `design/ux-decisions/`. Do not duplicate a broad `DESIGN.md` rule into a UX decision; reference it instead.
 
 ---
 
@@ -257,7 +262,7 @@ See `docs/specs/features/` for detailed specifications.
 
 ## UX DECISION FORMAT
 
-UX decisions live in `design/ux-decisions/NNN-slug.md`. Same structural shape as ADR but **never** filed in `docs/adrs/`. Title uses `UX-NNN`, not `ADR-NNN`.
+UX decisions live in `design/ux-decisions/NNN-slug.md`. Same structural shape as ADR but **never** filed in `docs/adrs/`. Title uses `UX-NNN`, not `ADR-NNN`. Create them when a user, designer, or source material confirms per-context design rationale with alternatives considered. Cross-cutting rules belong in `DESIGN.md` instead.
 
 ```markdown
 ---
@@ -339,12 +344,15 @@ We chose **[CHOICE]** because [rationale].
 - [ ] Filed in `design/ux-decisions/`, never `docs/adrs/`
 - [ ] Status in YAML, NOT in body
 - [ ] `**Positive:**` / `**Negative:**` (same as ADR)
+- [ ] Not just a broad rule that belongs in `DESIGN.md`
 
 ---
 
 ## DIRECTORY STRUCTURE TO CREATE
 
 ```
+DESIGN.md                       # Optional top-level design context
+
 docs/                          # CODE / ARCHITECTURE TREE
 ├── specs/
 │   ├── product.md

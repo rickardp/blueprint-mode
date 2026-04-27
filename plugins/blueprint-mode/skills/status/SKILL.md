@@ -1,6 +1,6 @@
 ---
 name: blueprint:status
-description: Show overview of project's Blueprint structure including specs, ADRs, patterns, and UX decisions. Use when the user asks about documented decisions, project status, or wants to see what's been captured.
+description: Show overview of project's Blueprint structure including specs, ADRs, patterns, DESIGN.md, and UX decisions. Use when the user asks about documented decisions, project status, or wants to see what's been captured.
 argument-hint: "[focus: specs|adrs|patterns|design]"
 allowed-tools:
   - Glob
@@ -10,7 +10,7 @@ allowed-tools:
 
 # Blueprint Status
 
-Display an overview of the project's spec-driven development structure.
+Display an overview of the project's Blueprint intent-capture structure.
 
 **Invoked by:** `/blueprint:status` or when user asks "what's documented?", "show me the specs", or "blueprint status".
 
@@ -40,7 +40,8 @@ Look for these directories across both trees:
 - `docs/adrs/`
 - `patterns/`
 
-**Design / UX tree:**
+**Design / UX intent:**
+- `DESIGN.md`
 - `design/ux-decisions/`
 
 If none exist:
@@ -62,7 +63,7 @@ Run these checks in parallel (single glob + batch file reads):
 
 ```bash
 # Single glob to find all relevant files
-# Pattern: docs/specs/*.md, docs/adrs/*.md, patterns/good/*, patterns/bad/*.md, CLAUDE.md
+# Pattern: DESIGN.md, docs/specs/*.md, docs/adrs/*.md, patterns/good/*, patterns/bad/*.md, CLAUDE.md
 ```
 
 **Glob patterns to check:**
@@ -76,6 +77,7 @@ Code / architecture tree:
 - `patterns/bad/anti-patterns.md` - Code anti-patterns file
 
 Design / UX tree:
+- `DESIGN.md` - top-level design context (cross-cutting UI rules/prohibitions)
 - `design/ux-decisions/*.md` - UX decisions (discovered via globbing)
 - `design/sources.md` - external design sources (Figma, Storybook, docs URLs)
 
@@ -84,9 +86,10 @@ Other:
 
 **In one batch read:**
 1. Read each `docs/adrs/*.md` file - parse frontmatter for status
-2. Read each `design/ux-decisions/*.md` file - parse frontmatter for status
-3. Read both anti-patterns files - count `## ` headings
-4. Read `CLAUDE.md` - check for "Pre-Edit Checklist" section
+2. Read `DESIGN.md` if present - count non-placeholder bullets/headings
+3. Read each `design/ux-decisions/*.md` file - parse frontmatter for status
+4. Read both anti-patterns files - count `## ` headings
+5. Read `CLAUDE.md` - check for "Pre-Edit Checklist" section
 
 ### Information to Extract
 
@@ -101,13 +104,14 @@ Other:
 | ADRs | Most recent | highest number in Active ADRs |
 | Code patterns | Good count | glob `patterns/good/*` (exclude .gitkeep) |
 | Code patterns | Bad count | `## ` headings in `patterns/bad/anti-patterns.md` |
+| DESIGN.md | Exists + non-placeholder rules | file check + content scan |
 | UX decisions | Active/Draft/Superseded/Deprecated counts | frontmatter status |
 | UX decisions | Most recent | highest number in Active UX decisions |
 | CLAUDE.md | Exists + has checklist | file check + "Pre-Edit Checklist" search |
 
 ## Step 3: Display Summary
 
-Show the design tree section only if `design/` exists. Show the code tree section only if `docs/` or `patterns/` exists.
+Show the design section if `DESIGN.md` or `design/` exists. Show the code tree section only if `docs/` or `patterns/` exists.
 
 ```markdown
 ## Blueprint Status for [Project Name]
@@ -133,6 +137,9 @@ Show the design tree section only if `design/` exists. Show the code tree sectio
 - Bad: [count] anti-patterns in patterns/bad/anti-patterns.md
 
 ## Design / UX Tree
+
+### Design Context
+- DESIGN.md: [exists ? "✓ N rules/headings" : "✗ missing"]
 
 ### UX Decisions
 - Active: [count]
@@ -178,6 +185,7 @@ Offer helpful next actions based on what's missing or incomplete:
 - Draft ADRs? → "These ADRs need refinement: [list]. Run `/blueprint:decide [topic]` to complete them"
 
 **UX decisions:**
+- No DESIGN.md but design tree exists? → "Use `/blueprint:onboard-design` to scaffold DESIGN.md when you want cross-cutting design rules"
 - No UX decisions but design tree exists? → "Use `/blueprint:decide` (it triages — UX inputs land in `design/ux-decisions/`)"
 - Draft UX decisions? → "These UX decisions need refinement: [list]"
 

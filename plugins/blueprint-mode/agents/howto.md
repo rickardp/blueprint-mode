@@ -1,6 +1,6 @@
 # Blueprint Mode - Agent Reference
 
-This project uses Blueprint Mode for spec-driven development. Blueprint captures decision rationale (WHY), not detailed specs (WHAT). Read this before making changes.
+This project uses Blueprint Mode to keep human intent explicit during AI-assisted development. Blueprint captures decision rationale (WHY), not detailed specs (WHAT). Read this before making changes.
 
 ## Directory Structure
 
@@ -18,8 +18,9 @@ patterns/good/*.[ext]          - Approved code examples
 patterns/bad/anti-patterns.md  - Code anti-patterns (with severity)
 ```
 
-**Design / UX tree (OPT-IN — only present if `/blueprint:onboard-design` was run):**
+**Design / UX intent (OPT-IN — only present if `/blueprint:onboard-design` was run or DESIGN.md exists):**
 ```
+DESIGN.md                           - Top-level design context: cross-cutting UI rules
 design/sources.md                  - External design sources (Figma, Storybook, docs URLs)
 design/ux-decisions/NNN-[slug].md  - UX decisions (UX-NNN) — WHY behind UX choices
 ```
@@ -38,7 +39,7 @@ Before writing or editing ANY code:
 2. **Related ADRs** - Check `related_adrs` field in feature specs — these MUST be followed
 3. **Boundaries** - Read `docs/specs/boundaries.md` — "Never Do" = hard blocker, "Ask First" = confirm with user
 4. **Code patterns** - Check `patterns/good/` for approved examples and `patterns/bad/anti-patterns.md` for what to avoid
-5. **For UI work, also check the design tree IF IT EXISTS** - The design tree is opt-in. If `design/ux-decisions/` exists, check it for UX choices that constrain the work. If it doesn't exist, skip this check (do NOT scaffold the tree from a regular task)
+5. **For UI work, also check design intent** - Read `DESIGN.md` if it exists for cross-cutting UI rules. If `design/ux-decisions/` exists, check it for UX choices that constrain the work. Documented UX decisions are deliberate design intent; undocumented UI code is not automatically deliberate.
 6. **Traceability** - Add `// ADR-NNN: brief note` for architectural decisions, `// UX-NNN: brief note` for UX decisions
 
 ## Key File Formats
@@ -48,6 +49,10 @@ Before writing or editing ANY code:
 **ADRs** have frontmatter: `status` (Draft/Active/Superseded/Deprecated), `date`. Sections: Context, Options Considered, Decision, Consequences, Related. Title: `# ADR-NNN: ...`
 
 **UX decisions** have the **same shape** as ADRs but live in `design/ux-decisions/` with title `# UX-NNN: ...` and independent numbering. They are NEVER filed under `docs/adrs/`.
+
+**DESIGN.md** is the top-level design context. Cross-cutting rules and prohibitions go there; per-context choices with alternatives considered go in `design/ux-decisions/`.
+
+**Undocumented UI code** is implementation state, not design rationale. Preserve it when practical, but flag unclear intent instead of inventing a reason.
 
 **Boundaries** have three levels: Always Do (mandatory), Ask First (need user confirmation), Never Do (hard blockers — refuse and suggest alternatives).
 

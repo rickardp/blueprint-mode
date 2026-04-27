@@ -1,6 +1,6 @@
 ---
 name: blueprint:help
-description: Explain Blueprint Mode plugin and available commands. Use when the user asks about Blueprint features, how to use skills, or needs guidance on spec-driven development workflow.
+description: Explain Blueprint Mode plugin and available commands. Use when the user asks about Blueprint features, how to use skills, or needs guidance on the intent-capture workflow.
 argument-hint: "[topic: commands|workflow|specs|adrs|patterns|design]"
 allowed-tools:
   - Glob
@@ -71,7 +71,7 @@ The two trees are strictly separate so different reviewers (engineering vs desig
 |---------|---------|
 | `/blueprint:setup-repo` | Create new project with spec structure |
 | `/blueprint:onboard` | Add spec structure to existing codebase (code/architecture tree only) |
-| `/blueprint:onboard-design` | Opt in to the design tree — interviews user, ingests Figma/Storybook refs |
+| `/blueprint:onboard-design` | Opt in to the design tree — captures sources and confirmed design intent |
 | `/blueprint:require` | Add functional or non-functional requirements |
 | `/blueprint:decide` | Record decisions — triages tech (ADR) vs UX (UX decision, only if design tree exists) |
 | `/blueprint:good-pattern` | Capture approved patterns (any subject — code, schema, UI) |
@@ -404,9 +404,14 @@ The design tree is created by:
 This skill:
 - Scaffolds `design/ux-decisions/` and `design/sources.md`
 - Records external design tool URLs (Figma, Storybook, etc.) in `design/sources.md`
+- Surfaces a small number of candidate UX decisions found in existing UI/code for the user or designer to confirm
 - Updates `CLAUDE.md` / `AGENTS.md` to point at the design tree
 
+Blueprint captures *intent* — conscious choices with a stated why. The triage uses code as a prompt for that conversation: the skill points at observable UI patterns so the user/designer has something concrete to react to, then captures only the ones they articulate a rationale for. A pattern existing in the code is not, by itself, evidence of intent.
+
 You can run it again any time to add more sources to `design/sources.md`.
+
+Documented UX decisions mean "this was intentional." Undocumented UI code is implementation state, not design rationale. Agents should preserve it when practical but should not invent a reason for it.
 
 If you don't run this skill, no other skill will create the design tree for you. `/blueprint:decide` will detect strong UX signals and warn you before filing the content as an ADR.
 
@@ -415,7 +420,17 @@ If you don't run this skill, no other skill will create the design tree for you.
 | Path | Purpose | Captured by |
 |------|---------|-------------|
 | `design/sources.md` | External design tool URLs (Figma, Storybook, docs) | `/blueprint:onboard-design` |
-| `design/ux-decisions/NNN-*.md` | UX decisions (UX-NNN) — the "why" behind UX choices | `/blueprint:decide` (triages) |
+| `design/ux-decisions/NNN-*.md` | UX decisions (UX-NNN) — per-context design choices with alternatives considered | `/blueprint:onboard-design` (day-one triage), `/blueprint:decide` |
+| `DESIGN.md` (repo root) | Cross-cutting design rules and prohibitions — community format (Google Stitch / awesome-design-md) Blueprint is compatible with but does not own | `/blueprint:onboard-design` may scaffold a stub; `/blueprint:decide` or `/blueprint:capture` may update rules conversationally |
+
+### `DESIGN.md` vs UX decisions
+
+Both carry design intent at different scopes. Pick by asking *"is this a broad rule, or one decision among alternatives?"*
+
+- **Cross-cutting rule** ("never more than 3 colours", "imperative voice for CTAs") → `DESIGN.md`
+- **Per-context choice with alternatives** ("modal vs page for destructive confirm — chose modal because…") → `design/ux-decisions/`
+
+UX decisions reference `DESIGN.md` rules rather than restating them. A draft UX decision that's really a cross-cutting prohibition with no alternatives belongs in `DESIGN.md` instead.
 
 ### What goes where
 
@@ -423,6 +438,7 @@ If you don't run this skill, no other skill will create the design tree for you.
 |---------|---------|-------|
 | Tech/architecture decision | `docs/adrs/` | `/blueprint:decide` |
 | UX decision (modal vs page, copy/voice, interaction) | `design/ux-decisions/` | `/blueprint:decide` |
+| Cross-cutting design rule (palette, type, voice, broad prohibition) | `DESIGN.md` | `/blueprint:decide` or `/blueprint:capture` |
 | Functional requirement (user can do X) | `docs/specs/features/` | `/blueprint:require` |
 | Non-functional requirement (latency, uptime) | `docs/specs/non-functional/` | `/blueprint:require` |
 | Pattern (any subject — code, schema, UI) | `patterns/` | `/blueprint:good-pattern` / `/blueprint:bad-pattern` |
@@ -455,4 +471,4 @@ Offer contextual suggestions based on the topic:
 - Specs → "Run `/blueprint:require [description]` to add a requirement"
 - ADRs → "Run `/blueprint:list-adrs` to see existing decisions"
 - Patterns → "Run `/blueprint:good-pattern [file]` to capture an example"
-- Design → "Run `/blueprint:decide` to record a UX decision (it triages tech vs UX)"
+- Design → "Run `/blueprint:onboard-design` to set up design intent capture, or `/blueprint:decide` to record a UX decision / DESIGN.md rule"

@@ -107,7 +107,7 @@ fi
 # =============================================================================
 
 if ! echo "$PROMPT" | grep -qE '/blueprint:'; then
-  if echo "$PROMPT" | grep -qiE '\bblueprint\b|\badrs?\b|architecture.decision|docs/specs|docs/adrs|patterns/(good|bad)|boundaries\.md|tech-stack\.md|feature.spec|anti-pattern|design/ux-decisions|ux.decision|design.tree'; then
+  if echo "$PROMPT" | grep -qiE '\bblueprint\b|\badrs?\b|architecture.decision|docs/specs|docs/adrs|patterns/(good|bad)|boundaries\.md|tech-stack\.md|feature.spec|anti-pattern|DESIGN\.md|design/ux-decisions|ux.decision|design.tree'; then
     HOWTO_FILE="$AGENTS_DIR/howto.md"
     if [ -f "$HOWTO_FILE" ]; then
       cat "$HOWTO_FILE"

@@ -1,7 +1,7 @@
 {
   "name": "blueprint-mode",
   "version": "1.4.0",
-  "description": "Spec-driven development with documented decision rationale: specs, ADRs, patterns, requirements, and a separate design tree for UX decisions and design patterns",
+  "description": "Documented intent for AI-assisted development: ADRs, specs, patterns, requirements, DESIGN.md, and a separate design tree for UX decisions",
   "author": {
     "name": "rickardp",
     "url": "https://github.com/rickardp"
@@ -22,8 +22,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Blueprint Mode",
-    "shortDescription": "Keep ADRs, specs, and patterns as a stable source of truth",
-    "longDescription": "Blueprint Mode helps teams document architecture decisions, requirements, boundaries, and good and bad code patterns so AI-assisted development stays consistent over time.",
+    "shortDescription": "Keep human intent explicit for AI agents",
+    "longDescription": "Blueprint Mode helps teams document architecture decisions, UX decisions, requirements, boundaries, and good and bad patterns so AI-assisted development stays consistent over time.",
     "developerName": "rickardp",
     "category": "Coding",
     "capabilities": [

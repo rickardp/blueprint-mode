@@ -4,21 +4,21 @@
   <img src="./assets/logo-s.png" />
 </p>
 
-Blueprint Mode is an attempt at creating a stable source of truth in the era of vibe coding and agentic AI assistants.
+Blueprint Mode is an attempt at turning the repo into a stable intent record in the era of vibe coding and agentic AI assistants.
 
-It attempts to solve the problem if maintainability in code repositories with large amounts of AI code while trying to
+It attempts to solve the problem of maintainability in code repositories with large amounts of AI code while trying to
 stay out of the way. The following axioms are what Blueprint Mode is built on:
 
-> When code *is* the spec, AI rewrites your source of truth at will. We need a high level ground truth that is not changed on a whim.
+> Code shows what-is, but not why-it-is. We need a high level ground truth that is not changed on a whim.
 > We want to keep humans in control of system design while letting AI deal with the details of the bulk of the code
 > More time is spent *maintaining* a code base than writing the first version
 
 ## The Problem
 
-### Code as the source of truth
+### Code alone as the source of truth
 
-This is what you typically get from vibe coding platforms like Lovable or Cursor (out of the box). Documentation is usually
-in the form of a README file and code comments.
+This is what you typically get from vibe coding platforms like Lovable or Cursor (out of the box). The running code shows
+what exists, but the reason behind important choices is usually scattered across a README, comments, chat, or human memory.
 
 - **Lost intent** — you can't tell if code reflects a conscious decision or AI just picking *something*
 - **Lost memory** — AI forgets why you chose PostgreSQL over MongoDB last week
@@ -38,9 +38,9 @@ Traditional spec-driven development tries to solve the "code as truth" problem b
 
 ## How It Works
 
-1. **Interview** — Your AI assistant asks about your project, tech choices, and *why* you made them
-2. **Document** — Decisions become ADRs, patterns get captured, boundaries get set
-3. **Develop** — AI follows your documented decisions consistently
+1. **Interview** — Your AI assistant asks about your project, tech/design choices, and *why* you made them
+2. **Document** — Decisions become ADRs or UX decisions, patterns get captured, boundaries get set, and `DESIGN.md` carries cross-cutting UI rules
+3. **Develop** — AI follows your documented intent consistently while code remains canonical for what exists
 4. **Evolve** — Update decisions with `/blueprint:decide` or `/blueprint:supersede`
 
 ## Quick Start
@@ -109,9 +109,9 @@ plugin-bundled surface.
 |---------|---------|
 | `/blueprint:setup-repo` | Set up new repository with spec structure |
 | `/blueprint:onboard` | Add spec structure to existing codebase (code/architecture tree only) |
-| `/blueprint:onboard-design` | Opt in to the design tree — interviews user, captures Figma/Storybook refs |
+| `/blueprint:onboard-design` | Opt in to design intent capture — scaffolds `design/ux-decisions/` and `design/sources.md`, can scaffold `DESIGN.md`, records Figma/Storybook URLs, and surfaces candidate UX decisions from existing UI for confirmation |
 | `/blueprint:require` | Add functional or non-functional requirements |
-| `/blueprint:decide` | Record decisions — triages tech (ADRs) vs UX (UX decisions, only if design tree exists) |
+| `/blueprint:decide` | Record decisions — triages tech (ADRs), UX decisions, and cross-cutting `DESIGN.md` rules |
 | `/blueprint:good-pattern` | Capture approved patterns (any subject — code, schema, UI) |
 | `/blueprint:bad-pattern` | Document anti-patterns (any subject — code, schema, UI) |
 | `/blueprint:supersede` | Replace previous decisions with new ones (ADR or UX decision) |
@@ -143,10 +143,11 @@ Note that this functionality is in its early stages.
 
 ## What Gets Created
 
-Blueprint splits artifacts into two strictly separate trees so different reviewers (engineering vs design) can own different paths via CODEOWNERS.
+Blueprint keeps engineering and design intent in distinct repo paths so different reviewers can own different files via CODEOWNERS.
 
 ```
 project/
+├── DESIGN.md                       # Top-level design context (cross-cutting UI rules, optional)
 ├── docs/                          # CODE / ARCHITECTURE TREE
 │   ├── specs/
 │   │   ├── product.md             # What, who, why
@@ -173,7 +174,11 @@ project/
 
 **Tree separation is strict.** UX decisions are NOT ADRs — they live in their own tree with independent numbering even though the document shape is similar.
 
-**The design tree is opt-in.** `/blueprint:onboard` only sets up the code/architecture tree. To capture UX decisions, run `/blueprint:onboard-design` separately — it scaffolds the directories and records external Figma/Storybook references.
+**The design tree is opt-in.** `/blueprint:onboard` only sets up the code/architecture tree. To capture UX decisions, run `/blueprint:onboard-design` separately — it scaffolds the directories, records external Figma/Storybook references, and surfaces a small number of candidate UX choices found in existing UI/code for the user or designer to confirm. Anything not covered there is captured later, on demand, via `/blueprint:decide`.
+
+**Deliberate vs coincidental UI.** The repo gives agents the same "is this deliberate?" coverage that ADRs give for architecture. Three layers answer the question for UI: `DESIGN.md` (cross-cutting design rules), `design/ux-decisions/` (per-decision rationale), and `// UX-TBD: [what's unclear]` comments to flag UI that has no governing decision yet — without inventing rationale. Documented UX decisions mean "this was intentional." Undocumented UI code is just implementation state; agents should not infer design rationale from it.
+
+**`DESIGN.md` is the top-level design context.** A short living `DESIGN.md` at the repo root (Google Stitch / awesome-design-md format) holds cross-cutting design rules and prohibitions ("never use more than 3 colours on a screen"). It's a community convention Blueprint stays *compatible with* rather than owning — `/blueprint:onboard-design` can scaffold a minimal stub when the user wants one, agents read it on every UI generation task, and authoring stays conversational. Blueprint avoids duplicating information that belongs in `DESIGN.md`: cross-cutting rules go there, per-decision rationale goes in `design/ux-decisions/`.
 
 ## Comparison
 
@@ -184,7 +189,7 @@ How Blueprint Mode differs from other AI development approaches:
 | Core question | "What do you want?" | "What's the interface?" | "Why did you choose this?" |
 | Human role | Sets high-level goals | Defines formal grammar | Makes & explains decisions |
 | AI role | Autonomous implementer | Strict spec follower | Consistency maintainer |
-| Artifacts | Evolving code | Interface blueprints | ADRs + patterns |
+| Artifacts | Evolving code | Interface blueprints | ADRs + UX decisions + DESIGN.md + patterns |
 | Philosophy | Adaptive, emergent | Formal, contractual | Stable, grounded |
 
 ## License

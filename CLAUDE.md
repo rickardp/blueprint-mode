@@ -2,9 +2,9 @@
 
 ## Project Context
 
-Blueprint Mode is a Claude Code plugin that creates a stable source of truth for AI-assisted development. It captures decision rationale (ADRs), patterns, and boundaries so AI agents maintain consistency across sessions.
+Blueprint Mode is a Claude Code plugin that turns the repo into a complete source of truth for AI-assisted development. Code carries *what-is*; Blueprint's ADRs, UX decisions, DESIGN.md context, patterns, and boundaries carry *why-it-is*. Both layers are first-class, both are agent-readable, and they sit next to each other in version control.
 
-**Key principle:** We capture WHY decisions were made, not detailed specs of WHAT to build. Rationale is stable; code is volatile.
+**Key principle:** Code shows what the system does; without a rationale layer, agents can't tell *deliberate decisions* from *expedient fills* — they look identical from the outside. Blueprint records the WHY so future humans and agents can disambiguate.
 
 ## Architecture Decisions
 
@@ -36,8 +36,11 @@ Key decisions:
    - Check `patterns/bad/anti-patterns.md` to know what to avoid
    - Follow existing patterns in the codebase
 
-4. **For UI work, also check the design tree**
+4. **For UI work, also check design intent**
+   - Read `DESIGN.md` if it exists for cross-cutting design rules and prohibitions
    - Check `design/ux-decisions/` for UX choices that constrain the work
+   - Treat documented UX decisions as deliberate design intent
+   - Do not assume undocumented UI code is deliberate; preserve it when practical, but flag unclear intent with `// UX-TBD: [what's unclear]` instead of inventing rationale
 
 5. **Traceability**
    - When implementing an architectural decision, add: `// ADR-NNN: [brief note]`
@@ -65,14 +68,15 @@ Blueprint splits artifacts into two strictly separate trees. Different reviewers
 | `patterns/good/` | Approved code examples to follow |
 | `patterns/bad/` | Code anti-patterns to avoid |
 
-**Design / UX tree (opt-in — only present if `/blueprint:onboard-design` was run):**
+**Design / UX intent (opt-in — only present if `/blueprint:onboard-design` was run or DESIGN.md exists):**
 
 | Directory | Purpose |
 |-----------|---------|
+| `DESIGN.md` | Top-level design context: cross-cutting UI rules and prohibitions |
 | `design/sources.md` | External design sources (Figma, Storybook, docs URLs) |
 | `design/ux-decisions/` | UX decisions (UX-NNN) - the "why" behind UX/design choices |
 
-The design tree is **not** auto-created. Run `/blueprint:onboard-design` once if you want it; the skill scaffolds the directories and records external Figma/Storybook references.
+The design tree is **not** auto-created. Run `/blueprint:onboard-design` once if you want it; the skill scaffolds the directories, records external Figma/Storybook references, and surfaces a small number of candidate UX decisions found in existing UI/code for the user to confirm. Anything not covered there is captured later, on demand, via `/blueprint:decide`.
 
 See [docs/specs/boundaries.md](docs/specs/boundaries.md) for agent guardrails (Always/Ask/Never rules).
 
@@ -95,6 +99,15 @@ grep -h "^status:" docs/adrs/*.md
 # Bad: Using grep because we need zero dependencies and jq would require installation
 # Good: # ADR-003: Zero-dependency hooks
 ```
+
+**Flagging unclear UI intent (`// UX-TBD:`):** When UI code has no governing UX decision and the agent isn't sure if a choice is deliberate, mark it explicitly rather than inventing rationale:
+
+```tsx
+// UX-TBD: empty-state copy — agent-generated, not reviewed
+<EmptyState message="..." />
+```
+
+`UX-TBD:` is a flag, not a decision. It signals "deliberate review needed", not "deliberate design". Resolve it by either capturing a UX decision (`/blueprint:decide`) and replacing with `// UX-NNN:`, or by removing the comment when designer confirms it doesn't matter.
 
 ## Pattern Discovery
 

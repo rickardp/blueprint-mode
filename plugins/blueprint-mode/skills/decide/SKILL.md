@@ -1,6 +1,6 @@
 ---
 name: blueprint:decide
-description: Record a decision (architectural or UX) with rationale. Triages tech vs UX vs requirements into the right document type and tree.
+description: Record a decision or cross-cutting design rule with rationale. Triages tech vs UX vs DESIGN.md rules vs requirements into the right document type and tree.
 argument-hint: "[topic] [because reason]"
 allowed-tools:
   - Glob
@@ -15,13 +15,13 @@ allowed-tools:
 
 # Record Decision
 
-**COMMAND:** Capture a decision with its rationale. Triage between architectural decisions (ADRs), UX decisions, feature specs, and NFRs — write to the correct tree.
+**COMMAND:** Capture a decision or design rule with its rationale. Triage between architectural decisions (ADRs), UX decisions, cross-cutting `DESIGN.md` rules, feature specs, and NFRs — write to the correct place.
 
 ## Execute
 
 1. **Parse** argument for topic and rationale
-2. **Detect tree availability** — Glob for `design/ux-decisions/` (or any `design/` subdirectory). Design tree is **opt-in** — if it doesn't exist, this skill behaves as ADR-only.
-3. **Classify** each concern in the input (see Classification below). UX classification is only available when the design tree exists.
+2. **Detect design availability** — Glob for `DESIGN.md` and `design/ux-decisions/` (or any `design/` subdirectory). Design tree is **opt-in** — if it doesn't exist, UX decisions are unavailable, but `DESIGN.md` rules are still available when the file exists or the user agrees to scaffold it.
+3. **Classify** each concern in the input (see Classification below). UX decision classification is only available when the design tree exists. Cross-cutting `DESIGN.md` rules are available when `DESIGN.md` exists, or when the user agrees to scaffold it.
 4. **If strong UX signal but no design tree:** Pause and warn the user (see "Strong UX Signal Without Tree" below). Do NOT silently misfile UX content as an ADR.
 5. **If mixed or misclassified:** Separate concerns into their document types
 6. **Check** the relevant directory for existing decisions (create dir if needed):
@@ -39,6 +39,7 @@ Before creating files, classify each distinct concern in the input:
 |--------|------|-------------|-----------|
 | Tech choice, library, infra, runtime/framework/database, code-level design pattern, "[X] over [Y]" technical | Architectural | ADR (`docs/adrs/NNN-[slug].md`) | Always |
 | User flow, navigation choice, "modal vs page", confirmation pattern, copy/voice, empty/error/loading state, interaction model, layout, visual hierarchy, motion, a11y trade-off | UX | UX decision (`design/ux-decisions/NNN-[slug].md`) | Only if `design/` tree exists |
+| Broad design rule, token usage, type scale, voice/tone, palette limit, "never use [X] on any screen", "all CTAs..." | Design rule | `DESIGN.md` | If present, or user agrees to scaffold |
 | "users can", feature behavior, workflow, user story | Functional | Feature spec (`docs/specs/features/`) | Always (redirect to `/blueprint:require`) |
 | Latency, throughput, uptime, encryption, SLA, scalability target | Non-functional | NFR (`docs/specs/non-functional/`) | Always (redirect to `/blueprint:require`) |
 
@@ -46,12 +47,27 @@ Before creating files, classify each distinct concern in the input:
 
 **Design tree is opt-in.** If `design/` does not exist in the repo, do NOT route anything as a UX decision — even if the input looks like one. See "Strong UX Signal Without Tree" below.
 
+**Cross-cutting UI rules belong in `DESIGN.md`, not as a UX decision.** UX decisions are *per-context choices with alternatives considered* ("modal vs full page for destructive confirmation — chose modal because..."). If the input is really a cross-cutting rule that applies broadly with no alternatives ("never use more than 3 colours on a screen", "all destructive actions require confirmation", "imperative voice for CTAs"), route it to `DESIGN.md` at the repo root — the community-format design context file.
+
+If `DESIGN.md` exists: update the relevant short section. If it does not exist, ask once:
+```
+This sounds like a cross-cutting design rule, which belongs in DESIGN.md.
+DESIGN.md does not exist yet. Scaffold it and add this rule?
+
+Options:
+- Scaffold DESIGN.md and add the rule
+- Capture as UX decision instead
+- Skip
+```
+Never duplicate a `DESIGN.md` rule into a UX decision; reference it instead.
+
 **If input mixes types:**
 1. Extract the architectural decision → create ADR
 2. Extract the UX decision (only if tree exists) → create UX decision (separate numbering, separate file)
-3. Extract functional requirements → suggest `/blueprint:require`
-4. Extract NFR targets → suggest `/blueprint:require`
-5. Report all files created
+3. Extract cross-cutting design rules → update `DESIGN.md` if present or confirmed
+4. Extract functional requirements → suggest `/blueprint:require`
+5. Extract NFR targets → suggest `/blueprint:require`
+6. Report all files created or updated
 
 **If input is purely functional or non-functional** (no decision rationale):
 - Inform: "This is a [functional/non-functional] requirement, not a decision."
@@ -63,6 +79,16 @@ Before creating files, classify each distinct concern in the input:
 - File in the chosen tree.
 
 **If classification is ambiguous and `design/` is missing**: file as ADR. The user can always re-file later by running `/blueprint:onboard-design` and `/blueprint:supersede`.
+
+## Updating DESIGN.md
+
+Use this only for cross-cutting design rules and prohibitions, not per-context rationale.
+
+1. Read existing `DESIGN.md` if present.
+2. Add the rule under the nearest existing heading (for example `Visual rules`, `Voice and tone`, `Prohibitions`) or create a concise heading if needed.
+3. Keep the edit short: one bullet with the rule and, if the user gave one, a brief reason.
+4. Do not add a long template, audit checklist, or per-screen detail.
+5. If the rule comes from a UX decision, reference `UX-NNN`; if a later UX decision follows the rule, reference `DESIGN.md` from that UX decision instead of duplicating the text.
 
 ## Strong UX Signal Without Tree
 
@@ -210,11 +236,17 @@ Created ADR-NNN at docs/adrs/NNN-technology.md
 Created UX-NNN at design/ux-decisions/NNN-slug.md
 ```
 
+**Cross-cutting design rule:**
+```
+Updated DESIGN.md with rule: [short rule]
+```
+
 **Mixed input (triaged across both trees):**
 ```
 Triaged input into 3 concerns:
 - ADR-NNN: [architectural decision] → docs/adrs/NNN-slug.md
 - UX-NNN: [UX decision] → design/ux-decisions/NNN-slug.md
+- DESIGN.md: [cross-cutting design rule]
 - Feature: [feature name] → docs/specs/features/slug.md (linked to ADR-NNN)
 ```
 

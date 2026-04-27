@@ -38,7 +38,7 @@ If existing documentation exists, CREATE BLUEPRINT STRUCTURE ANYWAY. Do not ask 
 6. **Exit plan mode** - Call ExitPlanMode when ready
 7. **Gather rationale** - For each tech without rationale, ask user (see format below)
 8. **Create** all Blueprint files (including agent instructions)
-9. **Clean up existing documentation** - Blueprint files are source of truth. Other docs (including CLAUDE.md and other agent instructions) *reference* these files rather than duplicating (keep brief summary + reference to ADR or spec)
+9. **Clean up existing documentation** - Blueprint files are the intent record. Other docs (including CLAUDE.md and other agent instructions) *reference* these files rather than duplicating (keep brief summary + reference to ADR or spec)
 10. **Clean up long code comments** referencing ADRs or specs instead of explaining rationale inlined in code
 11. **Report** what was created
 
@@ -94,8 +94,10 @@ Specs:
 
 [If UI signals detected:]
 Design tree NOT created here. UI signals detected ([signal summary]).
-Run /blueprint:onboard-design after this to opt in to the design tree
-(it scaffolds the directories and captures Figma/Storybook references).
+Run /blueprint:onboard-design after this to opt in to design intent capture
+(it scaffolds the design tree, can scaffold DESIGN.md, captures Figma/Storybook
+references, and surfaces a small number of candidate UX decisions found in
+existing UI for confirmation).
 
 [Call ExitPlanMode to proceed]
 ```
@@ -237,8 +239,9 @@ TBD sections can be refined by running this skill again.
 
 [If UI signals were detected:]
 UI signals detected ([summary]). The design tree is opt-in.
-Run /blueprint:onboard-design to set it up — it scaffolds the directories
-and records Figma / Storybook / docs URLs.
+Run /blueprint:onboard-design to set it up — it scaffolds the design tree,
+can scaffold DESIGN.md, records Figma / Storybook / docs URLs, and surfaces
+candidate UX decisions from existing UI for confirmation.
 ```
 
 ## If Structure Already Exists
