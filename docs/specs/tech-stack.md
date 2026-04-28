@@ -50,8 +50,13 @@ plugins/blueprint-mode/
 # Claude Code local development
 claude --plugin-dir ./plugins/blueprint-mode
 
-# Codex: reads .agents/plugins/marketplace.json from the repo root.
-# After cloning, restart Codex and enable Blueprint Mode from the repo marketplace.
+# Codex installation
+codex plugin marketplace add rickardp/blueprint-mode
+# Then enable Blueprint Mode from the Codex plugin directory.
+
+# Codex local development (working copy)
+codex plugin marketplace add ./
+# Marketplace metadata lives at .agents/plugins/marketplace.json
 ```
 
 ## Dependencies

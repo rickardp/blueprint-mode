@@ -1,7 +1,7 @@
 {
-  "name": "blueprint-mode-local",
+  "name": "blueprint-mode",
   "interface": {
-    "displayName": "Blueprint Mode Local"
+    "displayName": "Blueprint Mode"
   },
   "plugins": [
     {

@@ -57,8 +57,8 @@ Codex uses the repo-local `.agents/plugins/marketplace.json`:
 
 ```json
 {
-  "name": "blueprint-mode-local",
-  "interface": { "displayName": "Blueprint Mode Local" },
+  "name": "blueprint-mode",
+  "interface": { "displayName": "Blueprint Mode" },
   "plugins": [
     {
       "name": "blueprint-mode",
@@ -71,6 +71,12 @@ Codex uses the repo-local `.agents/plugins/marketplace.json`:
     }
   ]
 }
+```
+
+Users install the published marketplace via:
+
+```bash
+codex plugin marketplace add rickardp/blueprint-mode
 ```
 
 ## Plugin Manifest
@@ -137,7 +143,13 @@ claude --plugin-dir ./blueprint-mode/plugins/blueprint-mode
 
 ### Codex Local Development
 
-Codex reads the repo-local `.agents/plugins/marketplace.json`, copies the plugin from
+For a local working copy, point Codex at the repo root:
+
+```bash
+codex plugin marketplace add ./
+```
+
+Codex reads `.agents/plugins/marketplace.json`, copies the plugin from
 `./plugins/blueprint-mode`, and loads the installed copy from its plugin cache after a restart.
 
 ## Verification

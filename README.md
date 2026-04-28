@@ -54,11 +54,11 @@ Traditional spec-driven development tries to solve the "code as truth" problem b
 
 ### Codex
 
-Codex reads repo-local plugin marketplaces from `.agents/plugins/marketplace.json`.
-This repo now includes one that points at `plugins/blueprint-mode`.
+```bash
+codex plugin marketplace add rickardp/blueprint-mode
+```
 
-After cloning the repo, restart Codex and enable the `Blueprint Mode` plugin from the
-repo marketplace.
+Then enable `Blueprint Mode` from the Codex plugin directory.
 
 <details>
 <summary>Local development</summary>
@@ -84,12 +84,13 @@ claude --plugin-dir /path/to/blueprint-mode/plugins/blueprint-mode
 <details>
 <summary>Codex local development</summary>
 
-Codex loads repo-local plugins from `$REPO_ROOT/.agents/plugins/marketplace.json`.
-This repo ships a marketplace entry for `plugins/blueprint-mode`, so local development is:
+Codex also loads repo-local marketplaces from `$REPO_ROOT/.agents/plugins/marketplace.json`.
+For local development against a working copy:
 
 ```bash
 git clone https://github.com/rickardp/blueprint-mode.git
 cd blueprint-mode
+codex plugin marketplace add ./
 # Restart Codex, then enable Blueprint Mode from the repo marketplace
 ```
 
