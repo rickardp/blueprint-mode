@@ -1,6 +1,6 @@
 ---
 name: blueprint:onboard-design
-description: Opt-in. Add design intent capture to a Blueprint repo. Scaffolds design/ux-decisions/ and design/sources.md, records external artifact URLs (Figma, Storybook, design docs), offers to scaffold a minimal community-format DESIGN.md if absent, and surfaces a small number of candidate UX decisions found in existing UI/code for the user or designer to confirm.
+description: Opt-in. Add design intent capture to a Blueprint repo. Scaffolds design/ux-decisions/ and design/sources.md, records external artifact URLs (Figma, Storybook, design docs), offers to scaffold a minimal community-format DESIGN.md if absent, and can optionally surface a small number of candidate UX decisions found in existing UI/code for the user, developer, or designer to confirm.
 argument-hint: ""
 disable-model-invocation: true
 allowed-tools:
@@ -19,15 +19,15 @@ allowed-tools:
 
 **OPT-IN:** This skill is the only way the `design/` tree gets created. Other Blueprint skills do not auto-scaffold it. Run this when the repo has UX/design artifacts worth capturing.
 
-**COMMAND:** Scaffold `design/ux-decisions/` and `design/sources.md`, record external design source URLs (Figma, Storybook, etc.), and surface a small number of candidate UX decisions found in existing UI/code for the user or designer to confirm. Capture only the ones they confirm as deliberate. Skipping is always fine.
+**COMMAND:** Scaffold `design/ux-decisions/` and `design/sources.md`, record external design source URLs (Figma, Storybook, etc.), and optionally surface a small number of candidate UX decisions found in existing UI/code for the user, developer, or designer to confirm. Capture only the ones they confirm as deliberate. Skipping candidate triage is always fine.
 
-**Capture intent, not inferred structure.** The point of a UX decision is to record a *conscious* choice the user or designer made. Surface candidates the agent can point to in code/UI (a confirmation modal, a destructive-action pattern, a recurring layout) so the human has something concrete to react to — but only capture the choice if they articulate the *why*. If the rationale is "the code happens to look like that," the decision isn't ready and the agent should not invent one.
+**Capture intent, not inferred structure.** The point of a UX decision is to record a *conscious* choice the user, developer, or designer can explain. Existing code can prompt the conversation because the developer or designer may know the why behind it — but only capture the choice if a human articulates that why. If the rationale is "the code happens to look like that," the decision isn't ready and the agent should not invent one.
 
 ## DO NOT ASK FOR SCOPE
 
-**DO NOT** ask "Would you like me to..." or offer numbered scope options. **DO** scaffold the design tree and walk the interview.
+**DO NOT** ask "Would you like me to..." or offer numbered scope options for the design-tree setup. **DO** scaffold the design tree and walk the source / DESIGN.md interview.
 
-The user is allowed to skip any individual interview question — but never ask about whether to do it at all.
+The user is allowed to skip any individual interview question. Candidate triage from existing UI is optional content capture, not required onboarding scope.
 
 ---
 
@@ -74,7 +74,7 @@ After scaffolding I will interview you about:
 - External design tools (Figma, Sketch, Penpot, Storybook URLs, etc.)
 - External documentation (design system docs, brand guidelines, research repos)
 - Whether to scaffold a minimal `DESIGN.md` at the repo root for cross-cutting design context (skipped if it already exists)
-- A small number of UI patterns I found in the code, so you can tell me which were deliberate choices (with a short reason) and which were coincidental
+- Whether to review a small number of existing UI patterns now, so you can tell me which were deliberate choices (with a short reason) and which were coincidental
 
 The goal is to capture *conscious* design decisions — the why behind the
 choice. If a pattern is in the code but you don't have a clear reason for
@@ -162,7 +162,23 @@ Top-level design context for this project. Agents read this on every UI generati
 
 **Delineation reminder for the agent:** cross-cutting rules go in `DESIGN.md`; per-decision rationale (one choice + alternatives) goes in `design/ux-decisions/`. UX decisions reference `DESIGN.md` rules rather than restating them.
 
-### Step 6: Day-One Design Intent Triage (candidate-driven)
+### Step 6: Optional Existing-UI Design Intent Triage (candidate-driven)
+
+This step is optional. It exists because the developer or designer may already know the why behind important UI choices. Do not treat existing code as rationale by itself.
+
+Ask once via `AskUserQuestion`:
+
+```
+Review existing UI for candidate design decisions now?
+
+This can help capture whys that a developer or designer already knows.
+I will only create UX decisions for choices you mark as deliberate with a
+short reason. Otherwise, existing UI remains implementation state.
+
+Options: Review up to 5 candidates / Skip for now
+```
+
+If the user skips, do not scan for candidates and continue to Step 7.
 
 Scan the detected UI for **a small number** of high-confidence candidate UX choices the agent can point to in code. Cap the candidate list at five — fewer is fine. Look for evidence-bearing patterns such as:
 
@@ -178,7 +194,7 @@ Then ask the user/designer once, batched via `AskUserQuestion`:
 
 ```
 I found these candidate UX choices in the existing UI. For each one:
-mark it as deliberate (with a short reason) or skip.
+mark it as deliberate (with the reason you know) or skip.
 
 1. [observed pattern] — seen in [file:line or component]
 2. ...
@@ -193,6 +209,7 @@ For each item the user skips, marks "not deliberate", or provides no rationale f
 
 **Stay in intent-capture mode:**
 - Keep the candidate list small (≤5) — this is triage, not an audit of the codebase.
+- Treat developers and designers as valid sources for the why; they may know intent that is not visible in the code.
 - If the user can't articulate the *why* for a candidate, don't capture it. Blueprint records conscious decisions; coincidental code is not intent.
 - Don't infer rationale from how the code currently looks. The fact that a pattern exists in code is not evidence it was a deliberate choice.
 
@@ -212,7 +229,7 @@ Design tree set up:
 - design/sources.md            [N external sources recorded]
 - DESIGN.md (repo root)        [pre-existing | scaffolded stub | skipped]
 
-Day-one triage: [N candidates surfaced, M confirmed as deliberate, rest skipped]
+Existing-UI triage: [skipped | N candidates surfaced, M confirmed as deliberate, rest skipped]
 
 Updated CLAUDE.md (or AGENTS.md) with design tree references [and DESIGN.md read instruction for UI work].
 
@@ -268,7 +285,7 @@ Running this skill again on a repo that already has `design/`:
 - Does NOT recreate or overwrite existing files (including `DESIGN.md` if it already exists)
 - DOES add new sources to `design/sources.md`
 - DOES NOT modify existing UX decisions; it may create new Draft UX decisions only from freshly confirmed triage candidates
-- MAY surface fresh day-one triage candidates if new UI areas have appeared since the last run, but never re-asks about UI already covered by an existing UX decision
+- MAY offer fresh existing-UI triage candidates if new UI areas have appeared since the last run, but never re-asks about UI already covered by an existing UX decision
 - MAY offer to scaffold `DESIGN.md` if it still doesn't exist and the user previously skipped
 
 ## Error Recovery

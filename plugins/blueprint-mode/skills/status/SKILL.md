@@ -106,8 +106,8 @@ Other:
 | Specs | NFR file count | glob `docs/specs/non-functional/*.md` |
 | ADRs | Active/Draft/Superseded/Deprecated counts | frontmatter status |
 | ADRs | Most recent | highest number in Active ADRs |
-| Code patterns | Good count | glob `patterns/good/*` (exclude .gitkeep) |
-| Code patterns | Bad count | `## ` headings in `patterns/bad/anti-patterns.md` |
+| Patterns | Good count | glob `patterns/good/*` (exclude .gitkeep) |
+| Patterns | Bad count | `## ` headings in `patterns/bad/anti-patterns.md` |
 | DESIGN.md | Exists + non-placeholder rules | file check + content scan |
 | UX decisions | Active/Draft/Superseded/Deprecated counts | frontmatter status |
 | UX decisions | Most recent | highest number in Active UX decisions |

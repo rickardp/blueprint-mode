@@ -96,8 +96,8 @@ Specs:
 Design tree NOT created here. UI signals detected ([signal summary]).
 Run /blueprint:onboard-design after this to opt in to design intent capture
 (it scaffolds the design tree, can scaffold DESIGN.md, captures Figma/Storybook
-references, and surfaces a small number of candidate UX decisions found in
-existing UI for confirmation).
+references, and can optionally surface a small number of candidate UX decisions
+found in existing UI for confirmation).
 
 [Call ExitPlanMode to proceed]
 ```
@@ -119,6 +119,8 @@ CLAUDE.md (or AGENTS.md)         # Agent instructions - see detection above
 **This skill ONLY scaffolds the code/architecture tree.** The design tree (`design/`) is opt-in and is set up by a separate skill: `/blueprint:onboard-design`. Do NOT auto-create `design/` based on UI detection — even if the repo has React/Vue/Svelte components.
 
 **If UI code is detected, mention `/blueprint:onboard-design` in the final report** so the user knows it's available — but do not run it or scaffold it automatically.
+
+**When generating CLAUDE.md / AGENTS.md from the `<!-- SECTION: claude-md -->` template:** OMIT the "Important adjacent design context" and "Design / UX tree" tables — they only apply once `DESIGN.md` exists or `/blueprint:onboard-design` has been run. Generating those rows here would point agents at non-existent paths. `/blueprint:onboard-design` adds the rows post-hoc.
 
 ## Templates
 
@@ -240,8 +242,8 @@ TBD sections can be refined by running this skill again.
 [If UI signals were detected:]
 UI signals detected ([summary]). The design tree is opt-in.
 Run /blueprint:onboard-design to set it up — it scaffolds the design tree,
-can scaffold DESIGN.md, records Figma / Storybook / docs URLs, and surfaces
-candidate UX decisions from existing UI for confirmation.
+can scaffold DESIGN.md, records Figma / Storybook / docs URLs, and can
+optionally surface candidate UX decisions from existing UI for confirmation.
 ```
 
 ## If Structure Already Exists

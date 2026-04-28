@@ -363,7 +363,7 @@ docs/                          # CODE / ARCHITECTURE TREE
 └── adrs/
     └── NNN-[slug].md
 
-patterns/                      # CODE patterns only
+patterns/                      # Pattern examples and anti-patterns (any subject)
 ├── good/
 │   └── [name].[ext]
 └── bad/

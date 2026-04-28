@@ -14,7 +14,7 @@ docs/specs/boundaries.md       - Agent guardrails: Always / Ask First / Never Do
 docs/specs/features/*.md       - Feature specifications (status, module, related_adrs)
 docs/specs/non-functional/*.md - Performance, security, scalability requirements
 docs/adrs/NNN-[slug].md        - Architecture Decision Records (WHY behind tech choices)
-patterns/good/*.[ext]          - Approved code examples
+patterns/good/*.[ext]          - Approved examples
 patterns/bad/anti-patterns.md  - Code anti-patterns (with severity)
 ```
 
@@ -42,7 +42,7 @@ Before writing or editing ANY code:
 1. **Feature specs** - Read `docs/specs/features/[feature].md` if implementing a documented feature
 2. **Related ADRs** - Check `related_adrs` field in feature specs — these MUST be followed
 3. **Boundaries** - Read `docs/specs/boundaries.md` — "Never Do" = hard blocker, "Ask First" = confirm with user
-4. **Code patterns** - Check `patterns/good/` for approved examples and `patterns/bad/anti-patterns.md` for what to avoid
+4. **Patterns** - Check `patterns/good/` for approved examples and `patterns/bad/anti-patterns.md` for what to avoid
 5. **For UI work, also check design intent** - Read `DESIGN.md` if it exists for cross-cutting UI rules. If `design/ux-decisions/` exists, check it for UX choices that constrain the work. Documented UX decisions are deliberate design intent; undocumented UI code is not automatically deliberate.
 6. **Traceability** - Add `// ADR-NNN: brief note` for architectural decisions, `// UX-NNN: brief note` for UX decisions
 
@@ -60,7 +60,7 @@ Before writing or editing ANY code:
 
 **Boundaries** have three levels: Always Do (mandatory), Ask First (need user confirmation), Never Do (hard blockers — refuse and suggest alternatives).
 
-**Good patterns** are real code/UI files with a header comment block linking to the ADRs (and UX decisions, where relevant) that motivate them.
+**Good patterns** are real example files with a header comment block linking to the ADRs (and UX decisions, where relevant) that motivate them.
 
 **Anti-patterns** have severity (Critical/High/Medium/Low), a bad example, a good alternative, and an explanation.
 

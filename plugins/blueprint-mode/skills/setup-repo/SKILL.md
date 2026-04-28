@@ -182,7 +182,7 @@ _(Say 'create now' anytime - I'll infer defaults for anything not specified)_"
 │       ├── 001-runtime-choice.md      # Why this runtime
 │       ├── 002-framework-choice.md    # Why this framework (if applicable)
 │       └── 003-database-choice.md     # Why this database (if applicable)
-├── patterns/                          # CODE patterns only
+├── patterns/                          # Pattern examples and anti-patterns (any subject)
 │   ├── good/
 │   │   └── .gitkeep
 │   └── bad/
@@ -194,6 +194,8 @@ _(Say 'create now' anytime - I'll infer defaults for anything not specified)_"
 ```
 
 **The design tree (`design/`) and `DESIGN.md` are NOT created by this skill.** Design intent capture is opt-in via `/blueprint:onboard-design`. If the user mentions UI, frontend, dashboard, or a UI framework, mention `/blueprint:onboard-design` in the After Creation report — but do NOT scaffold design artifacts here.
+
+**When generating CLAUDE.md / AGENTS.md from the `<!-- SECTION: claude-md -->` template:** OMIT the "Important adjacent design context" and "Design / UX tree" tables. They only apply once `DESIGN.md` exists or `/blueprint:onboard-design` has been run. Including them here would point agents at non-existent paths. `/blueprint:onboard-design` adds the rows post-hoc.
 
 **Note:** ADRs are discovered via globbing `docs/adrs/*.md`. No index file needed.
 
@@ -346,7 +348,7 @@ See `docs/specs/features/` for detailed specifications.
    - `/blueprint:require` - Add requirements
    - `/blueprint:decide` - Record additional tech decisions
    - `/blueprint:good-pattern` - Capture good patterns
-   - `/blueprint:onboard-design` - Opt in to design intent capture; can scaffold DESIGN.md and surfaces candidate UX decisions from existing UI for confirmation (only if the project has UI in scope)
+   - `/blueprint:onboard-design` - Opt in to design intent capture; can scaffold DESIGN.md and optionally surface candidate UX decisions from existing UI for confirmation (only if the project has UI in scope)
 
 ## Examples
 

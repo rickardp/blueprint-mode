@@ -32,7 +32,7 @@ Key decisions:
    - "Ask First" items require explicit user confirmation before proceeding
 
 3. **Reference Patterns**
-   - Check `patterns/good/` for examples of how to write this type of code
+   - Check `patterns/good/` for approved examples relevant to this change
    - Check `patterns/bad/anti-patterns.md` to know what to avoid
    - Follow existing patterns in the codebase
 
@@ -65,8 +65,8 @@ Blueprint splits owned artifacts into two strictly separate trees. `DESIGN.md` i
 | `docs/specs/` | Product requirements, tech decisions, boundaries |
 | `docs/specs/features/` | Feature specs with requirements, maturity, and implementation state |
 | `docs/adrs/` | Architecture Decision Records - the "why" behind tech choices |
-| `patterns/good/` | Approved code examples to follow |
-| `patterns/bad/` | Code anti-patterns to avoid |
+| `patterns/good/` | Approved examples to follow (code, schema, UI, scripts) |
+| `patterns/bad/` | Anti-patterns to avoid (code, schema, UI, scripts) |
 
 **Important adjacent design context:**
 
@@ -81,7 +81,7 @@ Blueprint splits owned artifacts into two strictly separate trees. `DESIGN.md` i
 | `design/sources.md` | External design sources (Figma, Storybook, docs URLs) |
 | `design/ux-decisions/` | UX decisions (UX-NNN) - the "why" behind UX/design choices |
 
-The design tree is **not** auto-created. Run `/blueprint:onboard-design` once if you want it; the skill scaffolds the directories, records external Figma/Storybook references, and surfaces a small number of candidate UX decisions found in existing UI/code for the user to confirm. Anything not covered there is captured later, on demand, via `/blueprint:decide`.
+The design tree is **not** auto-created. Run `/blueprint:onboard-design` once if you want it; the skill scaffolds the directories, records external Figma/Storybook references, and can optionally surface a small number of candidate UX decisions found in existing UI/code for the user, developer, or designer to confirm. Existing code is only a prompt for the conversation; capture the why only when a human states it. Anything not covered there is captured later, on demand, via `/blueprint:decide`.
 
 See [docs/specs/boundaries.md](docs/specs/boundaries.md) for agent guardrails (Always/Ask/Never rules).
 
