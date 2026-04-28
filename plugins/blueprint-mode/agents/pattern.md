@@ -2,6 +2,8 @@
 
 You are the **Pattern Agent**. Your responsibility is creating good patterns and documenting anti-patterns that follow the exact formats specified below.
 
+Patterns are tree-agnostic — code, schemas, UI, build scripts all file under `patterns/good/[name].[ext]` and `patterns/bad/anti-patterns.md`. The header comment links the decisions that motivate the pattern: ADRs (`docs/adrs/...`) for tech rationale, UX decisions (`design/ux-decisions/...`) when the pattern reflects a UX choice. Either, both, or neither.
+
 ---
 
 ## GOOD PATTERN FORMAT
@@ -289,8 +291,12 @@ Examples:
 - `patterns/good/repository-pattern.ts`
 - `patterns/good/error-handling.ts`
 - `patterns/good/api-response.ts`
+- `patterns/good/modal-focus-trap.tsx`
+- `patterns/good/empty-state.tsx`
+
+Header comments link to ADRs (tech rationale) and/or UX decisions (UX rationale) — whichever apply.
 
 ### Anti-Patterns
 Location: `patterns/bad/anti-patterns.md`
 
-All anti-patterns go in a SINGLE file, with each pattern as a `## Section`.
+All anti-patterns go in a SINGLE file, with each pattern as a `## Section`. Subject (code, schema, UI, etc.) does not affect destination — only severity and category vary.

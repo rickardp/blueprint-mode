@@ -16,6 +16,16 @@ You are creating a complete Blueprint structure. You must follow the EXACT forma
 | Product | `docs/specs/product.md` | See Product Format below |
 | Good Pattern | `patterns/good/name.ext` | See Good Pattern Format below |
 | Anti-Pattern | `patterns/bad/anti-patterns.md` | See Anti-Pattern Format below |
+| Design Context | `DESIGN.md` | Important adjacent repo file for cross-cutting UI rules; not part of the Blueprint structure |
+| UX Decision | `design/ux-decisions/NNN-slug.md` | See UX Decision Format below |
+
+**TREE SEPARATION (CRITICAL):** `docs/**` and `patterns/**` are the engineering tree. `design/**` is the design tree. They are NEVER interchangeable — different reviewers own each. UX decisions are NOT ADRs (separate file tree, separate numbering, separate audience).
+
+**DESIGN TREE IS OPT-IN.** The `design/` tree only exists if `/blueprint:onboard-design` has been run. Always check whether `design/ux-decisions/` exists before producing files in it. If a user asks for a UX decision in a repo without the design tree, suggest `/blueprint:onboard-design` first — do NOT silently scaffold it from another skill.
+
+**DELIBERATE VS COINCIDENTAL UI:** `DESIGN.md` and UX decisions record confirmed design intent. Current UI code by itself is not proof that a design choice was deliberate.
+
+**DESIGN.md VS UX DECISIONS:** Cross-cutting rules and prohibitions go in repo-root `DESIGN.md`. Per-context choices with alternatives considered go in `design/ux-decisions/`. Do not duplicate a broad `DESIGN.md` rule into a UX decision; reference it instead.
 
 ---
 
@@ -250,6 +260,55 @@ See `docs/specs/features/` for detailed specifications.
 
 ---
 
+## UX DECISION FORMAT
+
+UX decisions live in `design/ux-decisions/NNN-slug.md`. Same structural shape as ADR but **never** filed in `docs/adrs/`. Title uses `UX-NNN`, not `ADR-NNN`. Create them when a user, designer, or source material confirms per-context design rationale with alternatives considered. Cross-cutting rules belong in `DESIGN.md` instead.
+
+```markdown
+---
+status: [Draft|Active|Superseded|Deprecated]
+date: YYYY-MM-DD
+---
+
+# UX-NNN: [Choice] for [Context]
+
+## Context
+[User problem / interaction tension]
+
+## Options Considered
+
+### Option 1: [Name]
+- Pro: [advantage]
+- Con: [disadvantage]
+
+### Option 2: [Name]
+- Pro: [advantage]
+- Con: [disadvantage]
+
+## Decision
+We chose **[CHOICE]** because [rationale].
+
+## Consequences
+
+**Positive:**
+- [benefit]
+
+**Negative:**
+- [tradeoff]
+
+## Related
+- Related UX decisions: [UX-NNN]
+```
+
+**FORBIDDEN in UX decisions:**
+- Filing in `docs/adrs/` (UX decisions live in `design/ux-decisions/`)
+- Title `# ADR-NNN` (use `# UX-NNN`)
+- `## Status` in body (use frontmatter)
+- `**Benefits:**` (use `**Positive:**`)
+- `**Trade-offs:**` (use `**Negative:**`)
+
+---
+
 ## MASTER VALIDATION CHECKLIST
 
 ### For ALL Documents:
@@ -280,13 +339,19 @@ See `docs/specs/features/` for detailed specifications.
 - [ ] Anti-patterns all in single file
 - [ ] `### Don't Do This` not "Wrong Way"
 - [ ] `### Do This Instead` not "Right Way"
+### UX Decision Specific:
+- [ ] Title `# UX-NNN: ...` (not `# ADR-NNN`)
+- [ ] Filed in `design/ux-decisions/`, never `docs/adrs/`
+- [ ] Status in YAML, NOT in body
+- [ ] `**Positive:**` / `**Negative:**` (same as ADR)
+- [ ] Not just a broad rule that belongs in `DESIGN.md`
 
 ---
 
 ## DIRECTORY STRUCTURE TO CREATE
 
 ```
-docs/
+docs/                          # CODE / ARCHITECTURE TREE
 ├── specs/
 │   ├── product.md
 │   ├── tech-stack.md
@@ -298,13 +363,18 @@ docs/
 └── adrs/
     └── NNN-[slug].md
 
-patterns/
+patterns/                      # Pattern examples and anti-patterns (any subject)
 ├── good/
 │   └── [name].[ext]
 └── bad/
     └── anti-patterns.md
 
+design/                        # DESIGN / UX TREE — OPT-IN, created by /blueprint:onboard-design
+├── sources.md                  # External design sources (Figma, Storybook, docs URLs)
+└── ux-decisions/
+    └── NNN-[slug].md
+
 CLAUDE.md (or AGENTS.md)
 ```
 
-**Create all directories that don't exist. Create files with TBD markers if information is incomplete.**
+**Create all directories that don't exist** — for the code/architecture tree. **Do NOT auto-create the `design/` tree or `DESIGN.md`** unless you are running `/blueprint:onboard-design` and the user accepts `DESIGN.md` scaffolding. `DESIGN.md` is important design context, but it is not part of the Blueprint structure. Other skills must check whether `design/` exists before producing files there. NEVER mix code and design trees — different reviewers own each.

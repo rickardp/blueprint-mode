@@ -43,7 +43,7 @@ if echo "$PROMPT" | grep -qE '/blueprint:(good-pattern|bad-pattern)'; then
 fi
 
 # Comprehensive setup skills - use all agents combined
-if echo "$PROMPT" | grep -qE '/blueprint:(onboard|setup-repo)'; then
+if echo "$PROMPT" | grep -qE '/blueprint:(onboard|setup-repo|onboard-design)'; then
   AGENT_FILE="$AGENTS_DIR/all.md"
 fi
 
@@ -52,7 +52,7 @@ fi
 # =============================================================================
 
 # Write-oriented skills - inject execution rules
-if echo "$PROMPT" | grep -qE '/blueprint:(onboard|decide|require|good-pattern|bad-pattern|setup-repo|supersede)'; then
+if echo "$PROMPT" | grep -qE '/blueprint:(onboard|decide|require|good-pattern|bad-pattern|setup-repo|supersede|onboard-design)'; then
   cat << 'EOF'
 BLUEPRINT SKILL EXECUTION RULES (MANDATORY):
 
@@ -95,7 +95,7 @@ Warning: Unrecognized Blueprint skill. No context rules were applied.
 
 Known skills:
 - Read-only: status, list-adrs, help, validate
-- Write-oriented: onboard, decide, require, good-pattern, bad-pattern, setup-repo, supersede
+- Write-oriented: onboard, decide, require, good-pattern, bad-pattern, setup-repo, supersede, onboard-design
 
 If this is a new skill, update hooks/blueprint-context.sh to include it.
 EOF
@@ -107,7 +107,7 @@ fi
 # =============================================================================
 
 if ! echo "$PROMPT" | grep -qE '/blueprint:'; then
-  if echo "$PROMPT" | grep -qiE '\bblueprint\b|\badrs?\b|architecture.decision|docs/specs|docs/adrs|patterns/(good|bad)|boundaries\.md|tech-stack\.md|feature.spec|anti-pattern'; then
+  if echo "$PROMPT" | grep -qiE '\bblueprint\b|\badrs?\b|architecture.decision|docs/specs|docs/adrs|patterns/(good|bad)|boundaries\.md|tech-stack\.md|feature.spec|anti-pattern|DESIGN\.md|design/ux-decisions|ux.decision|design.tree'; then
     HOWTO_FILE="$AGENTS_DIR/howto.md"
     if [ -f "$HOWTO_FILE" ]; then
       cat "$HOWTO_FILE"

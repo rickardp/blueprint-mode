@@ -1,7 +1,7 @@
 ---
 name: blueprint:supersede
-description: Replace or deprecate a previous architectural decision. Use when the user wants to change a tech choice, retire a decision, or remove functionality without replacement.
-argument-hint: "[ADR-number]"
+description: Replace or deprecate a previous decision (ADR or UX decision). Use when the user wants to change a tech or UX choice, retire a decision, or remove functionality without replacement.
+argument-hint: "[ADR-NNN or UX-NNN]"
 disable-model-invocation: true
 allowed-tools:
   - Glob
@@ -16,16 +16,17 @@ allowed-tools:
 
 # Supersede or Deprecate Decision
 
-Replace a previous architectural decision with a new one, or deprecate it entirely.
+Replace a previous decision with a new one, or deprecate it entirely. Works for both architectural decisions (ADRs in `docs/adrs/`) and UX decisions (in `design/ux-decisions/`).
 
-**Invoked by:** `/blueprint:supersede [ADR]` or when user discusses changing/removing a previous decision.
+**Invoked by:** `/blueprint:supersede [ADR-NNN]`, `/blueprint:supersede [UX-NNN]`, or when user discusses changing/removing a previous decision.
 
 ## Principles
 
 1. **Two options**: Replace or Deprecate (if outdated, delete file - git history is the archive)
 2. **Never block**: Allow skip on optional questions
-3. **History preserved**: Old ADRs are updated, never deleted
-4. **Use globbing**: Find ADRs via file system, no index needed
+3. **History preserved**: Old decisions are updated, never deleted
+4. **Use globbing**: Find decisions via file system, no index needed
+5. **Stay in tree**: Replacements are filed in the **same tree** as the original (ADRs don't supersede UX decisions and vice versa)
 
 **TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for all structured questions.**
 When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text or rephrase as plain text questions.
@@ -34,13 +35,23 @@ When you see JSON examples in this skill, they are parameters for the AskUserQue
 
 **FIRST ACTION: Enter plan mode by calling the `EnterPlanMode` tool.** This enables proper interactive questioning.
 
-### Step 1: Find the ADR
+### Step 1: Find the Decision
+
+Detect which tree to search based on the argument:
+
+| Argument | Tree | Glob |
+|----------|------|------|
+| `ADR-NNN` or just `NNN` referring to an architectural decision | `docs/adrs/` | `docs/adrs/*.md` |
+| `UX-NNN` | `design/ux-decisions/` | `design/ux-decisions/*.md` |
+| Bare number, no prefix | Search **both** trees, ask if found in both |
 
 Use Claude's built-in tools:
-- **Glob tool**: Find ADR files with `docs/adrs/*.md`
-- **Read tool**: View ADR contents
+- **Glob tool**: Find files in the appropriate tree
+- **Read tool**: View decision contents
 
-If no ADRs exist: "No ADRs found. Use `/blueprint:decide` to create your first decision."
+If no decisions exist in the relevant tree:
+- ADR tree empty: "No ADRs found. Use `/blueprint:decide` to create your first architectural decision."
+- UX tree empty: "No UX decisions found. Use `/blueprint:decide` to create your first UX decision."
 
 ### Step 2: Understand Intent
 
@@ -86,16 +97,20 @@ Understand the context and current decision.
 2. "Why the change?" (ask - can skip)
 3. "Any migration notes?" (optional)
 
-### 3. Create new ADR
+### 3. Create new decision (in the same tree)
 
-Get next number by counting `docs/adrs/*.md` files.
+**Stay in the same tree as the original.** ADRs are superseded by ADRs (in `docs/adrs/`); UX decisions are superseded by UX decisions (in `design/ux-decisions/`).
+
+Get next number by globbing the relevant tree:
+- ADRs: `docs/adrs/*.md`
+- UX decisions: `design/ux-decisions/*.md`
 
 Include:
-- Reference to superseded ADR in Context
-- "Supersedes: ADR-NNN" in Related section
+- Reference to superseded decision in Context
+- "Supersedes: ADR-NNN" or "Supersedes: UX-NNN" in Related section
 - Migration notes if provided
 
-### 4. Update OLD ADR frontmatter
+### 4. Update OLD decision frontmatter
 
 ```yaml
 ---
@@ -105,9 +120,14 @@ superseded_by: NNN-new-decision
 ---
 ```
 
-## New ADR Template (for replacement)
+## New Decision Template (for replacement)
 
-See `_templates/TEMPLATES.md` (section: `<!-- SECTION: adr-template -->`) for the base ADR template.
+Same shape for both trees — only the title prefix and destination differ.
+
+- ADR template: `_templates/TEMPLATES.md` (`<!-- SECTION: adr-template -->`)
+- UX decision template: `_templates/TEMPLATES.md` (`<!-- SECTION: ux-decision-template -->`)
+
+**ADR replacement (in `docs/adrs/`):**
 
 ```markdown
 ---
@@ -142,6 +162,41 @@ We will use **[new choice]** because [reason].
 ## Related
 
 - Supersedes: [ADR-OLD](./OLD-title.md)
+```
+
+**UX decision replacement (in `design/ux-decisions/`):**
+
+Same shape, but title is `# UX-NNN: ...` and the supersedes link points within the UX tree.
+
+```markdown
+---
+status: Active
+date: [TODAY]
+---
+
+# UX-[NNN]: [New Decision Title]
+
+## Context
+
+Previously, we used [old approach] (see UX-[OLD]).
+
+[Why we're changing - or TODO marker if skipped]
+
+## Decision
+
+We will use **[new choice]** because [reason].
+
+## Consequences
+
+**Positive:**
+- [benefit]
+
+**Negative:**
+- [tradeoff]
+
+## Related
+
+- Supersedes: [UX-OLD](./OLD-title.md)
 ```
 
 ---

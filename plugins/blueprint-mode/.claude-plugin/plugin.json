@@ -1,7 +1,7 @@
 {
   "name": "blueprint-mode",
-  "description": "Spec-driven development with documented decision rationale: specs, ADRs, patterns, and requirements",
-  "version": "1.3.0",
+  "description": "Documented intent for AI-assisted development: ADRs, specs, patterns, requirements, DESIGN.md, and a separate design tree for UX decisions",
+  "version": "1.4.0",
   "author": {
     "name": "rickardp"
   },
@@ -15,6 +15,7 @@
     "maintainability",
     "patterns",
     "requirements",
-    "spec-driven"
+    "spec-driven",
+    "ux-decisions"
   ]
 }

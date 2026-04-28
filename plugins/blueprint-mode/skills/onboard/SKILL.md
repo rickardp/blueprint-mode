@@ -38,7 +38,7 @@ If existing documentation exists, CREATE BLUEPRINT STRUCTURE ANYWAY. Do not ask 
 6. **Exit plan mode** - Call ExitPlanMode when ready
 7. **Gather rationale** - For each tech without rationale, ask user (see format below)
 8. **Create** all Blueprint files (including agent instructions)
-9. **Clean up existing documentation** - Blueprint files are source of truth. Other docs (including CLAUDE.md and other agent instructions) *reference* these files rather than duplicating (keep brief summary + reference to ADR or spec)
+9. **Clean up existing documentation** - Blueprint files are the intent record. Other docs (including CLAUDE.md and other agent instructions) *reference* these files rather than duplicating (keep brief summary + reference to ADR or spec)
 10. **Clean up long code comments** referencing ADRs or specs instead of explaining rationale inlined in code
 11. **Report** what was created
 
@@ -92,21 +92,35 @@ Specs:
 - docs/specs/tech-stack.md
 - docs/specs/boundaries.md
 
+[If UI signals detected:]
+Design tree NOT created here. UI signals detected ([signal summary]).
+Run /blueprint:onboard-design after this to opt in to design intent capture
+(it scaffolds the design tree, can scaffold DESIGN.md, captures Figma/Storybook
+references, and can optionally surface a small number of candidate UX decisions
+found in existing UI for confirmation).
+
 [Call ExitPlanMode to proceed]
 ```
 
 ## Files to Create
 
 ```
-docs/
+docs/                            # CODE / ARCHITECTURE TREE
 ├── adrs/
-│   └── 001-[tech].md    # One per major technology
+│   └── 001-[tech].md            # One per major technology
 ├── specs/
-│   ├── product.md       # Vision, users, goals (from README)
-│   ├── tech-stack.md    # All technologies (from dependencies)
-│   └── boundaries.md    # Always/Ask/Never rules
-CLAUDE.md (or AGENTS.md) # Agent instructions - see detection above
+│   ├── product.md               # Vision, users, goals (from README)
+│   ├── tech-stack.md            # All technologies (from dependencies)
+│   └── boundaries.md            # Always/Ask/Never rules
+
+CLAUDE.md (or AGENTS.md)         # Agent instructions - see detection above
 ```
+
+**This skill ONLY scaffolds the code/architecture tree.** The design tree (`design/`) is opt-in and is set up by a separate skill: `/blueprint:onboard-design`. Do NOT auto-create `design/` based on UI detection — even if the repo has React/Vue/Svelte components.
+
+**If UI code is detected, mention `/blueprint:onboard-design` in the final report** so the user knows it's available — but do not run it or scaffold it automatically.
+
+**When generating CLAUDE.md / AGENTS.md from the `<!-- SECTION: claude-md -->` template:** OMIT the "Important adjacent design context" and "Design / UX tree" tables — they only apply once `DESIGN.md` exists or `/blueprint:onboard-design` has been run. Generating those rows here would point agents at non-existent paths. `/blueprint:onboard-design` adds the rows post-hoc.
 
 ## Templates
 
@@ -224,6 +238,12 @@ Created Blueprint structure:
 - [CLAUDE.md | AGENTS.md | both] (agent instructions)
 
 TBD sections can be refined by running this skill again.
+
+[If UI signals were detected:]
+UI signals detected ([summary]). The design tree is opt-in.
+Run /blueprint:onboard-design to set it up — it scaffolds the design tree,
+can scaffold DESIGN.md, records Figma / Storybook / docs URLs, and can
+optionally surface candidate UX decisions from existing UI for confirmation.
 ```
 
 ## If Structure Already Exists

@@ -1,6 +1,6 @@
 ---
 name: blueprint:setup-repo
-description: Set up a new repository with spec-driven development structure from scratch. Use when creating a new project and the user wants to establish specs, ADRs, and patterns from the beginning.
+description: Set up a new repository with Blueprint intent-capture structure from scratch. Use when creating a new project and the user wants to establish specs, ADRs, and patterns from the beginning.
 disable-model-invocation: true
 argument-hint: ""
 allowed-tools:
@@ -17,7 +17,7 @@ allowed-tools:
 
 # Set Up New Repository
 
-Create a new project with spec-driven development structure from scratch.
+Create a new project with Blueprint intent-capture structure from scratch.
 
 **Invoked by:** `/blueprint:setup-repo` or `/blueprint:setup-repo [tech stack description]`
 
@@ -171,7 +171,7 @@ _(Say 'create now' anytime - I'll infer defaults for anything not specified)_"
 
 ```
 [project-name]/
-├── docs/
+├── docs/                              # CODE / ARCHITECTURE TREE
 │   ├── specs/
 │   │   ├── product.md                 # Vision, users, success metrics
 │   │   ├── features/                  # Feature specifications (empty, discovered via globbing)
@@ -182,7 +182,7 @@ _(Say 'create now' anytime - I'll infer defaults for anything not specified)_"
 │       ├── 001-runtime-choice.md      # Why this runtime
 │       ├── 002-framework-choice.md    # Why this framework (if applicable)
 │       └── 003-database-choice.md     # Why this database (if applicable)
-├── patterns/
+├── patterns/                          # Pattern examples and anti-patterns (any subject)
 │   ├── good/
 │   │   └── .gitkeep
 │   └── bad/
@@ -192,6 +192,10 @@ _(Say 'create now' anytime - I'll infer defaults for anything not specified)_"
 ├── CLAUDE.md (or AGENTS.md)           # Agent instructions - see detection above
 └── [standard project files]
 ```
+
+**The design tree (`design/`) and `DESIGN.md` are NOT created by this skill.** Design intent capture is opt-in via `/blueprint:onboard-design`. If the user mentions UI, frontend, dashboard, or a UI framework, mention `/blueprint:onboard-design` in the After Creation report — but do NOT scaffold design artifacts here.
+
+**When generating CLAUDE.md / AGENTS.md from the `<!-- SECTION: claude-md -->` template:** OMIT the "Important adjacent design context" and "Design / UX tree" tables. They only apply once `DESIGN.md` exists or `/blueprint:onboard-design` has been run. Including them here would point agents at non-existent paths. `/blueprint:onboard-design` adds the rows post-hoc.
 
 **Note:** ADRs are discovered via globbing `docs/adrs/*.md`. No index file needed.
 
@@ -344,6 +348,7 @@ See `docs/specs/features/` for detailed specifications.
    - `/blueprint:require` - Add requirements
    - `/blueprint:decide` - Record additional tech decisions
    - `/blueprint:good-pattern` - Capture good patterns
+   - `/blueprint:onboard-design` - Opt in to design intent capture; can scaffold DESIGN.md and optionally surface candidate UX decisions from existing UI for confirmation (only if the project has UI in scope)
 
 ## Examples
 

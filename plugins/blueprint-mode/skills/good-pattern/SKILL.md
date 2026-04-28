@@ -1,6 +1,6 @@
 ---
 name: blueprint:good-pattern
-description: Capture good code as a reusable example
+description: Capture good code as a reusable example (any subject — server code, schema, UI, scripts)
 argument-hint: "[file-path or description]"
 allowed-tools:
   - Glob
@@ -14,14 +14,14 @@ allowed-tools:
 
 # Capture Good Pattern
 
-**COMMAND:** Extract code as a pattern others should follow.
+**COMMAND:** Extract code as a pattern others should follow. Patterns are tree-agnostic — file everything under `patterns/good/` regardless of subject (server code, database model, UI, build scripts, etc.).
 
 ## Execute
 
 1. **Parse** argument for file path or description
 2. **Find** file (search if only description given)
 3. **Read** file content
-4. **Create** pattern at patterns/good/[name].[ext]
+4. **Create** pattern at `patterns/good/[name].[ext]`
 5. **Report** what was captured
 
 ## Input Handling
@@ -36,6 +36,8 @@ allowed-tools:
 
 Use template from `_templates/TEMPLATES.md` (`<!-- SECTION: good-patterns -->`).
 
+The header comment lists the decisions that motivate the pattern — ADRs (`../../docs/adrs/...`) for tech/architecture rationale, UX decisions (`../../design/ux-decisions/...`) when the pattern reflects a UX choice. Either, both, or neither — only link what genuinely applies.
+
 ```[language]
 /**
  * [Pattern Name]
@@ -46,8 +48,9 @@ Use template from `_templates/TEMPLATES.md` (`<!-- SECTION: good-patterns -->`).
  * KEY ELEMENTS:
  * 1. [Important aspect]
  *
- * Related ADRs:
+ * Related decisions:
  * - [ADR-NNN](../../docs/adrs/NNN-name.md) - [Why this pattern]
+ * - [UX-NNN](../../design/ux-decisions/NNN-name.md) - [If applicable]
  *
  * Source: [original file path]
  */

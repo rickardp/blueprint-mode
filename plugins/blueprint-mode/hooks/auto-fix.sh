@@ -22,9 +22,11 @@ fi
 FIXES_MADE=()
 
 # =============================================================================
-# ADR Auto-Fixes (docs/adrs/*.md)
+# Decision Auto-Fixes (ADRs + UX Decisions share the same format)
+# - docs/adrs/*.md (architectural)
+# - design/ux-decisions/*.md (UX)
 # =============================================================================
-if [[ "$FILE_PATH" == */docs/adrs/*.md ]]; then
+if [[ "$FILE_PATH" == */docs/adrs/*.md ]] || [[ "$FILE_PATH" == */design/ux-decisions/*.md ]]; then
 
   # Fix: **Benefits:** -> **Positive:**
   if grep -q '\*\*Benefits:\*\*' "$FILE_PATH"; then
@@ -66,6 +68,19 @@ if [[ "$FILE_PATH" == */docs/adrs/*.md ]]; then
   if grep -q '^status: Accepted' "$FILE_PATH"; then
     sed -i '' 's/^status: Accepted/status: Active/g' "$FILE_PATH"
     FIXES_MADE+=("status: Accepted -> status: Active")
+  fi
+
+fi
+
+# =============================================================================
+# UX Decision-only Fixes (cross-tree title slips)
+# =============================================================================
+if [[ "$FILE_PATH" == */design/ux-decisions/*.md ]]; then
+
+  # Fix: # ADR-NNN -> # UX-NNN (UX decisions live in the design tree)
+  if grep -qE '^# ADR-[0-9]+' "$FILE_PATH"; then
+    sed -i '' -E 's/^# ADR-([0-9]+)/# UX-\1/g' "$FILE_PATH"
+    FIXES_MADE+=("# ADR-NNN -> # UX-NNN (file is in design/ux-decisions/)")
   fi
 
 fi

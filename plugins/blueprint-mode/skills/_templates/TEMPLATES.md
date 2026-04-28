@@ -59,6 +59,10 @@ allowed-tools: [Glob, Grep, Read, Write, Edit]
 | ADRs: template | `<!-- SECTION: adr-template -->` | Creating individual ADRs |
 | Patterns: good | `<!-- SECTION: good-patterns -->` | Capturing good patterns |
 | Patterns: bad | `<!-- SECTION: bad-patterns -->` | Documenting anti-patterns |
+| Design: separation | `<!-- SECTION: design-separation -->` | Understanding code vs design split |
+| Design: UX decisions | `<!-- SECTION: ux-decision-template -->` | Creating UX decisions |
+| Design: UX-TBD marker | `<!-- SECTION: ux-tbd-comment -->` | Flagging unclear UI intent in code |
+| Triage: code vs design | `<!-- SECTION: triage-design -->` | Routing UX vs tech decisions |
 | CLAUDE.md | `<!-- SECTION: claude-md -->` | Creating agent instructions |
 | Interview Standards | `<!-- SECTION: interview -->` | Following interview patterns |
 
@@ -68,19 +72,22 @@ allowed-tools: [Glob, Grep, Read, Write, Edit]
 
 ## Plugin Scope
 
-**Blueprint is for:** Making specs the source of truth for your project.
+**Blueprint is for:** Making human intent explicit so agents can tell deliberate choices from coincidental implementation.
 
 ### In Scope
 - Documenting architectural decisions (ADRs) with rationale
-- Capturing good/bad code patterns with real examples
+- Capturing good/bad patterns with real examples
+- Capturing deliberate UX/design decisions when the opt-in design tree exists
+- Reading and updating repo-root `DESIGN.md` for cross-cutting design rules and prohibitions as an important adjacent repo artifact
 - Defining product requirements and feature specs
-- Setting agent boundaries (Always/Ask/Never rules)
+- Setting agent boundaries (Always/Ask/Never rules) in `docs/specs/boundaries.md`
 - Validating code against documented specs
 - Tracking non-functional requirements
 
 ### Out of Scope
 - **Task decomposition**: Blueprint documents what and why, not how to break down work. Use your preferred task management approach.
 - **Code generation**: Specs document decisions, they don't generate code. This is intentional to support iterative refinement.
+- **Parallel design source of truth for what exists**: Code remains canonical for UI state. `DESIGN.md` and UX decisions record why important design choices should persist.
 - **CI/CD pipelines**: Blueprint doesn't configure or manage CI/CD. Use `/blueprint:validate` manually or integrate it into your existing pipeline.
 - **Time estimates**: Blueprint focuses on clarity of intent, not project scheduling.
 - **Enforced acceptance criteria**: Requirements support iterative refinement. Given/When/Then format is optional, not mandatory.
@@ -98,8 +105,11 @@ allowed-tools: [Glob, Grep, Read, Write, Edit]
 
 ## Directory Structure
 
+Important adjacent repo artifact (not part of the Blueprint structure):
+- `DESIGN.md` — optional top-level design context with cross-cutting UI rules.
+
 ```
-docs/
+docs/                       # CODE / ARCHITECTURE TREE — engineering audience
 ├── specs/
 │   ├── product.md          # Project vision, users, success metrics
 │   ├── features/           # Feature specifications (discovered via globbing)
@@ -109,14 +119,111 @@ docs/
 │   │   └── [category].md   # Performance, security, scalability, etc.
 │   └── boundaries.md       # Always / Ask / Never rules
 ├── adrs/
-│   └── NNN-[slug].md       # Individual decisions (discovered via globbing)
-patterns/
+│   └── NNN-[slug].md       # Architecture decisions (discovered via globbing)
+patterns/                   # Pattern examples and anti-patterns (any subject)
 ├── good/
-│   └── [name].[ext]        # Approved code examples
+│   └── [name].[ext]        # Approved examples
 └── bad/
     └── anti-patterns.md    # Anti-patterns to avoid
+
+design/                     # DESIGN / UX TREE — OPT-IN, set up by /blueprint:onboard-design
+├── sources.md              # External design sources (Figma, Storybook, docs URLs)
+└── ux-decisions/
+    └── NNN-[slug].md       # UX decisions (discovered via globbing)
+
 CLAUDE.md                   # AI agent instructions
 ```
+
+**The `design/` tree is opt-in.** It is created by `/blueprint:onboard-design` and never auto-scaffolded by other skills. Repos without UI in scope (backend services, libraries, CLIs) typically won't have it. Skills that triage code vs design must check tree existence before producing design output paths.
+
+<!-- SECTION: design-separation -->
+## Code/Architecture vs Design/UX: Strict Separation
+
+**The `docs/` + `patterns/` tree and the `design/` tree are NEVER interchangeable.**
+
+Different audiences review different trees (CODEOWNERS-style routing):
+- `docs/**`, `patterns/**` → engineering reviewers
+- `design/**` → design reviewers (only if the tree exists)
+
+**The design tree is opt-in.** Set it up with `/blueprint:onboard-design`. Until then, triage skills only produce code-tree output and warn the user when they see strong UX/UI signals.
+
+| Concern | Tree | Captured by |
+|---------|------|-------------|
+| Tech/architecture decision (e.g. "Postgres over Mongo") | `docs/adrs/` | `/blueprint:decide` |
+| UX/design decision (e.g. "modal over page for X", "destructive confirm") | `design/ux-decisions/` | `/blueprint:decide` (triages) |
+| Cross-cutting design rule (e.g. "never more than 3 colours") | `DESIGN.md` | `/blueprint:decide` or `/blueprint:capture` |
+| Functional or non-functional requirement | `docs/specs/...` | `/blueprint:require` |
+| Pattern (any subject — code, schema, UI) | `patterns/good/` or `patterns/bad/` | `/blueprint:good-pattern` / `/blueprint:bad-pattern` |
+
+**UX decisions are NOT ADRs** — they live in their own tree with independent numbering even though the document shape is similar.
+
+### Deliberate vs Coincidental UI
+
+Current UI code is not automatically design intent. Agents should treat:
+
+- **`DESIGN.md` rules** (cross-cutting prohibitions, visual rules, voice/tone) as constraints that apply on every UI generation task.
+- **Documented UX decisions** as deliberate per-context constraints to preserve or consciously supersede.
+- **Documented UI patterns** as approved examples to follow.
+- **Undocumented UI code** as implementation state that may be coincidental, especially if generated by an agent.
+
+When a user, developer, or designer says a UI choice was intentional, capture the rationale where it belongs (see `DESIGN.md` vs UX decisions below) instead of relying on the current code shape to carry that meaning. When the agent encounters UI code that has no governing decision and no clear rationale, mark it with the `// UX-TBD:` flag (see `<!-- SECTION: ux-tbd-comment -->`) rather than inventing rationale.
+
+### `DESIGN.md` vs `design/ux-decisions/`: when to use which
+
+Both layers carry design intent, but at different scopes. Pick by asking *"is this a rule that applies broadly, or one decision among alternatives?"*
+
+| Goes in `DESIGN.md` (repo root) | Goes in `design/ux-decisions/UX-NNN-*.md` |
+|---|---|
+| Cross-cutting rules that apply across the product | A specific choice with alternatives considered |
+| "Never use more than 3 colours on a screen" | "Modal vs full page for destructive confirmation — chose modal because…" |
+| Visual rules, voice/tone, type scale, token usage | Per-flow or per-component rationale |
+| The kind of statement that's true on every screen | The kind of statement that's about *one thing* and what it was chosen over |
+| Read by agents on every UI generation task | Read by agents when working on the affected surface |
+
+**Don't duplicate.** A UX decision that derives from or codifies a `DESIGN.md` rule should *reference* the rule, not restate it. If a draft UX decision is really a cross-cutting prohibition with no alternatives, move it to `DESIGN.md` instead.
+
+**On `DESIGN.md` itself:** It's a community convention (Google Stitch / awesome-design-md), not a Blueprint-owned format and not part of the Blueprint structure. Blueprint stays compatible with it — `/blueprint:onboard-design` can scaffold a minimal stub when the user wants one, and Blueprint reads/respects the file when present. The team owns the file's contents; Blueprint avoids duplicating information that belongs there. Authoring stays conversational; never hand-fill it from a template — the same anti-ritual rule that applies to ADRs and UX decisions applies here.
+
+---
+
+<!-- SECTION: ux-tbd-comment -->
+## UX-TBD Code Comment Convention
+
+When UI code has no governing UX decision and the agent isn't sure if the choice is deliberate, mark it explicitly rather than inventing rationale.
+
+```tsx
+// UX-TBD: empty-state copy — agent-generated, not reviewed
+<EmptyState message="..." />
+```
+
+```tsx
+// UX-TBD: card layout — carried over from prototype, no UX decision yet
+<ProductCard ... />
+```
+
+**What `UX-TBD:` means:**
+- This UI element exists in code but has no documented UX rationale.
+- The agent (or whoever wrote it) is flagging it for designer review.
+- It is NOT a decision. It does NOT mean "deliberate".
+- It signals: *if this matters, capture it as a UX decision; if not, the next agent is free to change it.*
+
+**When to use it:**
+- Agent generates UI without an existing UX decision to follow.
+- Code is carried over from a prototype, mockup, or earlier session and its intent is unclear.
+- The reviewer (human or agent) wants to surface "is this deliberate?" without forcing a premature UX decision.
+
+**When NOT to use it:**
+- A UX decision already exists — use `// UX-NNN: brief note` instead.
+- The choice is purely engineering (state shape, performance) — that's an `// ADR-NNN:` reference, not UX.
+- The UI is trivial scaffolding with no design weight (a `<div>` wrapper, layout primitives) — silence is fine.
+
+**Lifecycle:**
+- A `UX-TBD:` is a flag, not a permanent annotation. It should resolve in one of three ways:
+  1. Designer confirms intent → upgrade to a UX decision (`/blueprint:decide`) and replace the comment with `// UX-NNN: [brief]`.
+  2. Designer says it doesn't matter → remove the comment.
+  3. Code is rewritten → the comment goes with it.
+
+**Symmetry note:** This is the design-tree counterpart to "deliberate vs coincidental" architecture. ADRs already answer the question for tech choices; `UX-TBD:` + UX decisions answer it for UI.
 
 ---
 
@@ -430,6 +537,118 @@ To complete a Draft ADR: fill in the `<!-- TODO: -->` sections, then change `sta
 
 ---
 
+<!-- SECTION: triage-design -->
+## Triage: Code/Architecture vs Design/UX
+
+Skills that handle both trees (`decide`, `good-pattern`, `bad-pattern`, `capture`, `supersede`) MUST classify the input before writing.
+
+### Decision triage (`/blueprint:decide`)
+
+| Signal in input | Type | Destination |
+|-----------------|------|-------------|
+| Tech choice, library, infra, "[X] over [Y]" technical, design pattern (code), runtime/framework/database | Architectural | `docs/adrs/NNN-[slug].md` |
+| User flow, navigation, "modal vs page", confirmation, copy/voice, empty state, error state, interaction model, layout, visual hierarchy | UX | `design/ux-decisions/NNN-[slug].md` |
+| Cross-cutting visual/voice/prohibition rule | Design rule | `DESIGN.md` |
+| Functional requirement, user capability | Functional | `docs/specs/features/` (redirect to `/blueprint:require`) |
+| Latency, uptime, encryption, scale targets | Non-functional | `docs/specs/non-functional/` (redirect to `/blueprint:require`) |
+
+### Patterns
+
+`/blueprint:good-pattern` and `/blueprint:bad-pattern` are **tree-agnostic**: every pattern (code, schema, UI, build script) files under `patterns/good/[name].[ext]` or `patterns/bad/anti-patterns.md`. The header comment can link to ADRs (tech rationale) and/or UX decisions (UX rationale) — whichever apply.
+
+---
+
+<!-- SECTION: ux-decision-template -->
+## design/ux-decisions/NNN-[slug].md (UX Decision Template)
+
+UX decisions document **why** a design/UX choice was made. Same shape as ADRs (Context, Options, Decision, Consequences) but separate file tree, separate numbering, and a design audience.
+
+**Reference style:** `UX-NNN` (e.g. `UX-007`) — parallel to `ADR-NNN`, never conflated.
+
+UX decisions are discovered via globbing `design/ux-decisions/*.md`. Status from frontmatter `status:` field.
+
+### Status Values
+
+- **Draft**: Emerging decision, has TODOs. Iterate freely.
+- **Active**: Decision is settled and being followed.
+- **Superseded**: Replaced by a newer UX decision.
+- **Deprecated**: No longer relevant.
+
+### Minimal UX Decision (Draft)
+
+```markdown
+---
+status: Draft
+date: [TODAY]
+---
+
+# UX-[NNN]: [Choice] for [Context]
+
+## Decision
+
+We chose **[CHOICE]** because [primary motivation].
+
+<!-- TODO: Add context — what user problem or interaction is this solving? -->
+<!-- TODO: Add alternatives considered -->
+<!-- TODO: Add consequences (positive and negative) -->
+```
+
+### Complete UX Decision (Active)
+
+```markdown
+---
+status: Active
+date: [TODAY]
+---
+
+# UX-[NNN]: [Choice] for [Context]
+
+## Context
+
+[What user problem, interaction, or design tension is this solving? Who experiences it?]
+
+## Options Considered
+
+### Option 1: [Alternative A]
+- Pro: [advantage]
+- Con: [disadvantage]
+
+### Option 2: [Alternative B]
+- Pro: [advantage]
+- Con: [disadvantage]
+
+## Decision
+
+We chose **[CHOICE]** because [primary motivation].
+
+[Additional reasoning — user research, heuristics, constraints]
+
+## Consequences
+
+**Positive:**
+- [benefit]
+
+**Negative:**
+- [tradeoff]
+
+## Related
+
+- Related UX decisions: [UX-NNN]
+```
+
+### UX Decision Format Enforcement (CRITICAL)
+
+| DO NOT use | USE instead |
+|------------|-------------|
+| `# ADR-NNN` (this is a UX decision) | `# UX-NNN` |
+| `## Status` with "Accepted" in body | YAML frontmatter `status: Active` |
+| `**Benefits:**` | `**Positive:**` |
+| `**Trade-offs:**` | `**Negative:**` |
+| `## References` | `## Related` |
+| Filing in `docs/adrs/` | File in `design/ux-decisions/` |
+
+---
+
 <!-- SECTION: bad-patterns -->
 ## patterns/bad/anti-patterns.md
 
@@ -530,13 +749,20 @@ See `docs/specs/tech-stack.md` for a summary table.
    - "Ask First" items require explicit user confirmation before proceeding
 
 3. **Reference Patterns**
-   - Check `patterns/good/` for examples of how to write this type of code
+   - Check `patterns/good/` for approved examples relevant to this change
    - Check `patterns/bad/anti-patterns.md` to know what to avoid
    - Follow existing patterns in the codebase
 
-4. **Traceability**
-   - When implementing a decision, add: `// ADR-NNN: [brief note]`
-   - Keep it short - the ADR has the full rationale
+4. **For UI work, also check design intent**
+   - Read `DESIGN.md` if it exists for cross-cutting design rules and prohibitions
+   - Check `design/ux-decisions/` if it exists for UX choices that constrain the work
+   - Treat documented UX decisions as deliberate design intent
+   - Do not assume undocumented UI code is deliberate; preserve it when practical, but flag unclear intent with `// UX-TBD: [what's unclear]` instead of inventing rationale
+
+5. **Traceability**
+   - When implementing an architectural decision, add: `// ADR-NNN: [brief note]`
+   - When implementing a UX decision, add: `// UX-NNN: [brief note]`
+   - Keep it short - the ADR / UX decision has the full rationale
 
 **BOUNDARY VIOLATIONS**
 
@@ -547,29 +773,55 @@ If a user request would violate a "Never Do" boundary:
 
 ## Documentation
 
+Blueprint splits owned artifacts into two strictly separate trees. `DESIGN.md` is important adjacent repo context, not part of the Blueprint structure. Different reviewers (engineering vs design) own different paths — never mix ADRs and UX decisions.
+
+**Code / architecture tree:**
+
 | Directory | Purpose |
 |-----------|---------|
 | `docs/specs/` | Product requirements, tech decisions, boundaries |
 | `docs/specs/features/` | Feature specs with requirements, maturity, and implementation state |
-| `docs/adrs/` | Architecture Decision Records - the "why" behind choices |
-| `patterns/good/` | Approved code examples to follow |
-| `patterns/bad/` | Anti-patterns to avoid |
+| `docs/adrs/` | Architecture Decision Records - the "why" behind tech choices |
+| `patterns/good/` | Approved examples to follow (code, schema, UI, scripts) |
+| `patterns/bad/` | Anti-patterns to avoid (code, schema, UI, scripts) |
+
+<!-- GENERATOR: Include the following two sections ONLY when DESIGN.md exists or the design/ tree exists. Otherwise omit them entirely so generated CLAUDE.md does not point at non-existent paths. /blueprint:onboard-design adds these rows post-hoc when the design tree is set up. -->
+
+**Important adjacent design context (only if `DESIGN.md` exists):**
+
+| Path | Purpose |
+|------|---------|
+| `DESIGN.md` | Top-level design context: cross-cutting UI rules and prohibitions |
+
+**Design / UX tree (only if `design/` exists — set up by `/blueprint:onboard-design`):**
+
+| Directory | Purpose |
+|-----------|---------|
+| `design/sources.md` | External design sources (Figma, Storybook, docs URLs) |
+| `design/ux-decisions/` | UX decisions (UX-NNN) - the "why" behind UX/design choices |
 
 See [docs/specs/boundaries.md](docs/specs/boundaries.md) for agent guardrails (Always/Ask/Never rules).
 
 ## Code Comments
 
-Reference ADRs with a brief note - the ADR has the full rationale:
+Reference ADRs / UX decisions with a brief note - the source doc has the full rationale:
 
 ```typescript
 // ADR-003: Repository pattern
 // ADR-007: Rate limiting
+// UX-002: Destructive actions require confirmation
 ```
 
 **Don't duplicate full rationale in comments:**
 ```typescript
 // Bad: Using repository pattern because it abstracts data access and makes testing easier
 // Good: // ADR-003: Repository pattern
+```
+
+**Flagging unclear UI intent (`// UX-TBD:`):** When UI code has no governing UX decision and the agent isn't sure if a choice is deliberate, mark it explicitly rather than inventing rationale:
+
+```typescript
+// UX-TBD: empty-state copy - agent-generated, not reviewed
 ```
 
 ## Pattern Discovery
@@ -715,13 +967,19 @@ related_adrs: []
 Skills should reference these templates rather than duplicating them:
 
 ```markdown
-Create files using templates from `_templates/TEMPLATES.md`:
+Code / architecture tree (engineering audience):
 - `docs/specs/product.md` - Project vision, users, success metrics
 - `docs/specs/features/[feature].md` - Feature specifications (discovered via globbing)
 - `docs/specs/tech-stack.md` - Technology decisions and commands
 - `docs/specs/non-functional/[category].md` - NFRs by category (discovered via globbing)
 - `docs/specs/boundaries.md` - Agent guardrails (Always/Ask/Never)
 - `docs/adrs/NNN-*.md` - Individual ADRs (discovered via globbing)
+- `patterns/good/*` - Patterns to follow (any subject)
+- `patterns/bad/anti-patterns.md` - Anti-patterns to avoid (any subject)
+
+Design / UX tree (design audience):
+- `design/ux-decisions/NNN-*.md` - UX decisions (discovered via globbing)
+- `design/sources.md` - External Figma / Storybook / docs URLs
 ```
 
 ---

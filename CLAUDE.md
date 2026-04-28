@@ -2,9 +2,9 @@
 
 ## Project Context
 
-Blueprint Mode is a Claude Code plugin that creates a stable source of truth for AI-assisted development. It captures decision rationale (ADRs), patterns, and boundaries so AI agents maintain consistency across sessions.
+Blueprint Mode is a Claude Code plugin that turns the repo into a complete source of truth for AI-assisted development. Code carries *what-is*; Blueprint's ADRs, UX decisions, DESIGN.md context, patterns, and boundaries carry *why-it-is*. Both layers are first-class, both are agent-readable, and they sit next to each other in version control.
 
-**Key principle:** We capture WHY decisions were made, not detailed specs of WHAT to build. Rationale is stable; code is volatile.
+**Key principle:** Code shows what the system does; without a rationale layer, agents can't tell *deliberate decisions* from *expedient fills* — they look identical from the outside. Blueprint records the WHY so future humans and agents can disambiguate.
 
 ## Architecture Decisions
 
@@ -32,13 +32,20 @@ Key decisions:
    - "Ask First" items require explicit user confirmation before proceeding
 
 3. **Reference Patterns**
-   - Check `patterns/good/` for examples of how to write this type of code
+   - Check `patterns/good/` for approved examples relevant to this change
    - Check `patterns/bad/anti-patterns.md` to know what to avoid
    - Follow existing patterns in the codebase
 
-4. **Traceability**
-   - When implementing a decision, add: `// ADR-NNN: [brief note]`
-   - Keep it short - the ADR has the full rationale
+4. **For UI work, also check design intent**
+   - Read `DESIGN.md` if it exists for cross-cutting design rules and prohibitions
+   - Check `design/ux-decisions/` for UX choices that constrain the work
+   - Treat documented UX decisions as deliberate design intent
+   - Do not assume undocumented UI code is deliberate; preserve it when practical, but flag unclear intent with `// UX-TBD: [what's unclear]` instead of inventing rationale
+
+5. **Traceability**
+   - When implementing an architectural decision, add: `// ADR-NNN: [brief note]`
+   - When implementing a UX decision, add: `// UX-NNN: [brief note]`
+   - Keep it short - the ADR / UX decision has the full rationale
 
 **BOUNDARY VIOLATIONS**
 
@@ -49,23 +56,47 @@ If a user request would violate a "Never Do" boundary:
 
 ## Documentation
 
+Blueprint splits owned artifacts into two strictly separate trees. `DESIGN.md` is important adjacent repo context, not part of the Blueprint structure. Different reviewers (engineering vs design) own different paths — never mix ADRs and UX decisions.
+
+**Code / architecture tree:**
+
 | Directory | Purpose |
 |-----------|---------|
 | `docs/specs/` | Product requirements, tech decisions, boundaries |
 | `docs/specs/features/` | Feature specs with requirements, maturity, and implementation state |
-| `docs/adrs/` | Architecture Decision Records - the "why" behind choices |
-| `patterns/good/` | Approved code examples to follow |
-| `patterns/bad/` | Anti-patterns to avoid |
+| `docs/adrs/` | Architecture Decision Records - the "why" behind tech choices |
+| `patterns/good/` | Approved examples to follow (code, schema, UI, scripts) |
+| `patterns/bad/` | Anti-patterns to avoid (code, schema, UI, scripts) |
+
+**Important adjacent design context:**
+
+| Path | Purpose |
+|------|---------|
+| `DESIGN.md` | Top-level design context: cross-cutting UI rules and prohibitions |
+
+**Design / UX tree (opt-in — only present if `/blueprint:onboard-design` was run):**
+
+| Directory | Purpose |
+|-----------|---------|
+| `design/sources.md` | External design sources (Figma, Storybook, docs URLs) |
+| `design/ux-decisions/` | UX decisions (UX-NNN) - the "why" behind UX/design choices |
+
+The design tree is **not** auto-created. Run `/blueprint:onboard-design` once if you want it; the skill scaffolds the directories, records external Figma/Storybook references, and can optionally surface a small number of candidate UX decisions found in existing UI/code for the user, developer, or designer to confirm. Existing code is only a prompt for the conversation; capture the why only when a human states it. Anything not covered there is captured later, on demand, via `/blueprint:decide`.
 
 See [docs/specs/boundaries.md](docs/specs/boundaries.md) for agent guardrails (Always/Ask/Never rules).
 
 ## Code Comments
 
-Reference ADRs with a brief note - the ADR has the full rationale:
+Reference ADRs / UX decisions with a brief note - the source doc has the full rationale:
 
 ```bash
 # ADR-003: Shell hooks for zero dependencies
 grep -h "^status:" docs/adrs/*.md
+```
+
+```tsx
+// UX-002: Destructive actions require confirmation
+<ConfirmDialog ... />
 ```
 
 **Don't duplicate full rationale in comments:**
@@ -73,6 +104,15 @@ grep -h "^status:" docs/adrs/*.md
 # Bad: Using grep because we need zero dependencies and jq would require installation
 # Good: # ADR-003: Zero-dependency hooks
 ```
+
+**Flagging unclear UI intent (`// UX-TBD:`):** When UI code has no governing UX decision and the agent isn't sure if a choice is deliberate, mark it explicitly rather than inventing rationale:
+
+```tsx
+// UX-TBD: empty-state copy — agent-generated, not reviewed
+<EmptyState message="..." />
+```
+
+`UX-TBD:` is a flag, not a decision. It signals "deliberate review needed", not "deliberate design". Resolve it by either capturing a UX decision (`/blueprint:decide`) and replacing with `// UX-NNN:`, or by removing the comment when designer confirms it doesn't matter.
 
 ## Pattern Discovery
 

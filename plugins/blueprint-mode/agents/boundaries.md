@@ -130,6 +130,8 @@ Optional section:
 ### Blueprint
 - Adding or editing ADRs in docs/adrs/
 - Adding or editing specs in docs/specs/
+- Adding or editing UX decisions in design/ux-decisions/
+- Editing DESIGN.md (top-level design context — read on every UI generation task)
 - Modifying boundaries.md
 
 ## Never Do
