@@ -404,14 +404,11 @@ The design tree is created by:
 ```
 
 This skill:
-- Scaffolds `design/ux-decisions/` and `design/sources.md`
-- Records external design tool URLs (Figma, Storybook, etc.) in `design/sources.md`
+- Scaffolds `design/ux-decisions/`
 - Can optionally surface a small number of candidate UX decisions found in existing UI/code for the user, developer, or designer to confirm
 - Updates `CLAUDE.md` / `AGENTS.md` to point at the design tree
 
 Blueprint captures *intent* — conscious choices with a stated why. Existing-UI triage uses code as a prompt for that conversation: the skill points at observable UI patterns so the user, developer, or designer has something concrete to react to, then captures only the ones they articulate a rationale for. A pattern existing in the code is not, by itself, evidence of intent.
-
-You can run it again any time to add more sources to `design/sources.md`.
 
 Documented UX decisions mean "this was intentional." Undocumented UI code is implementation state, not design rationale. Agents should preserve it when practical but should not invent a reason for it.
 
@@ -421,7 +418,6 @@ If you don't run this skill, no other skill will create the design tree for you.
 
 | Path | Purpose | Captured by |
 |------|---------|-------------|
-| `design/sources.md` | External design tool URLs (Figma, Storybook, docs) | `/blueprint:onboard-design` |
 | `design/ux-decisions/NNN-*.md` | UX decisions (UX-NNN) — per-context design choices with alternatives considered | `/blueprint:onboard-design` (optional existing-UI triage), `/blueprint:decide` |
 | `DESIGN.md` (repo root) | Cross-cutting design rules and prohibitions — community format (Google Stitch / awesome-design-md) Blueprint is compatible with but does not own | `/blueprint:onboard-design` may scaffold a stub; `/blueprint:decide` or `/blueprint:capture` may update rules conversationally |
 

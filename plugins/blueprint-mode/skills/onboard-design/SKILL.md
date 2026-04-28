@@ -1,6 +1,6 @@
 ---
 name: blueprint:onboard-design
-description: Opt-in. Add design intent capture to a Blueprint repo. Scaffolds design/ux-decisions/ and design/sources.md, records external artifact URLs (Figma, Storybook, design docs), offers to scaffold a minimal community-format DESIGN.md if absent, and can optionally surface a small number of candidate UX decisions found in existing UI/code for the user, developer, or designer to confirm.
+description: Opt-in. Add design intent capture to a Blueprint repo. Scaffolds design/ux-decisions/, offers to scaffold a minimal community-format DESIGN.md if absent, and can optionally surface a small number of candidate UX decisions found in existing UI/code for the user, developer, or designer to confirm.
 argument-hint: ""
 disable-model-invocation: true
 allowed-tools:
@@ -19,15 +19,17 @@ allowed-tools:
 
 **OPT-IN:** This skill is the only way the `design/` tree gets created. Other Blueprint skills do not auto-scaffold it. Run this when the repo has UX/design artifacts worth capturing.
 
-**COMMAND:** Scaffold `design/ux-decisions/` and `design/sources.md`, record external design source URLs (Figma, Storybook, etc.), and optionally surface a small number of candidate UX decisions found in existing UI/code for the user, developer, or designer to confirm. Capture only the ones they confirm as deliberate. Skipping candidate triage is always fine.
+**COMMAND:** Scaffold `design/ux-decisions/` and optionally surface a small number of candidate UX decisions found in existing UI/code for the user, developer, or designer to confirm. Capture only the ones they confirm as deliberate. Skipping candidate triage is always fine.
 
 **Capture intent, not inferred structure.** The point of a UX decision is to record a *conscious* choice the user, developer, or designer can explain. Existing code can prompt the conversation because the developer or designer may know the why behind it — but only capture the choice if a human articulates that why. If the rationale is "the code happens to look like that," the decision isn't ready and the agent should not invent one.
 
 ## DO NOT ASK FOR SCOPE
 
-**DO NOT** ask "Would you like me to..." or offer numbered scope options for the design-tree setup. **DO** scaffold the design tree and walk the source / DESIGN.md interview.
+**DO NOT** ask "Would you like me to..." or offer numbered scope options for the design-tree setup. **DO** scaffold the design tree and walk the DESIGN.md interview.
 
 The user is allowed to skip any individual interview question. Candidate triage from existing UI is optional content capture, not required onboarding scope.
+
+The user may copy-paste from external tools (Figma, Storybook, etc.) during the interview to help articulate decisions — that is fine. But Blueprint does NOT store persistent links to external tools. After onboarding, the repo is the complete source of truth.
 
 ---
 
@@ -61,7 +63,6 @@ I will set up the design tree:
 
 Scaffolding:
 - design/ux-decisions/         (NNN-[slug].md, populated by /blueprint:decide)
-- design/sources.md            (external design references)
 
 Detected UI signals:
 - Frontend: [framework]
@@ -71,10 +72,12 @@ Detected UI signals:
 - DESIGN.md at repo root: [yes/no]
 
 After scaffolding I will interview you about:
-- External design tools (Figma, Sketch, Penpot, Storybook URLs, etc.)
-- External documentation (design system docs, brand guidelines, research repos)
 - Whether to scaffold a minimal `DESIGN.md` at the repo root for cross-cutting design context (skipped if it already exists)
 - Whether to review a small number of existing UI patterns now, so you can tell me which were deliberate choices (with a short reason) and which were coincidental
+
+You can copy-paste from external tools (Figma, Storybook, etc.) during
+the interview to help articulate decisions. After onboarding, the repo
+is the complete source of truth — no external references are stored.
 
 The goal is to capture *conscious* design decisions — the why behind the
 choice. If a pattern is in the code but you don't have a clear reason for
@@ -89,37 +92,12 @@ Skip any question with "skip" — TBD markers are fine.
 
 Create directories and base files:
 - `design/ux-decisions/.gitkeep`
-- `design/sources.md` (template below)
 
-### Step 5: Interview — External Sources
-
-Use `AskUserQuestion`. Allow skip on every question. Batch up to 4 source types per call.
-
-```json
-{
-  "questions": [{
-    "question": "Which external design tools or docs should be referenced from the design tree?",
-    "header": "External Sources",
-    "options": [
-      {"label": "Figma", "description": "Component library or working files"},
-      {"label": "Storybook", "description": "Hosted component playground"},
-      {"label": "Design system docs", "description": "Wiki, Notion, dedicated site"},
-      {"label": "Brand guidelines", "description": "Visual language reference"},
-      {"label": "User research", "description": "Interview notes, usability tests"},
-      {"label": "Skip for now", "description": "Add later by editing design/sources.md"}
-    ],
-    "multiSelect": true
-  }]
-}
-```
-
-For each selected option, ask for the URL (plain text question allowed, since this is content, not scope). Record into `design/sources.md`.
-
-### Step 5b: Top-level `DESIGN.md`
+### Step 5: Top-level `DESIGN.md`
 
 `DESIGN.md` is a community convention (Google Stitch / awesome-design-md), not a Blueprint-owned format and not part of the Blueprint structure. Blueprint stays compatible with it: respects existing files, can scaffold a minimal stub, and avoids duplicating information that belongs there.
 
-If `DESIGN.md` already exists at the repo root: do NOT modify it. Note the file in `design/sources.md` so it's discoverable, and ensure the agent-instructions update in Step 7 includes "read DESIGN.md on UI work."
+If `DESIGN.md` already exists at the repo root: do NOT modify it. Ensure the agent-instructions update in Step 6 includes "read DESIGN.md on UI work."
 
 If `DESIGN.md` does not exist, ask once via `AskUserQuestion`:
 
@@ -221,12 +199,11 @@ If a Documentation table exists in CLAUDE.md, add the design tree rows. If not, 
 
 If `DESIGN.md` exists (or was just scaffolded), add a line to the pre-edit checklist for UI work: "Read `DESIGN.md` for cross-cutting design rules and prohibitions." This is what makes the file load-bearing — the doc says it should be consulted on every UI generation task.
 
-### Step 8: Report
+### Step 7: Report
 
 ```
 Design tree set up:
 - design/ux-decisions/         [N confirmed UX decisions, or "empty — populate with /blueprint:decide"]
-- design/sources.md            [N external sources recorded]
 - DESIGN.md (repo root)        [pre-existing | scaffolded stub | skipped]
 
 Existing-UI triage: [skipped | N candidates surfaced, M confirmed as deliberate, rest skipped]
@@ -236,39 +213,11 @@ Updated CLAUDE.md (or AGENTS.md) with design tree references [and DESIGN.md read
 Next steps:
 - /blueprint:decide [topic]    Record a UX decision (skill triages tech vs UX)
 - Edit DESIGN.md conversationally as cross-cutting rules accumulate (or via /blueprint:decide)
-
-Run /blueprint:onboard-design again any time to add more sources to design/sources.md.
 ```
 
 ---
 
 ## Templates
-
-### design/sources.md
-
-```markdown
-# External Design Sources
-
-External design assets and documentation referenced by this design system. Update when new sources are added or removed.
-
-## Design Tools
-
-| Source | URL | Purpose |
-|--------|-----|---------|
-<!-- TODO: Add Figma / Sketch / Penpot / etc. or remove this table -->
-
-## Documentation
-
-| Source | URL | Purpose |
-|--------|-----|---------|
-<!-- TODO: Add design system docs, brand guidelines, etc. -->
-
-## Research
-
-| Source | URL | Purpose |
-|--------|-----|---------|
-<!-- TODO: Add user research repos, usability test logs, etc. -->
-```
 
 ### Other templates
 
@@ -283,7 +232,6 @@ External design assets and documentation referenced by this design system. Updat
 
 Running this skill again on a repo that already has `design/`:
 - Does NOT recreate or overwrite existing files (including `DESIGN.md` if it already exists)
-- DOES add new sources to `design/sources.md`
 - DOES NOT modify existing UX decisions; it may create new Draft UX decisions only from freshly confirmed triage candidates
 - MAY offer fresh existing-UI triage candidates if new UI areas have appeared since the last run, but never re-asks about UI already covered by an existing UX decision
 - MAY offer to scaffold `DESIGN.md` if it still doesn't exist and the user previously skipped

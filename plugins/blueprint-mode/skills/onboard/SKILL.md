@@ -95,9 +95,9 @@ Specs:
 [If UI signals detected:]
 Design tree NOT created here. UI signals detected ([signal summary]).
 Run /blueprint:onboard-design after this to opt in to design intent capture
-(it scaffolds the design tree, can scaffold DESIGN.md, captures Figma/Storybook
-references, and can optionally surface a small number of candidate UX decisions
-found in existing UI for confirmation).
+(it scaffolds the design tree, can scaffold DESIGN.md, and can optionally
+surface a small number of candidate UX decisions found in existing UI
+for confirmation).
 
 [Call ExitPlanMode to proceed]
 ```
@@ -242,8 +242,8 @@ TBD sections can be refined by running this skill again.
 [If UI signals were detected:]
 UI signals detected ([summary]). The design tree is opt-in.
 Run /blueprint:onboard-design to set it up — it scaffolds the design tree,
-can scaffold DESIGN.md, records Figma / Storybook / docs URLs, and can
-optionally surface candidate UX decisions from existing UI for confirmation.
+can scaffold DESIGN.md, and can optionally surface candidate UX decisions
+from existing UI for confirmation.
 ```
 
 ## If Structure Already Exists

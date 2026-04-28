@@ -78,10 +78,9 @@ Blueprint splits owned artifacts into two strictly separate trees. `DESIGN.md` i
 
 | Directory | Purpose |
 |-----------|---------|
-| `design/sources.md` | External design sources (Figma, Storybook, docs URLs) |
 | `design/ux-decisions/` | UX decisions (UX-NNN) - the "why" behind UX/design choices |
 
-The design tree is **not** auto-created. Run `/blueprint:onboard-design` once if you want it; the skill scaffolds the directories, records external Figma/Storybook references, and can optionally surface a small number of candidate UX decisions found in existing UI/code for the user, developer, or designer to confirm. Existing code is only a prompt for the conversation; capture the why only when a human states it. Anything not covered there is captured later, on demand, via `/blueprint:decide`.
+The design tree is **not** auto-created. Run `/blueprint:onboard-design` once if you want it; the skill scaffolds the directories and can optionally surface a small number of candidate UX decisions found in existing UI/code for the user, developer, or designer to confirm. Existing code is only a prompt for the conversation; capture the why only when a human states it. Anything not covered there is captured later, on demand, via `/blueprint:decide`.
 
 See [docs/specs/boundaries.md](docs/specs/boundaries.md) for agent guardrails (Always/Ask/Never rules).
 

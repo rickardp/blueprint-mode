@@ -127,7 +127,6 @@ patterns/                   # Pattern examples and anti-patterns (any subject)
     └── anti-patterns.md    # Anti-patterns to avoid
 
 design/                     # DESIGN / UX TREE — OPT-IN, set up by /blueprint:onboard-design
-├── sources.md              # External design sources (Figma, Storybook, docs URLs)
 └── ux-decisions/
     └── NNN-[slug].md       # UX decisions (discovered via globbing)
 
@@ -797,7 +796,6 @@ Blueprint splits owned artifacts into two strictly separate trees. `DESIGN.md` i
 
 | Directory | Purpose |
 |-----------|---------|
-| `design/sources.md` | External design sources (Figma, Storybook, docs URLs) |
 | `design/ux-decisions/` | UX decisions (UX-NNN) - the "why" behind UX/design choices |
 
 See [docs/specs/boundaries.md](docs/specs/boundaries.md) for agent guardrails (Always/Ask/Never rules).
@@ -979,7 +977,6 @@ Code / architecture tree (engineering audience):
 
 Design / UX tree (design audience):
 - `design/ux-decisions/NNN-*.md` - UX decisions (discovered via globbing)
-- `design/sources.md` - External Figma / Storybook / docs URLs
 ```
 
 ---

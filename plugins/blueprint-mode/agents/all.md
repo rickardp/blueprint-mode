@@ -370,7 +370,6 @@ patterns/                      # Pattern examples and anti-patterns (any subject
     └── anti-patterns.md
 
 design/                        # DESIGN / UX TREE — OPT-IN, created by /blueprint:onboard-design
-├── sources.md                  # External design sources (Figma, Storybook, docs URLs)
 └── ux-decisions/
     └── NNN-[slug].md
 

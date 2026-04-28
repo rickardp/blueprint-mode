@@ -25,7 +25,6 @@ DESIGN.md                           - Top-level design context: cross-cutting UI
 
 **Design / UX tree (OPT-IN — only present if `/blueprint:onboard-design` was run):**
 ```
-design/sources.md                  - External design sources (Figma, Storybook, docs URLs)
 design/ux-decisions/NNN-[slug].md  - UX decisions (UX-NNN) — WHY behind UX choices
 ```
 

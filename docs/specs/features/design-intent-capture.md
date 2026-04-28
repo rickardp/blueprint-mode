@@ -45,7 +45,7 @@ Blueprint Mode helps teams distinguish deliberate UX/design choices from expedie
 | `/blueprint:decide`, `/blueprint:capture`, `/blueprint:status`, and `/blueprint:validate` treat `DESIGN.md` as a first-class repo artifact | Done |
 
 **Open questions:**
-- Whether design intent candidates should later be detected from visual diffs, Storybook stories, or code heuristics.
+- Whether design intent candidates should later be detected from visual diffs or code heuristics.
 - Whether a parallel `// ADR-TBD:` flag is worth introducing for symmetry, or whether architecture's "deliberate vs coincidental" question is already adequately served by ADRs alone.
 
 **Constraints:**

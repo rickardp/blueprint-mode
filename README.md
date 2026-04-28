@@ -110,7 +110,7 @@ plugin-bundled surface.
 |---------|---------|
 | `/blueprint:setup-repo` | Set up new repository with spec structure |
 | `/blueprint:onboard` | Add spec structure to existing codebase (code/architecture tree only) |
-| `/blueprint:onboard-design` | Opt in to design intent capture — scaffolds `design/ux-decisions/` and `design/sources.md`, can scaffold `DESIGN.md`, records Figma/Storybook URLs, and can optionally surface candidate UX decisions from existing UI for confirmation |
+| `/blueprint:onboard-design` | Opt in to design intent capture — scaffolds `design/ux-decisions/`, can scaffold `DESIGN.md`, and can optionally surface candidate UX decisions from existing UI for confirmation |
 | `/blueprint:require` | Add functional or non-functional requirements |
 | `/blueprint:decide` | Record decisions — triages tech (ADRs), UX decisions, and cross-cutting `DESIGN.md` rules |
 | `/blueprint:good-pattern` | Capture approved patterns (any subject — code, schema, UI) |
@@ -167,7 +167,6 @@ project/
 │   └── bad/
 │       └── anti-patterns.md       # Anti-patterns to avoid
 ├── design/                        # DESIGN / UX TREE (OPT-IN — created by /blueprint:onboard-design)
-│   ├── sources.md                 # External design sources (Figma, Storybook, docs URLs)
 │   └── ux-decisions/
 │       └── NNN-[slug].md          # UX decisions (UX-NNN), independent numbering
 └── CLAUDE.md                      # AI agent instructions
@@ -175,7 +174,7 @@ project/
 
 **Tree separation is strict.** UX decisions are NOT ADRs — they live in their own tree with independent numbering even though the document shape is similar.
 
-**The design tree is opt-in.** `/blueprint:onboard` only sets up the code/architecture tree. To capture UX decisions, run `/blueprint:onboard-design` separately — it scaffolds the directories, records external Figma/Storybook references, and can optionally surface a small number of candidate UX choices found in existing UI/code for the user, developer, or designer to confirm. Existing code is only a prompt for the conversation; Blueprint captures the why only when a human states it. Anything not covered there is captured later, on demand, via `/blueprint:decide`.
+**The design tree is opt-in.** `/blueprint:onboard` only sets up the code/architecture tree. To capture UX decisions, run `/blueprint:onboard-design` separately — it scaffolds the directories and can optionally surface a small number of candidate UX choices found in existing UI/code for the user, developer, or designer to confirm. Existing code is only a prompt for the conversation; Blueprint captures the why only when a human states it. Anything not covered there is captured later, on demand, via `/blueprint:decide`.
 
 **Deliberate vs coincidental UI.** The repo gives agents the same "is this deliberate?" coverage that ADRs give for architecture. Three layers answer the question for UI: `DESIGN.md` (cross-cutting design rules), `design/ux-decisions/` (per-decision rationale), and `// UX-TBD: [what's unclear]` comments to flag UI that has no governing decision yet — without inventing rationale. Documented UX decisions mean "this was intentional." Undocumented UI code is just implementation state; agents should not infer design rationale from it.
 

@@ -83,7 +83,6 @@ Important adjacent design context:
 
 Design / UX tree:
 - `design/ux-decisions/*.md` - UX decisions (discovered via globbing)
-- `design/sources.md` - external design sources (Figma, Storybook, docs URLs)
 
 Other:
 - `CLAUDE.md` - Agent instructions
