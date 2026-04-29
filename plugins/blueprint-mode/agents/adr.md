@@ -19,6 +19,8 @@ UX decisions mean a UI choice is deliberate. Do not infer UX rationale from curr
 - Warn the user that the design tree isn't set up and offer `/blueprint:onboard-design`.
 - If they decline and want to proceed: file as ADR with a Context note that this contains UX rationale and may need to move later via `/blueprint:supersede`.
 
+**Stay quiet about the design tree when it isn't relevant.** Only surface the design-tree warning above when the input actually has UX/design signals. If the input is unambiguously architectural (tech, library, infra, code-level pattern) and the repo has neither `design/` nor `DESIGN.md`, do NOT narrate "no design tree → ADR" or similar — just create the ADR. Design triage is noise in repos where design isn't in scope.
+
 **Triage signals:**
 - Tech choice, library, runtime/framework/database, infra, code pattern → ADR
 - User flow, modal vs page, copy/voice, interaction model, layout, motion, a11y trade-off → UX decision (only when `design/` exists)

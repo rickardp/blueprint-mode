@@ -58,7 +58,7 @@ allowed-tools:
    | Anti-pattern identified (any subject) | `patterns/bad/anti-patterns.md` | Append section |
    | Open question resolved | Existing spec / ADR / UX decision | Remove TODO, fill in answer |
 
-7. **Preview** — Show the user what will be captured before writing. If design content was scanned but skipped due to missing tree, list those skipped items separately:
+7. **Preview** — Show the user what will be captured before writing. If design content was scanned but skipped due to missing tree, list those skipped items separately. **Only show the "Skipped" block when at least one design item was actually scanned and skipped** — if the conversation had no UX/design content, omit it entirely (don't narrate design-tree absence as a reason for not capturing things that were never there):
    ```
    Found N items to capture:
 

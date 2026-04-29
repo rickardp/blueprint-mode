@@ -32,6 +32,19 @@ allowed-tools:
 8. **Create** file(s) per concern type
 9. **Report** what was created and where
 
+### Quiet on design when irrelevant
+
+Do NOT narrate design triage, design-tree absence, or "no design tree" reasoning when **both** of the following hold:
+
+- The input is unambiguously architectural (tech choice, library, infra, runtime/framework/database, code-level pattern, "[X] over [Y]" technical) — i.e. it has no UX/design signals from the Classification table.
+- Neither `design/` nor `DESIGN.md` exists in the repo.
+
+In that case, skip steps 2 and 4 in your user-visible output entirely. Just create the ADR and report it. Phrases like "Pure architectural decision, no design tree → ADR-NNN", "design tree not set up", or "filing as ADR since no design exists" are noise here — the design machinery is irrelevant to a backend/library/CLI repo deciding on a database.
+
+Surface design-related triage only when:
+- The input has UX/design signals (then handle per "Strong UX Signal Without Tree"), **or**
+- The repo has `design/` or `DESIGN.md` (then triage between trees is meaningful).
+
 ## Classification
 
 Before creating files, classify each distinct concern in the input:

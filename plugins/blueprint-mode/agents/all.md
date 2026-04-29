@@ -23,6 +23,8 @@ You are creating a complete Blueprint structure. You must follow the EXACT forma
 
 **DESIGN TREE IS OPT-IN.** The `design/` tree only exists if `/blueprint:onboard-design` has been run. Always check whether `design/ux-decisions/` exists before producing files in it. If a user asks for a UX decision in a repo without the design tree, suggest `/blueprint:onboard-design` first — do NOT silently scaffold it from another skill.
 
+**Stay quiet about design when it isn't relevant.** Only narrate design triage, design-tree absence, or `DESIGN.md` options when the input has UX/design signals OR the repo already has `design/` or `DESIGN.md`. For unambiguously architectural input in a repo with no design surface, just create the ADR — phrases like "no design tree → ADR" are noise.
+
 **DELIBERATE VS COINCIDENTAL UI:** `DESIGN.md` and UX decisions record confirmed design intent. Current UI code by itself is not proof that a design choice was deliberate.
 
 **DESIGN.md VS UX DECISIONS:** Cross-cutting rules and prohibitions go in repo-root `DESIGN.md`. Per-context choices with alternatives considered go in `design/ux-decisions/`. Do not duplicate a broad `DESIGN.md` rule into a UX decision; reference it instead.
