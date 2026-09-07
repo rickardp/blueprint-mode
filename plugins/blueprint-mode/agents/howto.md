@@ -13,7 +13,7 @@ docs/specs/tech-stack.md       - Technology choices with rationale
 docs/specs/boundaries.md       - Agent guardrails: Always / Ask First / Never Do
 docs/specs/features/*.md       - Feature specifications (status, module, related_adrs)
 docs/specs/non-functional/*.md - Performance, security, scalability requirements
-docs/adrs/NNN-[slug].md        - Architecture Decision Records (WHY behind tech choices)
+docs/adrs/NNN-[slug].md        - Architecture Decision Records (WHY behind tech choices; slug tracks current title)
 patterns/good/*.[ext]          - Approved examples
 patterns/bad/anti-patterns.md  - Code anti-patterns (with severity)
 ```
@@ -25,7 +25,7 @@ DESIGN.md                           - Top-level design context: cross-cutting UI
 
 **Design / UX tree (OPT-IN — only present if `/blueprint:onboard-design` was run):**
 ```
-design/ux-decisions/NNN-[slug].md  - UX decisions (UX-NNN) — WHY behind UX choices
+design/ux-decisions/NNN-[slug].md  - UX decisions (UX-NNN) — WHY behind UX choices; slug tracks current title
 ```
 
 **The design tree is opt-in.** Many repos (backend services, libraries, CLIs) will not have it. Always check whether `design/ux-decisions/` exists before assuming UX decisions can be filed there. If it doesn't exist and the user wants to record a UX decision, point them to `/blueprint:onboard-design`.

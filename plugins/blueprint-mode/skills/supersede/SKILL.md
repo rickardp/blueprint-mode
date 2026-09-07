@@ -27,6 +27,7 @@ Replace a previous decision with a new one, or deprecate it entirely. Works for 
 3. **History preserved**: Old decisions are updated, never deleted
 4. **Use globbing**: Find decisions via file system, no index needed
 5. **Stay in tree**: Replacements are filed in the **same tree** as the original (ADRs don't supersede UX decisions and vice versa)
+6. **Keep filenames current**: Decision file slugs track their current titles. If a title change makes the slug stale, rename the file and update all in-repo references to the old path.
 
 **TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for all structured questions.**
 When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool - invoke it, don't output the JSON as text or rephrase as plain text questions.
@@ -119,6 +120,8 @@ date: [original date]
 superseded_by: NNN-new-decision
 ---
 ```
+
+If revising the old decision title while marking it Superseded makes the slug stale, rename the old file to match the revised title and update every in-repo reference to the previous filename. Do not keep a stale slug just to avoid a rename.
 
 ## New Decision Template (for replacement)
 

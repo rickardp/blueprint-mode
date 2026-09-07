@@ -175,9 +175,12 @@ We chose **[CHOICE]** because [primary motivation].
 **Validation checklist before writing ADR:**
 - [ ] Has YAML frontmatter with `status:` and `date:`
 - [ ] Title format: `# ADR-NNN: [Choice] as [CATEGORY]`
+- [ ] Filename is `NNN-[slug].md` and the slug matches the current title
 - [ ] Has `## Options Considered` section
 - [ ] Uses `**Positive:**` and `**Negative:**` (not Benefits/Trade-offs)
 - [ ] Ends with `## Related` (not References)
+
+**Filename/title sync:** ADR filenames must track the current title. If an ADR title change during onboarding or cleanup makes the slug stale, rename the file and update all in-repo references to the old path.
 
 ### Other Templates
 

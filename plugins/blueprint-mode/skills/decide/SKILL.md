@@ -222,6 +222,14 @@ ADR and UX decision numbers are **independent**. Get the next number by globbing
 - ADRs: `docs/adrs/*.md` → next number after the highest
 - UX decisions: `design/ux-decisions/*.md` → next number after the highest
 
+### Filename/Title Sync
+
+Decision filenames must stay in sync with their current title:
+- ADRs: `docs/adrs/NNN-[slug-from-current-title].md`
+- UX decisions: `design/ux-decisions/NNN-[slug-from-current-title].md`
+
+When creating a decision, derive a descriptive slug from the title; it need not repeat every word. When updating an existing decision title, rename the file if the old slug no longer describes it. Keep the same decision number and tree. Search the repo for the old basename and extensionless stem as well as the full path. Update references that resolve to this decision, including relative Markdown links, `superseded_by` values, spec references, pattern headers, and agent instructions. Preserve number-only references (`ADR-NNN`, `UX-NNN`, `related_adrs`) and references to other decisions in the other tree. Verify the updated references resolve to the renamed file.
+
 ### Format Enforcement (CRITICAL)
 
 **MANDATORY:** Use the exact format above. DO NOT deviate.
@@ -235,8 +243,9 @@ ADR and UX decision numbers are **independent**. Get the next number by globbing
 | Filing UX decision in `docs/adrs/` | File in `design/ux-decisions/` |
 | `# ADR-NNN` for a UX decision | `# UX-NNN` |
 | `# UX-NNN` for an architectural decision | `# ADR-NNN` |
+| Title changed so the slug is stale, but old filename kept | Rename the file and update in-repo references |
 
-**Before writing:** Verify YAML frontmatter, title format (ADR-NNN vs UX-NNN), destination tree, and all sections match the template.
+**Before writing:** Verify YAML frontmatter, title format (ADR-NNN vs UX-NNN), destination tree, filename/title sync, and all sections match the template.
 
 ## Output
 

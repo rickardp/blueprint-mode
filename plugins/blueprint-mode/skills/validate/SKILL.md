@@ -192,7 +192,11 @@ Prompt must instruct the agent to:
 5. Cross-reference against UX decisions: Grep for UI patterns that contradict an Active UX decision.
 6. Cross-reference against deprecated features: Grep for references to Deprecated features as if active.
 7. Flag stale instructions in CLAUDE.md/AGENTS.md — these are **High severity** because agents follow them directly.
-8. **Content classification audit** — check if information is in the wrong document type or wrong tree:
+8. **Decision file integrity audit** — for `docs/adrs/*.md` and `design/ux-decisions/*.md`:
+   - Compare the filename number and slug to the H1 title. Flag mismatched numbers as **High** severity. Flag slugs that no longer describe the title as **Low** severity; descriptive abbreviations are valid. Suggest renaming a stale slug while preserving the decision number and tree.
+   - Independently check in-repo references to decision files, even when all current filenames match their titles. Resolve relative links from the referring file and extensionless `superseded_by` values within the referring decision's tree. Flag references to missing decision files as **Medium** severity. Suggest updating the broken reference to the intended decision's current filename, without renaming a file whose slug already describes its title.
+   - For any suggested rename, search for the old basename, extensionless stem, and full path, and suggest updating only references to that decision. Preserve number-only references and references to other decisions in the other tree. A stale slug whose links still resolve remains **Low** severity.
+9. **Content classification audit** — check if information is in the wrong document type or wrong tree:
    - ADRs containing functional requirements (user stories, feature behaviors, UI specs) → should be in `docs/specs/features/`
    - ADRs containing NFR targets (latency metrics, uptime SLAs, scalability numbers) → should be in `docs/specs/non-functional/`
    - ADRs containing UX rationale (modal vs page, copy/voice, interaction model) → should be in `design/ux-decisions/`
@@ -263,8 +267,8 @@ Present findings in a unified report ranked by severity:
 |----------|-------------|
 | Critical | Security vulnerabilities, boundary "Never Do" violations, secrets in config |
 | High | Tech stack mismatches, stale agent instructions (CLAUDE.md), ADR violations |
-| Medium | Pattern inconsistencies, undeclared dependencies, doc drift in guides, misclassified content (e.g., requirements in ADRs, architectural decisions in feature specs), ADR-only features lacking a feature spec, missing NFR categories (when infra exists) |
-| Low | Style preferences, minor terminology drift, missing test coverage, incomplete feature spec sections (TBD markers), missing NFR categories (small codebase) |
+| Medium | Pattern inconsistencies, undeclared dependencies, doc drift in guides, misclassified content (e.g., requirements in ADRs, architectural decisions in feature specs), stale decision filename references, ADR-only features lacking a feature spec, missing NFR categories (when infra exists) |
+| Low | Style preferences, minor terminology drift, stale decision filename slugs, missing test coverage, incomplete feature spec sections (TBD markers), missing NFR categories (small codebase) |
 
 **Report format:**
 ```markdown
@@ -294,6 +298,13 @@ Present findings in a unified report ranked by severity:
 | File | Issue | Severity | Blueprint Source |
 |------|-------|----------|-----------------|
 | ... | ... | ... | ... |
+
+### Decision File Integrity
+| File | Issue | Suggested Fix | Severity |
+|------|-------|---------------|----------|
+| ... | Filename slug does not match title | Rename file and update in-repo references | Low |
+| ... | Reference points to a missing decision file | Update reference to the intended decision's current filename | Medium |
+| ... | Filename number differs from H1 number | Reconcile with the decision's established identity and references | High |
 
 ### Content Classification
 | File | Misplaced Content | Should Be In | Severity |

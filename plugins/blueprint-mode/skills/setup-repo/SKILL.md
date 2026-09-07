@@ -205,6 +205,8 @@ _(Say 'create now' anytime - I'll infer defaults for anything not specified)_"
 
 ### ADR Template (inline for non-interactive execution)
 
+Name ADR files `docs/adrs/NNN-[slug-from-current-title].md`. If a generated ADR title change before delivery makes the slug stale, rename the file to match and update all in-repo references to the old path.
+
 ```markdown
 ---
 status: Active
