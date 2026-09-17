@@ -20,7 +20,7 @@ Create the full structure in one pass; the invocation is the scope. Formats and 
    - The agent instructions section from `agent-instructions`, with the Autonomy and limits lines filled from `boundaries.md` and the good-pattern names filled from `patterns/good/`. Omit the `DESIGN.md` and `design/` lines unless those exist. Replace 1.x-generated sections as `agent-file-detection` describes; preserve unrelated content.
 4. Ask one batched question covering every technology whose rationale is missing (likely options plus skip) and, if the README does not say, who the users are. Upgrade the answered Draft ADRs to Active.
 5. Report existing docs that duplicate rationale now living in ADRs, and long inline comments that explain a decision; do not edit source files.
-6. When the structure already exists: create only what is missing, refine Draft ADRs whose rationale is now known, add `maturity` and Implementation State to feature specs that lack them, and migrate a 1.x `boundaries.md` as the `boundaries` template describes.
+6. When the structure already exists: create only what is missing, refine Draft ADRs whose rationale is now known, add `maturity` and Implementation State to feature specs that lack them, and migrate a 1.x `boundaries.md` as the `boundaries` template describes. Refresh the scoped-boundaries routing line per `agent-instructions` after updating boundaries, including in 2.x agent files.
 7. Do not create `design/` or `DESIGN.md`. If the repo has UI code, mention `/blueprint-mode:onboard-design` in the report.
 
 ## Output

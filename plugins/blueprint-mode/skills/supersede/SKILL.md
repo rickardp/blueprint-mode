@@ -20,7 +20,7 @@ Replacements stay in the same tree as the original: ADRs replace ADRs in `docs/a
 4. Deprecation:
    - Set frontmatter to `status: Deprecated`, `deprecated_date: [TODAY]`, `deprecated_reason: [reason]` (default "No longer needed"), and add a `> **Deprecated on [TODAY]:** [reason]` note under the title.
    - Locate code that implements the retired decision and list it in the report.
-5. Search the codebase for references to the old decision (`ADR-NNN`, `UX-NNN`, the filename). If none exist, delete the old file, write the Supersedes line as plain text (`Supersedes: ADR-OLD, deleted; see git history`), and say so. If references exist, list them and keep the file.
+5. Search the repo for references to the old decision (`ADR-NNN`, `UX-NNN`, its filename, its extensionless stem), then discount the ones this skill just wrote or is about to remove: the old file's own title and frontmatter, and the replacement's Context and `Supersedes:` references to it. If nothing else refers to it, delete the old file, rewrite the Supersedes line as plain text (`Supersedes: ADR-OLD, deleted; see git history`), and say so. If code, specs, patterns, agent instructions, or another decision still refer to it, list those and keep the file.
 6. If a retitle made a filename slug stale, rename the file and update references as the template describes.
 
 ## Output

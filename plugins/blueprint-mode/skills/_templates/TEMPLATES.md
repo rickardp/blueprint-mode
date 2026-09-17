@@ -255,7 +255,17 @@ Boundaries tell an agent where it has autonomy, where to check in, and what is o
 - [Module-specific rule]
 ```
 
-A file written by Blueprint 1.x has `## Always Do` instead of `## Safe Without Asking`, and it holds obligations ("read ADRs before implementing", "run quality commands before commits") rather than grants. When migrating, drop the pre-read obligations (agent instructions now route conditionally), move command obligations to the agent instructions, and keep only true autonomy grants under the new heading.
+A file written by Blueprint 1.x has `## Always Do` instead of `## Safe Without Asking`, and it holds obligations ("read ADRs before implementing", "run quality commands before commits") rather than grants. Migrate it bullet by bullet, and drop nothing the team wrote without saying so:
+
+- Pre-read obligations ("read ADRs before implementing", "use patterns from `patterns/good/`"): drop. The agent instructions route to those files conditionally now.
+- Command obligations ("run quality commands before commits"): move to the Commands section of the agent instructions.
+- Anything the `agent-instructions` template already states, such as linking code to a decision with a one-line comment: drop as redundant.
+- Autonomy grants: keep under `## Safe Without Asking`.
+- Everything else is a project requirement the team chose and it keeps a home. A path-specific one ("use tenant-scoped queries under `src/billing/`") becomes a bullet under `## Scoped Rules` for that path. A cross-cutting one ("use tenant-scoped queries for customer data") goes in the agent instructions, under Where intent lives when it is a routing rule and under Autonomy and limits when it constrains what may be done; a measurable one becomes an NFR in `docs/specs/non-functional/`.
+
+Report where each moved rule landed.
+
+When adding, renaming, or removing scoped paths, refresh the compact routing line in the agent instructions per `agent-instructions` and `agent-file-detection`. Keep scoped rule contents here.
 
 ---
 
@@ -436,6 +446,8 @@ Severity: Critical (security, data loss, accessibility failures), High (performa
 
 The generated file routes an agent to the right document at the right moment and carries the few rules that must be known before any work. It does not demand reading everything before every edit; that burns context and slows work. Keep it under 60 lines. Fill the bracketed parts from the repo at generation time. Include the design lines only when `DESIGN.md` or `design/` exists.
 
+Fill the single scoped-boundaries line with the paths under `Scoped Rules` in `boundaries.md`, preserving their scope and listing each once. Omit empty or placeholder sections; omit the entire line if none remain. Include only paths in the line, not rule contents. Refresh this line when regenerating instructions, including on reruns.
+
 ```markdown
 # Agent Instructions for [PROJECT_NAME]
 
@@ -448,6 +460,7 @@ Code shows what the system does. These files record why, so deliberate choices c
 - `docs/adrs/` records architecture decisions. Read the relevant ADR when a change touches a documented choice; feature specs list theirs in `related_adrs`. If code contradicts an Active decision, say so before following either.
 - `docs/specs/features/` holds feature specs. Read one when implementing or changing that feature.
 - `docs/specs/boundaries.md` has the full list of what is safe, what to ask about, and what is never done, including module-scoped rules.
+- Scoped boundaries apply to [SCOPED_PATHS]. Before editing those paths, read only the matching sections in `docs/specs/boundaries.md`.
 - `patterns/good/` holds examples to follow: [list the files present, e.g. `repository.ts`, `api-handler.ts`]. `patterns/bad/anti-patterns.md` lists what to avoid. Check them when writing similar code.
 - `DESIGN.md` holds cross-cutting design rules. Read it for any UI work.
 - `design/ux-decisions/` records UX decisions. Read the relevant one when changing the affected surface. UX rationale goes there, never under `docs/adrs/`.

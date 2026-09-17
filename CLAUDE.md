@@ -7,6 +7,7 @@ Blueprint Mode is a Claude Code and Codex plugin that makes a repo carry its own
 - `docs/adrs/` records the plugin's own architecture decisions. Read the relevant ADR when a change touches a documented choice; ADR-006 covers why there are no hooks and how skills are written.
 - `docs/specs/features/` holds feature specs. Read one when changing that feature.
 - `docs/specs/boundaries.md` says what is safe without asking, what to ask about, and what is never done. Read it before changing the plugin surface, manifests, or file formats.
+- Scoped boundaries apply to `plugins/blueprint-mode/skills/`. Before editing those paths, read only the matching sections in `docs/specs/boundaries.md`.
 - `patterns/bad/anti-patterns.md` lists mistakes specific to writing skills and agent instructions. Check it when editing a skill or the generated CLAUDE.md template.
 - `docs/specs/tech-stack.md` summarizes the stack.
 

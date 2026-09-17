@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Documented intent for AI-assisted development: ADRs, specs, patterns, requirements, and UX decisions",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -13,7 +13,7 @@
       "name": "blueprint-mode",
       "source": "./plugins/blueprint-mode",
       "description": "Documented intent for AI-assisted development: ADRs, specs, patterns, requirements, DESIGN.md, and a separate design tree for UX decisions",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "author": {
         "name": "rickardp"
       }
