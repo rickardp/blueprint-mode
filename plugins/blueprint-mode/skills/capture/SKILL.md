@@ -46,9 +46,9 @@ allowed-tools:
 
    | Type | Destination | Action |
    |------|-------------|--------|
-   | New architectural decision | `docs/adrs/NNN-slug.md` | Create Draft ADR |
+   | New architectural decision | `docs/adrs/NNN-[slug-from-current-title].md` | Create Draft ADR |
    | Refinement of existing ADR | Existing ADR | Update (add context, resolve TODOs, promote Draft→Active) |
-   | New UX decision | `design/ux-decisions/NNN-slug.md` | Create Draft UX decision |
+   | New UX decision | `design/ux-decisions/NNN-[slug-from-current-title].md` | Create Draft UX decision |
    | Refinement of existing UX decision | Existing UX decision | Update |
    | Cross-cutting design rule | `DESIGN.md` | Append or update the relevant short section |
    | New feature/requirement | `docs/specs/features/slug.md` | Create with maturity: Exploring |
@@ -85,6 +85,7 @@ allowed-tools:
 - **Code is not design rationale** — only capture UX intent when the conversation confirms why a UI choice is deliberate
 - **DESIGN.md is for broad rules** — put cross-cutting design rules there, not in UX decisions. Do not duplicate an existing DESIGN.md rule into a UX decision; reference it.
 - **Implementation State is first-class** — always update the Implementation State section of affected feature specs
+- **Decision filenames track titles** — when capture changes an ADR or UX decision title, rename the file if its slug no longer describes the title, keeping the same number and tree. Search for the old basename, extensionless stem, and full path; update references to this decision (including relative links and `superseded_by`) and verify they resolve. Preserve number-only references and references to other decisions in the other tree.
 
 ## Output
 

@@ -8,7 +8,7 @@ You are creating a complete Blueprint structure. You must follow the EXACT forma
 
 | Document | Location | Format Reference |
 |----------|----------|------------------|
-| ADR | `docs/adrs/NNN-slug.md` | See ADR Format below |
+| ADR | `docs/adrs/NNN-[slug-from-current-title].md` | See ADR Format below |
 | Feature Spec | `docs/specs/features/name.md` | See Feature Spec Format below |
 | NFR | `docs/specs/non-functional/category.md` | See NFR Format below |
 | Boundaries | `docs/specs/boundaries.md` | See Boundaries Format below |
@@ -17,7 +17,7 @@ You are creating a complete Blueprint structure. You must follow the EXACT forma
 | Good Pattern | `patterns/good/name.ext` | See Good Pattern Format below |
 | Anti-Pattern | `patterns/bad/anti-patterns.md` | See Anti-Pattern Format below |
 | Design Context | `DESIGN.md` | Important adjacent repo file for cross-cutting UI rules; not part of the Blueprint structure |
-| UX Decision | `design/ux-decisions/NNN-slug.md` | See UX Decision Format below |
+| UX Decision | `design/ux-decisions/NNN-[slug-from-current-title].md` | See UX Decision Format below |
 
 **TREE SEPARATION (CRITICAL):** `docs/**` and `patterns/**` are the engineering tree. `design/**` is the design tree. They are NEVER interchangeable — different reviewers own each. UX decisions are NOT ADRs (separate file tree, separate numbering, separate audience).
 
@@ -76,6 +76,8 @@ We chose **[CHOICE]** because [rationale].
 - `## References` (use `## Related`)
 
 **Cleanup:** Delete Superseded/Deprecated ADRs when no code references them. Git history is the archive.
+
+**Filename/title sync (ADRs and UX decisions):** The slug must describe the current title; it need not repeat every word. If a title change makes the slug stale, rename the file, keeping the same decision number and tree. Search for the old basename, extensionless stem, and full path; update references to this decision, including relative links and `superseded_by` values, and verify they resolve. Preserve number-only references and references to other decisions in the other tree.
 
 ---
 
@@ -264,7 +266,7 @@ See `docs/specs/features/` for detailed specifications.
 
 ## UX DECISION FORMAT
 
-UX decisions live in `design/ux-decisions/NNN-slug.md`. Same structural shape as ADR but **never** filed in `docs/adrs/`. Title uses `UX-NNN`, not `ADR-NNN`. Create them when a user, designer, or source material confirms per-context design rationale with alternatives considered. Cross-cutting rules belong in `DESIGN.md` instead.
+UX decisions live in `design/ux-decisions/NNN-[slug-from-current-title].md`. Same structural shape as ADR but **never** filed in `docs/adrs/`. Title uses `UX-NNN`, not `ADR-NNN`. Create them when a user, designer, or source material confirms per-context design rationale with alternatives considered. Cross-cutting rules belong in `DESIGN.md` instead. If a title change makes the slug stale, rename the file and update every in-repo reference to the old path.
 
 ```markdown
 ---

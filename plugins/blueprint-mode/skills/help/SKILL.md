@@ -270,6 +270,8 @@ ADRs can be:
 - **Superseded** - Replaced by a newer decision
 - **Deprecated** - Retired without replacement
 
+ADR filenames use `docs/adrs/NNN-[slug].md`, and the slug should track the current title. If retitling an ADR makes its slug stale, rename the file and update in-repo references to the old filename.
+
 ### ADR Structure
 
 ```markdown

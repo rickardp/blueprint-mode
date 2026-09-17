@@ -455,6 +455,8 @@ To list all ADRs, read files in `docs/adrs/*.md` and check the `status` field in
 
 ADRs are meant to evolve. Start as Draft and iterate toward Active — don't wait for a perfect decision before writing it down.
 
+The filename slug must describe the current title; it need not repeat every word. If the title changes so the slug no longer describes it, rename the ADR file to `NNN-[slug-from-current-title].md`, keeping its number and tree. Search for the old basename, extensionless stem, and full path; update references to this decision, including relative links and `superseded_by` values, and verify they resolve. Preserve number-only references and references to other decisions in the other tree.
+
 ADR statuses:
 - **Draft**: Emerging decision. Has TODO markers, options may still be open. Iterate freely.
 - **Active**: Decision is settled and being followed.
@@ -532,7 +534,7 @@ We chose **[CHOICE]** because [primary motivation].
 
 ### Refining Draft ADRs
 
-To complete a Draft ADR: fill in the `<!-- TODO: -->` sections, then change `status: Draft` to `status: Active` in the frontmatter.
+To complete a Draft ADR: fill in the `<!-- TODO: -->` sections, then change `status: Draft` to `status: Active` in the frontmatter. If refinement makes the filename slug stale, rename the file to match the new title and update all in-repo references to the old filename.
 
 ---
 
@@ -565,6 +567,8 @@ UX decisions document **why** a design/UX choice was made. Same shape as ADRs (C
 **Reference style:** `UX-NNN` (e.g. `UX-007`) — parallel to `ADR-NNN`, never conflated.
 
 UX decisions are discovered via globbing `design/ux-decisions/*.md`. Status from frontmatter `status:` field.
+
+The filename slug must describe the current title; it need not repeat every word. If the title changes so the slug no longer describes it, rename the UX decision file to `NNN-[slug-from-current-title].md`, keeping its number and tree. Search for the old basename, extensionless stem, and full path; update references to this decision, including relative links and `superseded_by` values, and verify they resolve. Preserve number-only references and references to other decisions in the other tree.
 
 ### Status Values
 
@@ -837,6 +841,8 @@ This section explains how to create and update documentation without any plugins
 ### Adding a New ADR
 
 **Naming:** `docs/adrs/NNN-[slug].md` (e.g., `004-redis-caching.md`)
+
+**Keep filename and title synced:** The slug comes from the current ADR title. If a title change makes the slug stale, rename the ADR file and update all in-repo links or path references to the old filename.
 
 **Find next number:** Check existing files in `docs/adrs/` and use the next sequential number.
 

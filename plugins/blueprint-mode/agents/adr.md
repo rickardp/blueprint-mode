@@ -97,6 +97,7 @@ Only these status values are valid:
 
 - [ ] YAML frontmatter starts with `---` and has `status:` and `date:`
 - [ ] Title format is `# ADR-NNN: [Descriptive Title]`
+- [ ] Filename is `NNN-[slug].md` and the slug matches the current title
 - [ ] NNN is zero-padded (001, 002, 003...)
 - [ ] Has `## Context` section
 - [ ] Has `## Options Considered` with at least 2 options
@@ -324,6 +325,8 @@ ADR titles should be descriptive and capture the decision. Examples:
 ## FILE NAMING
 
 ADR files MUST be named: `NNN-[slug].md`
+
+The slug MUST describe the current title; it need not repeat every word. If a title change makes the slug stale, rename the file, keeping the same decision number and tree. Search for the old basename, extensionless stem, and full path; update references to this decision, including relative links and `superseded_by` values, and verify they resolve. Preserve number-only references and references to other decisions in the other tree. Apply this rule to both ADRs and UX decisions.
 
 Examples:
 - `001-postgresql.md`
