@@ -46,7 +46,7 @@ Traditional spec-driven development introduces its own problems:
 ### AI Agents
 - Need clear rationale to make consistent implementation choices
 - Need to know what patterns to follow and avoid
-- Need boundaries (Always/Ask/Never rules) for autonomous operation
+- Need boundaries (Safe Without Asking / Ask First / Never Do rules) for autonomous operation
 
 ## Success Metrics
 
@@ -63,5 +63,5 @@ See `docs/specs/features/` for detailed feature specifications.
 
 ## Quality Standards
 
-- Run `/blueprint:validate` to check code against documented patterns, DESIGN.md, and decisions
+- Run `/blueprint-mode:validate` to check code against documented patterns, DESIGN.md, and decisions
 - Follow templates from `plugins/blueprint-mode/skills/_templates/TEMPLATES.md`

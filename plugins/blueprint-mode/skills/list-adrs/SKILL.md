@@ -1,147 +1,39 @@
 ---
-name: blueprint:list-adrs
-description: List all Architecture Decision Records with their status and summaries. Use when the user wants to see all decisions, review ADR history, or find a specific decision.
-argument-hint: "[filter: active|superseded|deprecated|draft|keyword]"
-allowed-tools:
-  - Glob
-  - Grep
-  - Read
+name: list-adrs
+description: List Architecture Decision Records grouped by status. Use when the user wants to see, filter, or search the ADRs.
+argument-hint: "[filter: active|draft|superseded|deprecated|keyword]"
+allowed-tools: Read, Glob, Grep
 ---
 
 # List ADRs
 
-Display all Architecture Decision Records with status and brief summaries.
+## Steps
 
-**Invoked by:** `/blueprint:list-adrs` or when user asks "list decisions", "show ADRs", "what decisions exist?".
+1. Glob `docs/adrs/*.md`. If empty, say so and suggest `/blueprint-mode:decide`.
+2. From each file read the number and slug from the filename, the title from the `# ADR-NNN:` heading, `status`, `date`, `superseded_by`, and `deprecated_reason` from frontmatter, and the first sentence of the Decision section.
+3. Apply the filter: a status word keeps that status; any other word searches titles and content.
+4. Group by status (Active, Draft, Superseded, Deprecated), newest first within a group. Hide empty groups except Active. For more than 20 ADRs, show counts first and details for the requested group.
 
-## Principles
-
-1. **Use globbing**: Find ADRs via `docs/adrs/*.md`, no index file needed
-2. **Parse frontmatter**: Extract status from each ADR file
-3. **Efficient batching**: For large sets, show summary first
-
-## Process
-
-### Step 1: Find ADRs
-
-**Tool Preferences:**
-- **Glob tool**: Find ADR files with `docs/adrs/*.md`
-- **Read tool**: Read individual ADR files for metadata
-
-```
-docs/adrs/*.md
-```
-
-**If no files found:**
-```
-No ADRs found.
-
-Use `/blueprint:decide` to record your first architecture decision.
-```
-
-### Step 2: Parse Each ADR
-
-For each ADR file, extract from frontmatter and content:
-
-| Field | Source |
-|-------|--------|
-| Number | From filename (e.g., `001-postgres.md` → 001) |
-| Title | From `# ADR-NNN: [Title]` heading |
-| Date | From frontmatter `date:` |
-| Status | From frontmatter `status:` (Active/Draft/Superseded/Deprecated) |
-| Summary | First sentence of "Decision" section (~60 chars) |
-| Superseded by | From frontmatter `superseded_by:` |
-| Deprecated reason | From frontmatter `deprecated_reason:` |
-
-### Step 3: Group by Status
-
-Group ADRs into sections:
-1. **Active** - Current decisions in effect
-2. **Draft** - Decisions with incomplete documentation
-3. **Superseded** - Decisions replaced by newer ones
-4. **Deprecated** - Decisions removed entirely
-
-### Step 4: Display Tables
-
-Sort by ADR number (newest first within each section).
+## Output
 
 ```markdown
 ## Architecture Decision Records
 
-### Active ([count])
-
+### Active (N)
 | # | Title | Date | Summary |
 |---|-------|------|---------|
-| 006 | Use Zod for validation | 2025-01-20 | Schema validation with TypeScript inference |
-| 005 | PostgreSQL for database | 2025-01-15 | ACID compliance, JSON support |
 
-### Draft ([count])
-
+### Draft (N)
 | # | Title | Date | Missing |
 |---|-------|------|---------|
-| 007 | Use Redis for sessions | 2025-01-22 | Context, Rationale |
 
-### Superseded ([count])
-
+### Superseded (N)
 | # | Title | Superseded By |
 |---|-------|---------------|
-| 002 | ESLint + Prettier | ADR-004 |
 
-### Deprecated ([count])
-
+### Deprecated (N)
 | # | Title | Date | Reason |
 |---|-------|------|--------|
-| 001 | Redis caching | 2025-01-25 | Caching removed |
-
----
-View full ADR: `docs/adrs/NNN-title.md`
 ```
 
-## Large ADR Sets (>20)
-
-For projects with many ADRs:
-
-1. **Show summary first:**
-   ```
-   Found 42 ADRs: 30 Active, 5 Draft, 5 Superseded, 2 Deprecated
-
-   View: all | active | draft | superseded | deprecated | [search term]
-   ```
-
-2. **Load details on demand** - only read full ADR content when user requests specific section or search
-
-## Empty Sections
-
-Hide section headers if count is 0, but always show Active:
-
-```markdown
-### Active (0)
-
-*No active decisions. Use `/blueprint:decide` to record one.*
-```
-
-## Filtering
-
-If user asks for specific filter:
-
-| Command | Action |
-|---------|--------|
-| `/blueprint:list-adrs active` | Show only Active |
-| `/blueprint:list-adrs draft` | Show only Draft (incomplete) |
-| `/blueprint:list-adrs database` | Search titles/content for "database" |
-
-## After Display
-
-Offer contextual actions based on what's shown:
-
-- Draft ADRs exist → "Complete drafts with `/blueprint:decide [topic]`"
-- Superseded/Deprecated ADRs with no code references → "Consider deleting - git history is the archive"
-- General → "Add decision: `/blueprint:decide [topic]`"
-
-## Examples
-
-- `/blueprint:list-adrs` → Full list grouped by status
-- `/blueprint:list-adrs active` → Only active decisions
-- `/blueprint:list-adrs draft` → Incomplete ADRs needing attention
-- "What decisions need work?" → Show Draft section
-- "Find ADRs about authentication" → Search filter
+Mention Draft ADRs that need completion and superseded ones with no code references that could be deleted.

@@ -7,9 +7,9 @@ date: 2026-04-21
 
 ## Context
 
-Blueprint Mode started as a Claude Code plugin because the initial team workflow relied on Claude's native plugin, skills, and hooks model.
+Blueprint Mode started as a Claude Code plugin because the initial team workflow relied on Claude's native plugin and skills model.
 
-As Codex plugin support matured, the repository needed a way to support both runtimes without introducing a second independently maintained Blueprint implementation. The existing Claude plugin tree already contains the authoritative `skills/`, `hooks/`, `agents/`, and templates used by Blueprint Mode.
+As Codex plugin support matured, the repository needed a way to support both runtimes without introducing a second independently maintained Blueprint implementation. The existing Claude plugin tree already contains the authoritative `skills/` and templates used by Blueprint Mode.
 
 We needed to choose how to package Blueprint for Codex while keeping Claude behavior stable.
 
@@ -28,7 +28,7 @@ We needed to choose how to package Blueprint for Codex while keeping Claude beha
 - Pro: Lets Codex try the existing skills before any runtime-specific split
 - Pro: Preserves the current repository structure
 - Con: Some skill text is Claude-shaped and may not be ideal for Codex
-- Con: Codex-specific hooks and UX may still need separate follow-up work
+- Con: Codex-specific UX may still need separate follow-up work
 
 ### Option 3: Generated runtime artifacts from a shared source model
 - Pro: Could produce runtime-specific outputs with less duplication
@@ -60,13 +60,9 @@ This keeps the current Claude plugin working as-is while testing the simplest po
 
 **Negative:**
 - Some shared skill text may be suboptimal for Codex
-- Codex-specific hook behavior remains a separate problem
-- Codex plugin packaging does not currently document plugin-bundled `agents/`, so `plugins/blueprint-mode/agents/` remains Claude-oriented reference material for now
 - We may still need to fork a subset of skills later if evidence shows meaningful Codex regressions
 
 ## Related
 
 - Builds on: [ADR-002: Claude Code Plugin System as Distribution Mechanism](002-claude-code-plugin.md)
 - Tech stack overview: [docs/specs/tech-stack.md](../specs/tech-stack.md)
-- Hooks implementation: `plugins/blueprint-mode/hooks/`
-- Reference personas: `plugins/blueprint-mode/agents/`

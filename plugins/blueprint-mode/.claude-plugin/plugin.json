@@ -1,7 +1,7 @@
 {
   "name": "blueprint-mode",
   "description": "Documented intent for AI-assisted development: ADRs, specs, patterns, requirements, DESIGN.md, and a separate design tree for UX decisions",
-  "version": "1.4.0",
+  "version": "2.0.0",
   "author": {
     "name": "rickardp"
   },
