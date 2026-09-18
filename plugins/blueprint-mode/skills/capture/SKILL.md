@@ -1,103 +1,34 @@
 ---
-name: blueprint:capture
-description: Capture decisions and context from the current conversation into blueprint docs, DESIGN.md, and design trees
-argument-hint: "[optional: specific topic to capture]"
-allowed-tools:
-  - Glob
-  - Grep
-  - Read
-  - Write
-  - Edit
-  - AskUserQuestion
+name: capture
+description: Persist decisions, requirements, patterns, and progress from the current conversation into Blueprint docs. Use at the end of a working session or when the user says to save what was discussed.
+argument-hint: "[optional topic to focus on]"
+disable-model-invocation: true
+allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 
-# Capture Context
+# Capture Conversation
 
-**COMMAND:** Extract decisions, rationale, and context from the current conversation and persist them into the appropriate blueprint documents — across the code/architecture tree, `DESIGN.md`, and the design/UX tree.
+Formats are in `../_templates/TEMPLATES.md` (relative to this skill's directory). Respect the code tree vs design tree split in section `design-separation`.
 
-## Execute
+## Steps
 
-1. **Detect design availability** — Glob for `DESIGN.md` and `design/ux-decisions/`. `DESIGN.md` may exist without the opt-in design tree. If `design/ux-decisions/` doesn't exist, UX decisions are skipped — never silently filed as ADRs — but cross-cutting design rules can still update `DESIGN.md` when it exists.
-
-2. **Scan** the current conversation for:
-   - Architectural decisions (tech choices, code-level approaches, trade-offs)
-   - **UX decisions** (only if `design/` exists): interaction model, navigation, modal vs page, empty/error states, motion
-   - **Cross-cutting design rules** (only if `DESIGN.md` exists): visual rules, token usage, type scale, voice/tone, broad prohibitions
-   - Design-intent confirmations: statements that a current UI choice is deliberate rather than coincidental
-   - Requirements discovered or refined during discussion
-   - Patterns agreed upon (any subject — code, schema, UI)
-   - Open questions that were resolved
-   - Implementation state changes (progress, blockers, new constraints)
-
-3. **If argument provided:** Focus capture on that specific topic only.
-
-4. **If design content was discussed but the right design artifact doesn't exist:** Note this in the preview. Don't misfile it.
-   - UX decision but no `design/` tree: suggest `/blueprint:onboard-design`
-   - Cross-cutting design rule but no `DESIGN.md`: suggest `/blueprint:onboard-design` to scaffold it, or create `DESIGN.md` only if the user explicitly confirms in this capture flow
-
-5. **Read** existing docs to avoid duplicates:
-   - `docs/adrs/*.md` — existing architectural decisions
-   - `docs/specs/features/*.md` — existing feature specs
-   - `patterns/good/` and `patterns/bad/anti-patterns.md` — existing patterns
-   - `DESIGN.md` — cross-cutting design rules (if present)
-   - `design/ux-decisions/*.md` — existing UX decisions (if tree exists)
-
-6. **Classify** each captured item — **respect tree separation**, never file design content under `docs/` or code content under `design/`. Design destinations are only valid when `design/` exists:
-
-   | Type | Destination | Action |
-   |------|-------------|--------|
-   | New architectural decision | `docs/adrs/NNN-[slug-from-current-title].md` | Create Draft ADR |
-   | Refinement of existing ADR | Existing ADR | Update (add context, resolve TODOs, promote Draft→Active) |
-   | New UX decision | `design/ux-decisions/NNN-[slug-from-current-title].md` | Create Draft UX decision |
-   | Refinement of existing UX decision | Existing UX decision | Update |
-   | Cross-cutting design rule | `DESIGN.md` | Append or update the relevant short section |
-   | New feature/requirement | `docs/specs/features/slug.md` | Create with maturity: Exploring |
-   | Refinement of existing feature | Existing feature spec | Update requirements, implementation state, maturity |
-   | Implementation progress | Existing feature spec | Update Implementation State section |
-   | Good pattern agreed on (any subject) | `patterns/good/name.ext` | Create pattern file |
-   | Anti-pattern identified (any subject) | `patterns/bad/anti-patterns.md` | Append section |
-   | Open question resolved | Existing spec / ADR / UX decision | Remove TODO, fill in answer |
-
-7. **Preview** — Show the user what will be captured before writing. If design content was scanned but skipped due to missing tree, list those skipped items separately. **Only show the "Skipped" block when at least one design item was actually scanned and skipped** — if the conversation had no UX/design content, omit it entirely (don't narrate design-tree absence as a reason for not capturing things that were never there):
-   ```
-   Found N items to capture:
-
-   1. [UPDATE] docs/specs/features/foo.md — Add implementation state, advance maturity to Building
-   2. [CREATE] docs/adrs/005-caching-strategy.md — Draft ADR for Redis caching decision
-
-   Skipped (design tree not set up — run /blueprint:onboard-design to capture these):
-   - 1 UX decision (modal vs full page for confirmations)
-   - 1 DESIGN.md rule (imperative CTA voice) — DESIGN.md not present
-   ```
-
-8. **Confirm** — Ask: "Proceed with all, or select specific items?"
-
-9. **Write** confirmed items using templates from `_templates/TEMPLATES.md`
-
-10. **Report** what was captured and where (and what was skipped)
-
-## Rules
-
-- **Draft by default** for new ADRs — conversation decisions are emerging, not final
-- **Never overwrite** existing content without showing the diff
-- **Update > Create** — prefer updating existing docs over creating new ones
-- **Skip obvious** — don't capture things already documented or derivable from code
-- **Code is not design rationale** — only capture UX intent when the conversation confirms why a UI choice is deliberate
-- **DESIGN.md is for broad rules** — put cross-cutting design rules there, not in UX decisions. Do not duplicate an existing DESIGN.md rule into a UX decision; reference it.
-- **Implementation State is first-class** — always update the Implementation State section of affected feature specs
-- **Decision filenames track titles** — when capture changes an ADR or UX decision title, rename the file if its slug no longer describes the title, keeping the same number and tree. Search for the old basename, extensionless stem, and full path; update references to this decision (including relative links and `superseded_by`) and verify they resolve. Preserve number-only references and references to other decisions in the other tree.
+1. Scan the conversation (or the given topic) for: decisions with rationale, requirements discovered or refined, patterns agreed on, resolved open questions, and implementation progress or new constraints. For UI, capture intent only where a person confirmed a choice was deliberate.
+2. Map each item to a destination:
+   - New architectural decision: Draft ADR
+   - New UX decision: Draft UX decision, only if `design/ux-decisions/` exists
+   - Cross-cutting design rule: bullet in `DESIGN.md`, only if it exists
+   - New feature: feature spec at `maturity: Exploring`
+   - Refinement or progress: update the existing spec or decision, including its Implementation State; set a Draft to Active when its last TODO is resolved
+   - Pattern or anti-pattern: `patterns/`
+3. For each item, check its target directory for an existing document on the topic and update that instead of creating. Skip anything already documented or derivable from code.
+4. Write the creates and updates. In the report, show old and new text for any update that replaces existing rationale rather than adding to it.
+5. If a UX decision or `DESIGN.md` rule was skipped because its destination does not exist, list it separately and point at `/blueprint-mode:onboard-design`. Omit that note when nothing was skipped.
+6. If a retitle makes a decision filename stale, rename the file and update references as the template describes.
 
 ## Output
 
 ```
 Captured from conversation:
-
 - Created docs/adrs/005-caching-strategy.md (Draft)
-- Updated docs/specs/features/notifications.md:
-  - Maturity: Exploring → Building
-  - Added 2 requirements
-  - Updated implementation state: "Database schema designed"
-- Updated docs/adrs/003-shell-hooks.md: resolved 1 TODO
-
-Context is now persisted. Safe to start a new session.
+- Updated docs/specs/features/notifications.md: maturity Exploring -> Building, 2 requirements, implementation state
 ```

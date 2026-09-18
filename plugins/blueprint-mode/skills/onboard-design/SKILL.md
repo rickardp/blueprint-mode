@@ -1,244 +1,45 @@
 ---
-name: blueprint:onboard-design
-description: Opt-in. Add design intent capture to a Blueprint repo. Scaffolds design/ux-decisions/, offers to scaffold a minimal community-format DESIGN.md if absent, and can optionally surface a small number of candidate UX decisions found in existing UI/code for the user, developer, or designer to confirm.
-argument-hint: ""
+name: onboard-design
+description: Opt in to design intent capture by scaffolding design/ux-decisions, optionally a DESIGN.md stub, and optionally reviewing a few existing UI patterns for stated intent. Safe to rerun.
 disable-model-invocation: true
-allowed-tools:
-  - Glob
-  - Grep
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - AskUserQuestion
-  - EnterPlanMode
-  - ExitPlanMode
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash
 ---
 
 # Onboard Design Tree
 
-**OPT-IN:** This skill is the only way the `design/` tree gets created. Other Blueprint skills do not auto-scaffold it. Run this when the repo has UX/design artifacts worth capturing.
+This is the only skill that creates `design/`. Its purpose is to record conscious UX choices a person can explain. Existing code is a prompt for that conversation, not evidence of intent. Formats are in `../_templates/TEMPLATES.md` (relative to this skill's directory): `ux-decision-template`, `design-separation`, `agent-file-detection`, `agent-instructions`.
 
-**COMMAND:** Scaffold `design/ux-decisions/` and optionally surface a small number of candidate UX decisions found in existing UI/code for the user, developer, or designer to confirm. Capture only the ones they confirm as deliberate. Skipping candidate triage is always fine.
+## Steps
 
-**Capture intent, not inferred structure.** The point of a UX decision is to record a *conscious* choice the user, developer, or designer can explain. Existing code can prompt the conversation because the developer or designer may know the why behind it — but only capture the choice if a human articulates that why. If the rationale is "the code happens to look like that," the decision isn't ready and the agent should not invent one.
+1. Detect UI signals: frontend frameworks in manifests, component directories, `*.tsx|jsx|vue|svelte` files, design tokens or Tailwind config, Storybook, and an existing `DESIGN.md`.
+2. Create `design/ux-decisions/.gitkeep`. If the directory already exists, keep everything in it and only fill gaps.
+3. Put every question in one message: whether to proceed if no UI signals were found; whether to scaffold a minimal `DESIGN.md` stub if it is absent (an existing file is left untouched); and whether to review up to five existing UI patterns now.
+4. If the stub was accepted, write the community-format stub below with empty sections; do not interview the user to fill them. Rules accumulate later through `/blueprint-mode:decide` and `/blueprint-mode:capture`.
+5. If the review was accepted, pick high-confidence candidates (destructive-action confirmation, empty and error states, repeated layout, navigation model, copy conventions), each tied to a file, and ask in one batch which were deliberate and why. Create a Draft UX decision only for those given a reason, titled in the user's words and referencing the observed file. Create nothing for the rest.
+6. Update the agent instructions file per `agent-file-detection`. Add the `design/ux-decisions/` line from the `agent-instructions` template to its "Where intent lives" list, and the `DESIGN.md` line only when that file exists, whether pre-existing or scaffolded in step 4. Never add a line pointing at a file the user declined. If the file has no such list, it predates 2.0: regenerate the Blueprint section as `/blueprint-mode:onboard` does, then add the lines that apply.
+7. Rerunning never overwrites existing files or UX decisions; it may offer new candidates for UI not yet covered.
 
-## DO NOT ASK FOR SCOPE
-
-**DO NOT** ask "Would you like me to..." or offer numbered scope options for the design-tree setup. **DO** scaffold the design tree and walk the DESIGN.md interview.
-
-The user is allowed to skip any individual interview question. Candidate triage from existing UI is optional content capture, not required onboarding scope.
-
-The user may copy-paste from external tools (Figma, Storybook, etc.) during the interview to help articulate decisions — that is fine. But Blueprint does NOT store persistent links to external tools. After onboarding, the repo is the complete source of truth.
-
----
-
-## Process
-
-**FIRST ACTION: Enter plan mode by calling `EnterPlanMode`.**
-
-### Step 1: Detect existing UI signals
-
-Read in parallel (Glob/Grep):
-- `package.json` / `pyproject.toml` / `Cargo.toml` — frontend frameworks (React, Vue, Svelte, SwiftUI, etc.)
-- `src/components/`, `src/ui/`, `app/components/`, `packages/ui/`, `apps/*/src/components/` — component directories
-- `**/*.{tsx,jsx,vue,svelte}` — UI source files (count, top dirs)
-- `**/tailwind.config.*`, `**/theme.*`, `**/tokens.*`, `**/design-system*` — design system signals
-- `**/.storybook/`, `**/storybook/` — Storybook setup
-- `DESIGN.md` at repo root — top-level design context (Google Stitch / awesome-design-md style)
-
-If no UI signals at all and the user hasn't insisted, ask once: *"This repo doesn't look like it has UI code. Set up the design tree anyway?"* (Skip if user invoked this skill explicitly with awareness — assume yes.)
-
-### Step 2: Detect existing design tree
-
-Check for:
-- `design/ux-decisions/`
-
-If any of these already exist, the skill is in **refine mode** — don't recreate, just fill gaps and add seeds based on the interview.
-
-### Step 3: Show the plan
-
-```
-I will set up the design tree:
-
-Scaffolding:
-- design/ux-decisions/         (NNN-[slug].md, populated by /blueprint:decide)
-
-Detected UI signals:
-- Frontend: [framework]
-- Component dirs: [paths]
-- Design system: [tailwind | tokens | none]
-- Storybook: [yes/no]
-- DESIGN.md at repo root: [yes/no]
-
-After scaffolding I will interview you about:
-- Whether to scaffold a minimal `DESIGN.md` at the repo root for cross-cutting design context (skipped if it already exists)
-- Whether to review a small number of existing UI patterns now, so you can tell me which were deliberate choices (with a short reason) and which were coincidental
-
-You can copy-paste from external tools (Figma, Storybook, etc.) during
-the interview to help articulate decisions. After onboarding, the repo
-is the complete source of truth — no external references are stored.
-
-The goal is to capture *conscious* design decisions — the why behind the
-choice. If a pattern is in the code but you don't have a clear reason for
-it, that's fine: we leave it as implementation, not as a UX decision.
-
-Skip any question with "skip" — TBD markers are fine.
-
-[Call ExitPlanMode to proceed]
-```
-
-### Step 4: Exit plan mode and scaffold
-
-Create directories and base files:
-- `design/ux-decisions/.gitkeep`
-
-### Step 5: Top-level `DESIGN.md`
-
-`DESIGN.md` is a community convention (Google Stitch / awesome-design-md), not a Blueprint-owned format and not part of the Blueprint structure. Blueprint stays compatible with it: respects existing files, can scaffold a minimal stub, and avoids duplicating information that belongs there.
-
-If `DESIGN.md` already exists at the repo root: do NOT modify it. Ensure the agent-instructions update in Step 6 includes "read DESIGN.md on UI work."
-
-If `DESIGN.md` does not exist, ask once via `AskUserQuestion`:
-
-```
-Scaffold a minimal DESIGN.md at the repo root?
-
-DESIGN.md is a community convention (Google Stitch / awesome-design-md)
-for cross-cutting design context — visual rules, voice/tone, prohibitions
-("never use more than 3 colours on a screen"). Agents read it on every UI
-generation task. Blueprint just stays compatible with it; you own the
-file's contents.
-
-I'd write a small stub following the community format. Rules are added
-later, conversationally, as decisions accumulate — never hand-filled.
-
-Options: Scaffold / Skip
-```
-
-If the user accepts, write a minimal stub that follows the community format:
+## DESIGN.md stub
 
 ```markdown
 # Design
 
-Top-level design context for this project. Agents read this on every UI generation task. Keep it short; cross-cutting rules and prohibitions only.
+Cross-cutting design context for this project. Agents read this for any UI work. Keep it short: rules and prohibitions only. Per-decision rationale lives in design/ux-decisions/.
 
 ## Visual rules
 
-<!-- e.g. token usage, colour limits, type scale. Empty until rules accumulate. -->
-
 ## Voice and tone
 
-<!-- e.g. imperative CTAs, no jargon. Empty until rules accumulate. -->
-
 ## Prohibitions
-
-<!-- e.g. "Never use more than 3 colours on a screen." Empty until rules accumulate. -->
 ```
 
-**Do not interview the user to fill these sections.** Leave the placeholders empty. Rules are added later, conversationally, when actual decisions are made.
-
-**Delineation reminder for the agent:** cross-cutting rules go in `DESIGN.md`; per-decision rationale (one choice + alternatives) goes in `design/ux-decisions/`. UX decisions reference `DESIGN.md` rules rather than restating them.
-
-### Step 6: Optional Existing-UI Design Intent Triage (candidate-driven)
-
-This step is optional. It exists because the developer or designer may already know the why behind important UI choices. Do not treat existing code as rationale by itself.
-
-Ask once via `AskUserQuestion`:
-
-```
-Review existing UI for candidate design decisions now?
-
-This can help capture whys that a developer or designer already knows.
-I will only create UX decisions for choices you mark as deliberate with a
-short reason. Otherwise, existing UI remains implementation state.
-
-Options: Review up to 5 candidates / Skip for now
-```
-
-If the user skips, do not scan for candidates and continue to Step 7.
-
-Scan the detected UI for **a small number** of high-confidence candidate UX choices the agent can point to in code. Cap the candidate list at five — fewer is fine. Look for evidence-bearing patterns such as:
-
-- Confirmation / destructive-action treatment (modal vs inline, copy patterns)
-- Empty / error / loading state shape (consistent across screens?)
-- Repeated card or list layout used in core flows
-- Navigation model (tabs vs stack vs drawer)
-- Copy/voice conventions (e.g. all CTAs use imperative verbs)
-
-For each candidate, prepare a one-line description that names the file or component the agent observed it in.
-
-Then ask the user/designer once, batched via `AskUserQuestion`:
-
-```
-I found these candidate UX choices in the existing UI. For each one:
-mark it as deliberate (with the reason you know) or skip.
-
-1. [observed pattern] — seen in [file:line or component]
-2. ...
-```
-
-For each item the user marks deliberate **with a short rationale**:
-- Create a Draft UX decision in `design/ux-decisions/` (Draft because the rationale will usually be terse on day one)
-- Title from the user's framing, not the agent's
-- Reference the observed file or component in the decision's `Context` or `Related` section
-
-For each item the user skips, marks "not deliberate", or provides no rationale for: create nothing. Coincidental UI is the default; UX decisions exist only for confirmed intent.
-
-**Stay in intent-capture mode:**
-- Keep the candidate list small (≤5) — this is triage, not an audit of the codebase.
-- Treat developers and designers as valid sources for the why; they may know intent that is not visible in the code.
-- If the user can't articulate the *why* for a candidate, don't capture it. Blueprint records conscious decisions; coincidental code is not intent.
-- Don't infer rationale from how the code currently looks. The fact that a pattern exists in code is not evidence it was a deliberate choice.
-
-### Step 7: Update CLAUDE.md / AGENTS.md
-
-Detect the agent instructions file (same logic as `/blueprint:onboard` — check symlinks first). Add or update the design tree section so future agent sessions know the tree exists. Keep it brief; reference don't duplicate.
-
-If a Documentation table exists in CLAUDE.md, add the design tree rows. If not, append a section.
-
-If `DESIGN.md` exists (or was just scaffolded), add a line to the pre-edit checklist for UI work: "Read `DESIGN.md` for cross-cutting design rules and prohibitions." This is what makes the file load-bearing — the doc says it should be consulted on every UI generation task.
-
-### Step 7: Report
+## Output
 
 ```
 Design tree set up:
-- design/ux-decisions/         [N confirmed UX decisions, or "empty — populate with /blueprint:decide"]
-- DESIGN.md (repo root)        [pre-existing | scaffolded stub | skipped]
+- design/ux-decisions/: N Draft UX decisions (or empty)
+- DESIGN.md: scaffolded | pre-existing | skipped
+- CLAUDE.md updated to route UI work to DESIGN.md and UX decisions
 
-Existing-UI triage: [skipped | N candidates surfaced, M confirmed as deliberate, rest skipped]
-
-Updated CLAUDE.md (or AGENTS.md) with design tree references [and DESIGN.md read instruction for UI work].
-
-Next steps:
-- /blueprint:decide [topic]    Record a UX decision (skill triages tech vs UX)
-- Edit DESIGN.md conversationally as cross-cutting rules accumulate (or via /blueprint:decide)
+Record UX decisions with /blueprint-mode:decide.
 ```
-
----
-
-## Templates
-
-### Other templates
-
-| Artifact | Section in TEMPLATES.md |
-|----------|-------------------------|
-| UX decision (Draft) | `<!-- SECTION: ux-decision-template -->` |
-| Tree separation rules | `<!-- SECTION: design-separation -->` |
-
----
-
-## Idempotency
-
-Running this skill again on a repo that already has `design/`:
-- Does NOT recreate or overwrite existing files (including `DESIGN.md` if it already exists)
-- DOES NOT modify existing UX decisions; it may create new Draft UX decisions only from freshly confirmed triage candidates
-- MAY offer fresh existing-UI triage candidates if new UI areas have appeared since the last run, but never re-asks about UI already covered by an existing UX decision
-- MAY offer to scaffold `DESIGN.md` if it still doesn't exist and the user previously skipped
-
-## Error Recovery
-
-If creation partially fails (permission denied, etc.):
-1. Report what was created and what wasn't
-2. Don't roll back — partial structure is better than none
-3. Suggest re-running the skill to fill the gaps

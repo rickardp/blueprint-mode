@@ -1,95 +1,26 @@
 ---
-name: blueprint:require
-description: Add a requirement (functional or non-functional)
+name: require
+description: Add a functional or non-functional requirement to docs/specs. Use when the user states what the product must do or a measurable target such as latency, uptime, or a security constraint.
 argument-hint: "[requirement description]"
-allowed-tools:
-  - Glob
-  - Grep
-  - Read
-  - Write
-  - Edit
-  - EnterPlanMode
-  - ExitPlanMode
+allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 
 # Add Requirement
 
-**COMMAND:** Add a requirement to specs. Auto-detect type from description.
+Formats are in `../_templates/TEMPLATES.md` (relative to this skill's directory): `feature-specs`, `nfr`.
 
-## Execute
+## Steps
 
-1. **Parse** argument for requirement description
-2. **Detect** type: FR (feature) or NFR (performance/security/etc)
-3. **Create** spec file (scaffold dirs if needed)
-4. **Report** what was created
-
-## Type Detection
-
-| Input contains | Type | File |
-|----------------|------|------|
-| "users can", "should be able to" | FR | docs/specs/features/[name].md |
-| "P95", "latency", "under Xms" | NFR | docs/specs/non-functional/performance.md |
-| "uptime", "availability" | NFR | docs/specs/non-functional/reliability.md |
-| "encryption", "auth" | NFR | docs/specs/non-functional/security.md |
-
-## Templates
-
-**Source of truth:** `_templates/TEMPLATES.md`
-
-### Feature Spec Template (inline for non-interactive execution)
-
-```markdown
----
-status: Active
-maturity: Exploring
-module: src/[module]/
-related_adrs: []
----
-
-# [Feature Name]
-
-## Overview
-[1-2 sentence description]
-
-## User Stories
-- As a [user type], I want [capability] so that [benefit]
-
-## Requirements
-- [Requirement 1]
-
-## Implementation State
-
-**Current focus:** TBD
-
-**Open questions:**
-- <!-- TODO: Add open questions -->
-
-## Acceptance Criteria
-<!-- TODO: Add when ready for test automation -->
-```
-
-### NFR Template (inline for non-interactive execution)
-
-```markdown
----
-category: Performance | Security | Scalability | Reliability
----
-
-# [Category] Requirements
-
-| Metric | Target | Measured At |
-|--------|--------|-------------|
-| [metric] | [target] | [location] |
-
-## [Specific Requirement]
-**Requirement:** [Measurable statement]
-**Rationale:** [Why this matters]
-```
+1. Read the argument and the conversation for the requirement, the user type, and any rationale.
+2. Classify:
+   - Capability ("users can", "should be able to", a workflow): feature spec at `docs/specs/features/[slug].md`. Add to an existing spec if one covers the feature.
+   - Measurable target (latency, throughput, uptime, encryption, auth, scale): the matching file in `docs/specs/non-functional/` (`performance.md`, `reliability.md`, `security.md`, `scalability.md`). Create it if missing.
+   - A decision with rationale rather than a requirement: record it as `/blueprint-mode:decide` would and say so.
+3. Write or update the file. New feature specs start at `maturity: Exploring`. Unknown sections get `TBD`. A spec that predates `maturity` and Implementation State gets them added.
+4. Link related ADRs in `related_adrs` when the feature clearly depends on a documented decision.
 
 ## Output
 
 ```
-Added requirement to docs/specs/[path]
+Added requirement to docs/specs/features/slug.md
 ```
-
-If details missing, use TBD markers.

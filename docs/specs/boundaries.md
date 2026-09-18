@@ -1,70 +1,42 @@
 # Agent Boundaries
 
-## Always Do
+## Safe Without Asking
 
-- Run `/blueprint:validate` before committing changes that affect documented decisions
-- Follow existing code patterns in the codebase
-- Read ADRs before implementing features that touch documented decisions
-- Use patterns from `patterns/good/`
-- Link code to ADRs in comments when implementing documented decisions: `// ADR-NNN: brief note`
-- Keep comments brief - document design intent in specs, not inline
+- Edit skills, templates, and docs in this repo
+- Record a decision, pattern, or requirement the user stated
+- Rename decision files when a retitle makes the slug stale, updating references
+- Run `/blueprint-mode:validate` and act on its findings for docs you changed
 
 ## Ask First
 
-### Architecture
-- Changing the plugin's hook injection strategy
-- Adding new file formats beyond Markdown
-- Modifying the skill/template structure
+### Plugin surface
+- Renaming or removing a skill, or changing a skill's argument shape
+- Changing the format of an ADR, spec, or pattern file that existing user repos already contain
+- Changing the boundaries vocabulary (`Safe Without Asking` / `Ask First` / `Never Do`)
 
-### Breaking Changes
-- Changing ADR or spec file formats
-- Modifying hook output format
-- Renaming or removing skills
+### Distribution
+- Changing either plugin manifest or marketplace file beyond a version bump
+- Adding any file format beyond Markdown
 
-### Dependencies
-- Adding ANY runtime dependency (Node.js, Python, etc.)
-- Adding external service integrations
-
-### Blueprint
-- Adding or editing ADRs in docs/adrs/
-- Adding or editing specs in docs/specs/
-- Modifying boundaries.md
+### Documentation
+- Creating ad-hoc Markdown files outside the Blueprint structure
 
 ## Never Do
 
+### Dependencies
+- Add a runtime, shell script, hook, build step, or external service; the plugin is Markdown only ([ADR-006](../adrs/006-skills-and-repo-files-only.md))
+
 ### Security
 - Commit secrets or credentials
-- Execute arbitrary code from user input in hooks
-
-### Code
-- Add runtime dependencies - this is a zero-dependency plugin
-- Create build steps or compilation requirements
-- Add features that don't work without external services
 
 ### Documentation
-- Create ad-hoc README/markdown files outside the docs/ structure without prior agreement
-- Add excessive comments (code should be self-documenting)
-- Duplicate rationale that belongs in ADRs
+- Duplicate a format that lives in `_templates/TEMPLATES.md` into a skill
+- Restate rationale inline in code or docs that an ADR already holds
 
 ## Scoped Rules
 
-### plugins/blueprint-mode/hooks/
-**Always Do:**
-- Keep hooks fast (< 1 second execution)
-- Output clean, parseable text
-- Handle missing files gracefully (don't error on empty dirs)
-
-**Never Do:**
-- Make network requests
-- Modify files (hooks are read-only)
-- Use non-portable bash features
-
 ### plugins/blueprint-mode/skills/
-**Always Do:**
-- Follow TEMPLATES.md for file formats
-- Keep skills under 100 lines
-- Use imperative commands, not questions about scope
-
-**Never Do:**
-- Generate code (skills document decisions, not produce code)
-- Ask scope questions ("what would you like to create?")
+- Keep a `SKILL.md` under 80 lines and imperative: steps, then output
+- State the scope once; ask only about content that cannot be found
+- Give every model-invocable skill a description that says when to use it
+- Mark skills that write many files or change history `disable-model-invocation: true`

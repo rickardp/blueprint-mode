@@ -1,428 +1,60 @@
 ---
-name: blueprint:validate
-description: Check code against documented specs, patterns, anti-patterns, ADRs, DESIGN.md, and UX decisions. Use when the user wants to verify consistency, audit the codebase, check spec compliance, or find violations.
-argument-hint: "[scope: all|specs|patterns|adrs|features|docs|directory]"
-disable-model-invocation: true
-allowed-tools:
-  - Bash
-  - Glob
-  - Grep
-  - Read
-  - Write
-  - Edit
-  - Task
-  - AskUserQuestion
-  - EnterPlanMode
-  - ExitPlanMode
+name: validate
+description: Check the codebase and its documentation against recorded decisions, boundaries, patterns, specs, and design intent. Use when the user asks for a consistency audit or whether the code still follows the documented decisions.
+argument-hint: "[scope: all|changes|specs|patterns|adrs|features|docs|<directory>]"
+allowed-tools: Read, Glob, Grep, Bash
 ---
 
 # Validate Blueprint Compliance
 
-Check codebase against documented specs, patterns, anti-patterns, architectural decisions, DESIGN.md, and UX decisions using parallel sub-agents.
+Report only; never fix without being asked. Canonical formats are in `../_templates/TEMPLATES.md` (relative to this skill's directory).
 
-**Invoked by:** `/blueprint:validate`
+## Scope
 
-## Principles
+Use the argument if given. `changes` means uncommitted files plus the last commit. Otherwise, on a feature branch validate files changed against `main` or `master`; on the default branch validate the whole repo excluding build output and dependencies.
 
-1. **Discover first, scan second**: Build a structural map before diving into details.
-2. **Parallel sub-agents**: Launch one Task agent per validation domain — they run concurrently in the background.
-3. **Severity-based**: Rank findings by impact (Critical > High > Medium > Low).
-4. **Non-destructive**: Report only, never auto-fix without explicit request.
+## Steps
 
-**TOOL USAGE: You MUST invoke the `AskUserQuestion` tool for scope selection if not specified.**
-When you see JSON examples in this skill, they are parameters for the AskUserQuestion tool — invoke it, don't output the JSON as text.
+1. Inventory Blueprint files: `docs/specs/**/*.md`, `docs/adrs/*.md`, `patterns/**`, `DESIGN.md`, `design/ux-decisions/*.md`. If none exist, say so and point at `/blueprint-mode:onboard`.
+2. Read them and extract the rules to check: tech stack, boundaries, each decision's chosen and rejected options, anti-patterns, feature specs with module paths, `DESIGN.md` rules, UX decisions.
+3. Run the checks below for every domain that applies.
+4. Report findings ranked by severity, then offer the follow-ups.
 
-## Process
+## Checks
 
-**FIRST ACTION: Enter plan mode by calling the `EnterPlanMode` tool.**
+**Source code.** Dependency manifests versus declared tech stack. Grep for "Never Do" violations and for rejected alternatives named in Active decisions. In-scope changes that touch an "Ask First" item (Medium). Grep for documented anti-patterns. Note repeated conventions (three or more occurrences) that no good pattern captures.
 
-### Step 1: Discovery
+**Features.** Each spec's `module` path exists; Active features have code and tests; maturity matches reality; Implementation State is present and not stale; `related_adrs` still Active. Specs missing User Stories or Requirements, or carrying TBD markers (Low). `docs/specs/non-functional/` missing performance, security, scalability, or reliability (Low; Medium when CI or infrastructure config exists). Source directories with no spec are flagged as unspecified.
 
-Gather repo structure and blueprint inventory in parallel. Use Glob and Read directly (not sub-agents) — this should be fast.
+**Documentation.** Markdown outside the Blueprint trees, including `CLAUDE.md` and `AGENTS.md`, does not recommend rejected alternatives or deprecated features. Stale agent instructions are High severity because agents follow them directly. Agent instructions that demand reading every Blueprint file before every edit, including a Blueprint 1.x `Pre-Edit Checklist`, are High with the fix "rerun `/blueprint-mode:onboard`".
 
-**1a. Blueprint inventory** (parallel Glob calls — code tree, design tree, and important adjacent design context):
+**Scoped boundary routing.** Compare paths under `Scoped Rules` in `boundaries.md` with the compact routing line in the agent instructions identified by `agent-file-detection`. Ignore empty or placeholder sections. Missing, extra, or renamed paths are stale agent instructions (High); recommend refreshing the line per `agent-instructions`. With no scoped rules, the line should be absent. It should direct matching edits to only the relevant sections, without copying scoped rule contents.
 
-Code / architecture tree:
-- `docs/specs/*.md` and `docs/specs/**/*.md` — specs (tech-stack, product, boundaries, features, NFRs)
-- `docs/adrs/*.md` — architecture decision records
-- `patterns/bad/**/*.md` and `patterns/good/**/*.md` — documented code patterns
+**Vocabulary.** A legacy `## Always Do` heading in boundaries is read as `## Safe Without Asking`; obligation-style bullets under it ("read X before Y", "run Z before commit") are Low, with the destination the `boundaries` template gives for that kind of bullet. Do not recommend deleting a project requirement; it moves to scoped rules, the agent instructions, or an NFR. Non-canonical synonyms are Low: in decisions `Benefits`, `Trade-offs`, `Pros`, `Cons`, `References`, `status: Accepted`, and an `# ADR-` title under `design/ux-decisions/`; in feature specs `## Description`, `## Stories`, `status: Done|Complete|Todo`; in boundaries `# Boundaries`, `Do Always`, `Ask Before`, `Don't Do`, `Prohibited`; in anti-patterns `Wrong Way`, `Right Way`, `Better`, `**Level:**`.
 
-Important adjacent design context:
-- `DESIGN.md` — top-level design context, if present; important, but not part of the Blueprint structure
+**Decision files.** Filename number matches the title number (High). Slug still describes the title (Low). Links and `superseded_by` values resolve (Medium).
 
-Design / UX tree:
-- `design/ux-decisions/*.md` — UX decisions
+**Content placement.** Requirements inside ADRs, architectural rationale inside feature specs, UX rationale under `docs/adrs/` unless its Context says it was filed there deliberately, tech rationale under `design/`, broad rules filed as UX decisions, or per-flow rationale inside `DESIGN.md` (Medium, with the correct destination).
 
-If no Blueprint files exist in either tree and no `DESIGN.md` exists: "No Blueprint structure found. Run `/blueprint:onboard` first." and stop. If only `DESIGN.md` exists, run a limited design-context validation and suggest `/blueprint:onboard` or `/blueprint:onboard-design` for full Blueprint coverage.
+**Design.** Only when `DESIGN.md` or `design/` exists. UI source against explicit `DESIGN.md` prohibitions (High) and against rejected alternatives in Active UX decisions. Count `UX-TBD` flags (Low, informational).
 
-**1b. Repo structure** (parallel Glob calls):
-- `**/*.md` — all markdown files (for documentation drift detection)
-- `.github/workflows/*.yml` or `.gitlab-ci.yml` or `Jenkinsfile` or `bitbucket-pipelines.yml` — CI/CD
-- `infra/**/*` or `terraform/**/*` or `cdk/**/*` or `pulumi/**/*` or `sst.config.*` or `Dockerfile*` or `docker-compose*` — infrastructure
-- `package.json` or `requirements.txt` or `go.mod` or `Cargo.toml` or `pyproject.toml` — dependency manifests
-- Top-level source directories (e.g., `src/`, `lib/`, `app/`, `functions/`, `common/`)
+**CI/CD and infrastructure.** Only when such files exist. Pipelines use the declared commands; infrastructure provisions what the decisions chose; no secrets committed (Critical).
 
-**1c. Read validation context**: Read all discovered spec, ADR, boundary, pattern, `DESIGN.md`, and UX decision files. `DESIGN.md` is an important adjacent repo artifact, not a Blueprint-structure file. Patterns are tree-agnostic (one `patterns/` tree for all subjects). Extract key validation rules into a structured context block:
+## Severity
 
-```
-=== BLUEPRINT CONTEXT ===
+Critical: secrets, "Never Do" violations. High: tech stack mismatches, decision violations, stale agent instructions, design prohibition violations. Medium: misplaced content, broken decision links, undeclared dependencies, unapproved Ask First changes. Low: vocabulary drift, stale slugs, UX-TBD counts, missing spec sections.
 
-TECH STACK (from docs/specs/tech-stack.md):
-- Runtime: [X]
-- Framework: [X]
-- Database: [X]
-- Commands: install=[X], dev=[X], test=[X], lint=[X]
+## Output
 
-BOUNDARIES (from docs/specs/boundaries.md):
-- Always: [rule1], [rule2], ...
-- Never: [rule1], [rule2], ...
-- Ask First: [rule1], [rule2], ...
-
-ADR DECISIONS:
-- ADR-001 [title]: Chose [X], rejected [Y, Z]
-- ADR-002 [title]: Chose [X], rejected [Y, Z]
-- ...
-
-CODE PATTERNS:
-- Anti-patterns: [name1: description], ...
-- Good patterns: [name1: key elements], ...
-
-FEATURES (from docs/specs/features/):
-- [name] (status, maturity, module, ADRs)
-- ...
-
-UX DECISIONS (from design/ux-decisions/):
-- UX-001 [title]: Chose [X], rejected [Y, Z]
-- ...
-
-DESIGN CONTEXT (from DESIGN.md, if present):
-- Cross-cutting rules/prohibitions: [rule1], [rule2], ...
-- Voice/tone: [rules]
-
-=== END CONTEXT ===
-```
-
-### Step 2: Scope Selection
-
-**Branch Detection:**
-1. Run `git branch --show-current`
-2. If NOT `main`/`master`, run `git diff --name-only main...HEAD 2>/dev/null || git diff --name-only master...HEAD 2>/dev/null`
-
-**If on a feature branch with changes, use AskUserQuestion:**
-```json
-{
-  "questions": [{
-    "question": "You're on branch '[branch-name]' with [N] changed files vs main. What should I validate?",
-    "header": "Scope",
-    "options": [
-      {"label": "Branch changes (Recommended)", "description": "Only validate files changed on this branch vs main/master"},
-      {"label": "All source", "description": "Validate entire codebase excluding node_modules, dist, build"},
-      {"label": "Specific directory", "description": "I'll specify a path to validate"}
-    ],
-    "multiSelect": false
-  }]
-}
-```
-
-**If on main/master or no branch changes:**
-```json
-{
-  "questions": [{
-    "question": "What should I validate?",
-    "header": "Scope",
-    "options": [
-      {"label": "All source (Recommended)", "description": "Validate entire codebase excluding node_modules, dist, build"},
-      {"label": "Recent changes", "description": "Only files modified in last commit or uncommitted"},
-      {"label": "Specific directory", "description": "I'll specify a path to validate"}
-    ],
-    "multiSelect": false
-  }]
-}
-```
-
-### Step 3: Launch Parallel Sub-Agents
-
-Based on discovery results, launch **one Task agent per validation domain** — all in a **single message** so they run concurrently. Use `subagent_type: "Explore"` and `run_in_background: true` for each.
-
-Every agent prompt MUST include:
-1. The full **Blueprint Context** block from Step 1c
-2. The **scope** (file list or directory) from Step 2
-3. Domain-specific scan instructions (below)
-4. Instruction to return findings as a structured list with severity, location, description, and blueprint source
-
-#### Agent: Source Code
-
-**Launch when:** Source directories exist.
-
-Prompt must instruct the agent to:
-1. **Tech stack compliance**: Read dependency manifests, compare against declared tech stack. Flag undeclared dependencies, missing declared tech, version mismatches.
-2. **Boundary violations**: For each "Never Do" rule, Grep source files for violations. For "Always Do" rules, verify compliance. For "Ask First" items, warn if detected.
-3. **Anti-pattern scan**: For each documented anti-pattern, Grep source files for matching code.
-4. **ADR compliance**: For each ADR's chosen approach, verify source follows it. For rejected alternatives, Grep for their usage.
-5. **Undocumented patterns**: Note consistent code patterns (repeated 3+ times) not captured in `patterns/good/`.
-
-#### Agent: Features
-
-**Launch when:** `docs/specs/features/*.md` exist.
-
-Prompt must instruct the agent to:
-1. For each feature spec, verify declared module path exists.
-2. Check for test files in each feature's module.
-3. Verify status matches reality (Active features should have code, Deprecated should not be actively developed).
-4. Verify maturity matches reality:
-   - `Exploring` with substantial code and tests → suggest advancing to Building/Hardening
-   - `Stable` with many open TODOs or missing tests → flag as inconsistent
-   - Missing `maturity` field → flag as needing update
-5. Check Implementation State section:
-   - Missing entirely → flag (Medium severity)
-   - Has stale "Current focus" that doesn't match recent git activity → flag (Low severity)
-   - Has open questions that appear resolved in code → flag (Low severity)
-6. Flag orphaned modules — source directories with no corresponding feature spec.
-7. Verify related ADRs referenced by features are still Active.
-
-#### Agent: Documentation Drift & Content Classification
-
-**Launch when:** Markdown files exist outside `docs/specs/`, `docs/adrs/`, `patterns/`, `design/` **OR** any Blueprint files or `DESIGN.md` exist.
-
-Prompt must instruct the agent to:
-1. Find all `.md` files outside the Blueprint structure (CLAUDE.md, README.md, guides, `.claude/*.md`, etc.). Treat `DESIGN.md` as an important adjacent design-context file, not as stray documentation.
-2. Cross-reference against tech stack: Grep for superseded/banned alternatives (e.g., `npm install` when ADR chose Bun).
-3. Cross-reference against ADR decisions: Grep for rejected alternatives being recommended.
-4. Cross-reference against DESIGN.md: Grep for UI guidance in docs that contradicts cross-cutting design rules.
-5. Cross-reference against UX decisions: Grep for UI patterns that contradict an Active UX decision.
-6. Cross-reference against deprecated features: Grep for references to Deprecated features as if active.
-7. Flag stale instructions in CLAUDE.md/AGENTS.md — these are **High severity** because agents follow them directly.
-8. **Decision file integrity audit** — for `docs/adrs/*.md` and `design/ux-decisions/*.md`:
-   - Compare the filename number and slug to the H1 title. Flag mismatched numbers as **High** severity. Flag slugs that no longer describe the title as **Low** severity; descriptive abbreviations are valid. Suggest renaming a stale slug while preserving the decision number and tree.
-   - Independently check in-repo references to decision files, even when all current filenames match their titles. Resolve relative links from the referring file and extensionless `superseded_by` values within the referring decision's tree. Flag references to missing decision files as **Medium** severity. Suggest updating the broken reference to the intended decision's current filename, without renaming a file whose slug already describes its title.
-   - For any suggested rename, search for the old basename, extensionless stem, and full path, and suggest updating only references to that decision. Preserve number-only references and references to other decisions in the other tree. A stale slug whose links still resolve remains **Low** severity.
-9. **Content classification audit** — check if information is in the wrong document type or wrong tree:
-   - ADRs containing functional requirements (user stories, feature behaviors, UI specs) → should be in `docs/specs/features/`
-   - ADRs containing NFR targets (latency metrics, uptime SLAs, scalability numbers) → should be in `docs/specs/non-functional/`
-   - ADRs containing UX rationale (modal vs page, copy/voice, interaction model) → should be in `design/ux-decisions/`
-   - UX decisions containing only broad rules/prohibitions with no alternatives considered → should be in `DESIGN.md`
-   - `DESIGN.md` containing per-flow rationale with alternatives considered → should be in `design/ux-decisions/`
-   - UX decisions containing tech rationale (library choice, infra) → should be ADRs in `docs/adrs/`
-   - Feature specs containing architectural rationale ("we chose X over Y" technical) → should be ADRs
-   - NFR files containing architectural decisions → should be ADRs
-   - Product spec containing detailed feature requirements → should be feature specs
-   Flag misplaced content as **Medium** severity with a suggestion to move it to the correct location.
-
-#### Agent: CI/CD
-
-**Launch when:** CI/CD config files detected (`.github/workflows/`, `.gitlab-ci.yml`, etc.).
-
-Prompt must instruct the agent to:
-1. Read CI/CD config files.
-2. Verify pipeline uses declared commands from tech stack (correct install, test, lint commands).
-3. Check that quality gates match "Always Do" boundary rules.
-4. Flag pipelines using tools/commands that contradict ADR decisions.
-5. Check for secrets or credentials committed in pipeline configs (**Critical** severity).
-
-#### Agent: Infrastructure
-
-**Launch when:** Infrastructure files detected (`infra/`, `terraform/`, `Dockerfile`, `sst.config.*`, etc.).
-
-Prompt must instruct the agent to:
-1. Read infrastructure config files.
-2. Verify infrastructure choices match ADR decisions (e.g., if ADR chose DynamoDB, check IaC isn't provisioning PostgreSQL).
-3. Check that declared cloud services match tech stack.
-4. Flag infrastructure patterns that contradict documented anti-patterns.
-5. Verify environment/stage patterns match any documented deployment specs.
-
-#### Agent: UX Decisions & Design Context
-
-**Launch when:** `DESIGN.md` or `design/ux-decisions/` exists.
-
-Prompt must instruct the agent to:
-1. **DESIGN.md compliance**: If `DESIGN.md` exists, extract concrete cross-cutting rules and Grep/spot-check UI source for violations. Treat clear violations of explicit prohibitions as **High** severity; softer style mismatches are **Low/Medium** depending on impact.
-2. **UX decision compliance**: For each Active UX decision, Grep UI source code for violations of the rejected alternative. Example: UX-002 chose modal-based confirmation; flag inline `window.confirm(...)` calls as a violation.
-3. **UX-TBD flag inventory**: Grep UI source for `// UX-TBD:` (or `# UX-TBD:`) comments. Report counts and locations as **Low** severity. These are not violations — they're flags awaiting designer review. A growing UX-TBD count is a signal that more UX decisions should be captured.
-4. **Cross-tree leakage**: Flag any UX decision filed under `docs/adrs/` (wrong tree), any ADR filed under `design/ux-decisions/`, broad rules that belong in `DESIGN.md`, or per-context decisions that were placed in `DESIGN.md`.
-
-#### Agent: Requirements Gaps
-
-**Launch when:** Source directories exist.
-
-Prompt must instruct the agent to:
-1. **Unspecified implementations**: Find source modules/directories with no corresponding feature spec in `docs/specs/features/`. Code that implements user-facing behavior should trace to a feature requirement, not only to an ADR. ADRs capture *why* a technical choice was made, but the *what* (functional behavior) belongs in a feature spec.
-2. **ADR-only features**: Scan ADRs for functional language (user stories, UI behavior, workflow descriptions, endpoint contracts). If an ADR describes *what the system does* rather than *why a technical choice was made*, flag that the functional requirements should be extracted into a feature spec with `related_adrs` linking back.
-3. **Feature spec completeness**: For each existing feature spec, check for:
-   - Missing or empty `## User Stories` section
-   - Missing or empty `## Requirements` section
-   - `<!-- TODO: -->` or "TBD" markers indicating incomplete sections
-   - Missing `related_adrs` when the feature clearly depends on architectural decisions
-4. **NFR coverage gaps**: Check whether `docs/specs/non-functional/` exists and covers key categories (performance, security, scalability, reliability). Flag missing categories as **Low** if the codebase is small, **Medium** if infrastructure or deployment configs exist.
-5. **Cross-cutting gaps**: Identify areas where code touches multiple concerns (auth, payments, data pipelines) but no NFR or feature spec addresses the integration points.
-
-### Step 4: Collect Results
-
-Read the output from each background agent using the Read tool on their output files. Collect all findings into a unified list.
-
-### Step 5: Report
-
-Present findings in a unified report ranked by severity:
-
-| Severity | Description |
-|----------|-------------|
-| Critical | Security vulnerabilities, boundary "Never Do" violations, secrets in config |
-| High | Tech stack mismatches, stale agent instructions (CLAUDE.md), ADR violations |
-| Medium | Pattern inconsistencies, undeclared dependencies, doc drift in guides, misclassified content (e.g., requirements in ADRs, architectural decisions in feature specs), stale decision filename references, ADR-only features lacking a feature spec, missing NFR categories (when infra exists) |
-| Low | Style preferences, minor terminology drift, stale decision filename slugs, missing test coverage, incomplete feature spec sections (TBD markers), missing NFR categories (small codebase) |
-
-**Report format:**
 ```markdown
 ## Blueprint Validation Report
 
-### Source Code
-**Tech Stack:** [findings]
-**Boundary Compliance:** [findings]
-**Pattern Violations:** [findings]
-**ADR Compliance:** [findings]
+| Severity | Location | Finding | Source |
+|----------|----------|---------|--------|
 
-### Features
-**Feature Coverage:**
-| Feature | Spec Status | Module | Evidence |
-|---------|-------------|--------|----------|
-| ... | ... | ... | ... |
-
-**Orphaned Modules:** [findings]
-
-### UX Decisions
-**DESIGN.md Compliance:** [findings]
-**UX Decision Compliance:** [findings]
-**UX-TBD Flags:** [count and top locations — Low; these are review markers, not violations]
-**Cross-Tree Leakage:** [findings — UX in docs/adrs/, ADRs in design/ux-decisions/]
-
-### Documentation Drift
-| File | Issue | Severity | Blueprint Source |
-|------|-------|----------|-----------------|
-| ... | ... | ... | ... |
-
-### Decision File Integrity
-| File | Issue | Suggested Fix | Severity |
-|------|-------|---------------|----------|
-| ... | Filename slug does not match title | Rename file and update in-repo references | Low |
-| ... | Reference points to a missing decision file | Update reference to the intended decision's current filename | Medium |
-| ... | Filename number differs from H1 number | Reconcile with the decision's established identity and references | High |
-
-### Content Classification
-| File | Misplaced Content | Should Be In | Severity |
-|------|-------------------|--------------|----------|
-| ... | ... | ... | ... |
-
-### CI/CD
-[findings if agent was launched, otherwise "No CI/CD config detected"]
-
-### Infrastructure
-[findings if agent was launched, otherwise "No infrastructure config detected"]
-
-### Requirements Gaps
-**Unspecified Implementations:**
-| Module | Has Feature Spec | Has ADR Only | Suggested Action |
-|--------|-----------------|--------------|------------------|
-| ... | ... | ... | ... |
-
-**Incomplete Feature Specs:**
-| Feature | Missing Section | Severity |
-|---------|----------------|----------|
-| ... | ... | ... |
-
-**NFR Coverage:**
-| Category | Status |
-|----------|--------|
-| Performance | Documented / Missing |
-| Security | Documented / Missing |
-| Scalability | Documented / Missing |
-| Reliability | Documented / Missing |
-
-### Summary
-- Critical: [N] | High: [N] | Medium: [N] | Low: [N]
-- Agents run: [list of domains scanned]
-- Domains skipped: [list not applicable to this repo]
+Summary: Critical N, High N, Medium N, Low N. Domains scanned: [...]. Skipped: [...].
 ```
 
-### Step 6: Requirements Gap Interview
+## Follow-ups
 
-**If the Requirements Gaps agent found gaps, interview the user using AskUserQuestion.**
-
-For each unspecified implementation or ADR-only feature found, present a batch (up to 5 at a time):
-
-```json
-{
-  "questions": [{
-    "question": "These modules have no feature spec. Which ones should get one?",
-    "header": "Unspecified Implementations",
-    "options": [
-      {"label": "[module1]", "description": "Currently only referenced by ADR-NNN"},
-      {"label": "[module2]", "description": "No blueprint reference at all"},
-      {"label": "Skip for now", "description": "I'll handle these later"}
-    ],
-    "multiSelect": true
-  }]
-}
-```
-
-For selected modules, create feature specs using the template from `_templates/TEMPLATES.md` with TBD markers for unknown sections. Link any related ADRs in the `related_adrs` frontmatter field.
-
-For incomplete feature specs (missing user stories, requirements, or acceptance criteria), ask:
-
-```json
-{
-  "questions": [{
-    "question": "[Feature] is missing [sections]. Want to fill these in now?",
-    "header": "Incomplete Feature Specs",
-    "options": [
-      {"label": "Yes, interview me", "description": "I'll answer questions to complete the spec"},
-      {"label": "Add TBD markers", "description": "Mark sections as TODO for later"},
-      {"label": "Skip", "description": "Leave as-is for now"}
-    ],
-    "multiSelect": false
-  }]
-}
-```
-
-If the user chooses "Yes, interview me", ask targeted content questions about user stories, requirements, and acceptance criteria for that feature. Create or update the spec with their answers.
-
-For missing NFR categories, ask:
-
-```json
-{
-  "questions": [{
-    "question": "No NFR specs found for these categories. Which should I create?",
-    "header": "Missing Non-Functional Requirements",
-    "options": [
-      {"label": "Performance", "description": "Latency, throughput, response times"},
-      {"label": "Security", "description": "Auth, encryption, data protection"},
-      {"label": "Scalability", "description": "Load handling, growth capacity"},
-      {"label": "Reliability", "description": "Uptime, recovery, fault tolerance"},
-      {"label": "Skip for now", "description": "I'll handle NFRs later"}
-    ],
-    "multiSelect": true
-  }]
-}
-```
-
-For selected NFR categories, create files in `docs/specs/non-functional/` using the template with TBD markers.
-
-## After Validation
-
-- **Spec drift found**: Suggest updating specs or creating ADRs for undocumented changes
-- **Tech stack mismatch**: Suggest `/blueprint:decide` to document the actual choice
-- **Boundary violations**: Highlight critical issues requiring immediate attention
-- **Documentation drift found**: Suggest updating stale docs (especially CLAUDE.md — agents follow it directly)
-- **Misclassified content found**: Suggest moving content to correct document type (e.g., extract requirements from ADR into feature spec, extract tech rationale from feature spec into ADR)
-- **Requirements gaps found**: Interview user to create missing feature specs, complete incomplete specs, or create NFR documents
-- **Undocumented patterns found**: Suggest `/blueprint:good-pattern`
-- **No violations**: Confirm codebase consistency with specs
-
-## Examples
-
-- `/blueprint:validate` → Full validation (all domains in parallel)
-- `/blueprint:validate specs` → Source code + features agents only
-- `/blueprint:validate docs` → Documentation drift agent only
-- `/blueprint:validate features` → Features agent only
-- `/blueprint:validate adrs` → ADR compliance checks across all domains
-- "Check if code matches our specs" → Full validation
-- "Is CLAUDE.md up to date?" → Documentation drift agent
-- "Validate the auth module" → All agents scoped to `src/auth/`
+Offer, do not perform: `/blueprint-mode:decide` for undocumented tech choices, `/blueprint-mode:require` for unspecified modules, `/blueprint-mode:good-pattern` for repeated conventions, and `/blueprint-mode:onboard` for stale agent instructions.
