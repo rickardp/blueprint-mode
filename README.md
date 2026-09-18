@@ -4,6 +4,8 @@
   <img src="./assets/logo-s.png" />
 </p>
 
+> **2.x is skills and repo files only** — hooks and subagent personas are gone; see [Upgrading from 1.x](#upgrading-from-1x).
+
 Blueprint Mode is an attempt at turning the repo into a stable intent record in the era of vibe coding and agentic AI assistants.
 
 It attempts to solve the problem of maintainability in code repositories with large amounts of AI code while trying to
