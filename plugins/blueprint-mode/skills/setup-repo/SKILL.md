@@ -1,8 +1,6 @@
 ---
 name: setup-repo
-description: Scaffold a brand-new project with the Blueprint structure, a test setup, and an initial commit. Use only for a new project; use onboard for an existing codebase.
-argument-hint: "[name: description, stack, reasons]"
-disable-model-invocation: true
+description: Scaffold a brand-new project with Blueprint documentation and a test setup. Use when the user asks to create a new project with Blueprint; use onboard for an existing codebase.
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash
 ---
 
@@ -23,8 +21,8 @@ Formats and working style are in `../_templates/TEMPLATES.md` (relative to this 
    - Agent instructions from the `agent-instructions` template, without the design lines, with Autonomy and limits filled from `boundaries.md`
    - A minimal test setup for the runtime and one passing example test
    - Standard project files for the runtime (manifest, ignore file)
-5. Initialize git if needed and make an initial commit.
-6. Do not create `design/` or `DESIGN.md`. If the project has UI in scope, mention `/blueprint-mode:onboard-design`.
+5. Initialize git if needed for the requested project. Make an initial commit only when the user requested or already authorized it; otherwise leave the changes uncommitted.
+6. Do not create `design/` or `DESIGN.md`. If the project has UI in scope, mention that design intent capture can be enabled by asking for it.
 
 ## Output
 
@@ -33,7 +31,7 @@ Created [name]:
 - N ADRs
 - docs/specs/, patterns/, CLAUDE.md
 - Tests: [framework], example test passing
-- Initial commit made
+- Git: initialized | existing; commit: made | not requested
 
-Next: /blueprint-mode:require to add requirements, /blueprint-mode:decide for further decisions.
+Describe further requirements or decisions and ask to record them.
 ```

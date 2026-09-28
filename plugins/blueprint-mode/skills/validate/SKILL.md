@@ -1,7 +1,6 @@
 ---
 name: validate
 description: Check the codebase and its documentation against recorded decisions, boundaries, patterns, specs, and design intent. Use when the user asks for a consistency audit or whether the code still follows the documented decisions.
-argument-hint: "[scope: all|changes|specs|patterns|adrs|features|docs|<directory>]"
 allowed-tools: Read, Glob, Grep, Bash
 ---
 
@@ -15,7 +14,7 @@ Use the argument if given. `changes` means uncommitted files plus the last commi
 
 ## Steps
 
-1. Inventory Blueprint files: `docs/specs/**/*.md`, `docs/adrs/*.md`, `patterns/**`, `DESIGN.md`, `design/ux-decisions/*.md`. If none exist, say so and point at `/blueprint-mode:onboard`.
+1. Inventory Blueprint files: `docs/specs/**/*.md`, `docs/adrs/*.md`, `patterns/**`, `DESIGN.md`, `design/ux-decisions/*.md`. If none exist, say so and suggest asking to set up Blueprint.
 2. For scoped checks, select relevant ADRs per `adr-reading` using the affected files and requirements, including cross-cutting decisions. Extract current choices and constraints from their status and Decision sections; read full ADRs for ambiguous applicability, potential conflicts or scope extensions, and legacy sections lacking operational context. For whole-repo or ADR-wide checks, read every in-scope ADR fully, including rationale, to check operational completeness. Read other applicable boundaries, patterns, specs, and design rules for the chosen scope.
 3. Run the checks below for every domain that applies.
 4. Report findings ranked by severity, then offer the follow-ups.
@@ -26,7 +25,7 @@ Use the argument if given. `changes` means uncommitted files plus the last commi
 
 **Features.** Each spec's `module` path exists; Active features have code and tests; maturity matches reality; Implementation State is present and not stale; `related_adrs` still Active. Specs missing User Stories or Requirements, or carrying TBD markers (Low). `docs/specs/non-functional/` missing performance, security, scalability, or reliability (Low; Medium when CI or infrastructure config exists). Source directories with no spec are flagged as unspecified.
 
-**Documentation.** Markdown outside the Blueprint trees, including `CLAUDE.md` and `AGENTS.md`, does not recommend rejected alternatives or deprecated features. Stale agent instructions are High severity because agents follow them directly. Agent instructions that demand reading every Blueprint file before every edit, including a Blueprint 1.x `Pre-Edit Checklist`, are High with the fix "rerun `/blueprint-mode:onboard`".
+**Documentation.** Markdown outside the Blueprint trees, including `CLAUDE.md` and `AGENTS.md`, does not recommend rejected alternatives or deprecated features. Stale agent instructions are High severity because agents follow them directly. Agent instructions that demand reading every Blueprint file before every edit, including a Blueprint 1.x `Pre-Edit Checklist`, are High with the fix "ask to upgrade Blueprint documentation".
 
 **Scoped boundary routing.** Compare paths under `Scoped Rules` in `boundaries.md` with the compact routing line in the agent instructions identified by `agent-file-detection`. Ignore empty or placeholder sections. Missing, extra, or renamed paths are stale agent instructions (High); recommend refreshing the line per `agent-instructions`. With no scoped rules, the line should be absent. It should direct matching edits to only the relevant sections, without copying scoped rule contents.
 
@@ -57,4 +56,4 @@ Summary: Critical N, High N, Medium N, Low N. Domains scanned: [...]. Skipped: [
 
 ## Follow-ups
 
-Offer, do not perform: `/blueprint-mode:decide` for undocumented tech choices, `/blueprint-mode:require` for unspecified modules, `/blueprint-mode:good-pattern` for repeated conventions, and `/blueprint-mode:onboard` for stale agent instructions.
+Offer, do not perform: record undocumented tech choices, document requirements for unspecified modules, save repeated conventions as examples, or update stale Blueprint agent instructions. Describe these actions in ordinary language.

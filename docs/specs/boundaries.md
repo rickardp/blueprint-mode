@@ -5,7 +5,7 @@
 - Edit skills, templates, and docs in this repo
 - Record a decision, pattern, or requirement the user stated
 - Rename decision files when a retitle makes the slug stale, updating references
-- Run `/blueprint-mode:validate` and act on its findings for docs you changed
+- Run `validate` skill and act on its findings for docs you changed
 
 ## Ask First
 
@@ -39,4 +39,4 @@
 - Keep a `SKILL.md` under 80 lines and imperative: steps, then output
 - State the scope once; ask only about content that cannot be found
 - Give every model-invocable skill a description that says when to use it
-- Mark skills that write many files or change history `disable-model-invocation: true`
+- Keep skills automatically discoverable with precise user-intent triggers; skill selection does not authorize extra changes or commits

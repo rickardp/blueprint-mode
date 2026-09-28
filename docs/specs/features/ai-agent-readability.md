@@ -19,6 +19,10 @@ Blueprint Mode optimizes documentation for AI agent consumption over human histo
 
 ## Requirements
 
+- Users describe desired outcomes in natural language; no skill names or command syntax are required
+- All skills remain automatically discoverable with precise intent triggers; selecting a skill does not expand authorization
+- Conversation capture requires a request to save intent; new-project setup commits only when authorized
+
 - Delete superseded/deprecated ADRs when no code references them (git is the archive)
 - Use PR reviews as the advice mechanism (no explicit Advice section in ADRs)
 - Simplified status flow: Draft → Active → Superseded/Deprecated

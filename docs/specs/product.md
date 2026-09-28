@@ -63,5 +63,5 @@ See `docs/specs/features/` for detailed feature specifications.
 
 ## Quality Standards
 
-- Run `/blueprint-mode:validate` to check code against documented patterns, DESIGN.md, and decisions
+- Run `validate` skill to check code against documented patterns, DESIGN.md, and decisions
 - Follow templates from `plugins/blueprint-mode/skills/_templates/TEMPLATES.md`

@@ -15,12 +15,12 @@ What would you like to create?
 ```
 
 **Problems:**
-- The user already invoked the skill; the invocation is the scope
+- The user already stated the desired outcome; their request defines the scope
 - Every checkpoint pulls the model toward stopping early
 
 ### Do This Instead
 ```markdown
-Create the full structure. Ask only for rationale you cannot find; write TBD when skipped.
+Complete the requested setup. Ask only for rationale you cannot find; write TBD when skipped.
 ```
 
 **Why:** Modern models complete a stated scope on their own. Questions are for missing content, never for permission to do the job.
@@ -76,7 +76,7 @@ MANDATORY: Use the exact format above. DO NOT deviate.
 Format: `_templates/TEMPLATES.md`, section `adr-template`.
 ```
 
-**Why:** One copy of every format keeps skills short and lets `/blueprint-mode:validate` check against a single source of truth.
+**Why:** One copy of every format keeps skills short and lets `validate` skill check against a single source of truth.
 
 ---
 

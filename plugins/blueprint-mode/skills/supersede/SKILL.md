@@ -1,8 +1,6 @@
 ---
 name: supersede
 description: Replace or deprecate an existing ADR or UX decision. Use when the user is changing a documented choice or retiring one.
-argument-hint: "[ADR-NNN or UX-NNN]"
-disable-model-invocation: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash
 ---
 
@@ -12,8 +10,8 @@ Replacements stay in the same tree as the original: ADRs replace ADRs in `docs/a
 
 ## Steps
 
-1. Find the decision. `ADR-NNN` searches `docs/adrs/`, `UX-NNN` searches `design/ux-decisions/`, a bare number searches both and asks if found in both. If nothing matches, say so and suggest `/blueprint-mode:decide`.
-2. Read the full existing decision, including motivation and options. For ADRs, use `adr-reading` to distinguish a clarification or compatible extension from a changed choice, scope, or constraint. If only a clarification is requested, update in place, refresh references if retitled, report it, and stop; for an independent extension, record it as `/blueprint-mode:decide` would, leave this decision Active, report it, and stop. Determine intent from what the user said. "Switching to X" or "replace with X" is a replacement; "removing", "no longer needed" is a deprecation. Ask once, in the same message as any missing rationale, if unclear.
+1. Find the decision. `ADR-NNN` searches `docs/adrs/`, `UX-NNN` searches `design/ux-decisions/`, a bare number searches both and asks if found in both. If nothing matches, say so and suggest recording a decision and its rationale.
+2. Read the full existing decision, including motivation and options. For ADRs, use `adr-reading` to distinguish a clarification or compatible extension from a changed choice, scope, or constraint. If only a clarification is requested, update in place, refresh references if retitled, report it, and stop; for an independent extension, record it as `decide` skill would, leave this decision Active, report it, and stop. Determine intent from what the user said. "Switching to X" or "replace with X" is a replacement; "removing", "no longer needed" is a deprecation. Ask once, in the same message as any missing rationale, if unclear.
 3. Replacement:
    - Create the new decision with the next number in the same tree. For an ADR, use a self-contained Decision section with the new applicability, constraints, and exceptions; carry forward only rules that still apply. Its Context references the old decision; its Related section has `Supersedes: [ADR-OLD](./OLD-file.md)`. Add a `## Migration` section when the user gave migration notes.
    - Set the old file's frontmatter to `status: Superseded` and `superseded_by: NNN-new-slug`.

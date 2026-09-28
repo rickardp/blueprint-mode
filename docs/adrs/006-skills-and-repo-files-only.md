@@ -15,7 +15,7 @@ Ship **skills and repo files only**, without hooks or injected subagent personas
 - Keep the plugin Markdown only: `SKILL.md` files, one shared `TEMPLATES.md`, and the documents skills write. Add no runtime, shell, or tool dependencies.
 - Skills state their scope once, ask only for missing content, and reference shared template sections rather than duplicating formats.
 - Generated instructions route conditionally and grant autonomy through `Safe Without Asking`; do not require reading every document before every edit.
-- Report vocabulary drift through `/blueprint-mode:validate`, rather than rewriting files with hooks.
+- Report vocabulary drift through `validate` skill, rather than rewriting files with hooks.
 - Use `Safe Without Asking` for autonomy grants, not obligations; validation accepts legacy `Always Do` headings and reports obligation-style bullets.
 
 **Exceptions:** Existing 1.x repositories retain their legacy instructions until onboarding is rerun; validation supports those legacy headings.
@@ -28,7 +28,7 @@ That design targeted models that needed to be pushed to act, to follow a format,
 
 Codex already ran the plugin without hooks, since its manifest exposes only `skills/`, which proved the hook-free path works.
 
-We chose **skills and repo files only**. The plugin is now `SKILL.md` files, one shared `TEMPLATES.md`, and the documents it writes into the user's repo. Skills state the scope once, ask only about missing content, and point at the template section they need. The generated agent instructions route conditionally ("read the ADR when a change touches a documented choice") and grant autonomy explicitly through a "Safe Without Asking" boundary section. Vocabulary drift is reported by `/blueprint-mode:validate`.
+We chose **skills and repo files only**. The plugin is now `SKILL.md` files, one shared `TEMPLATES.md`, and the documents it writes into the user's repo. Skills state the scope once, ask only about missing content, and point at the template section they need. The generated agent instructions route conditionally ("read the ADR when a change touches a documented choice") and grant autonomy explicitly through a "Safe Without Asking" boundary section. Vocabulary drift is reported by `validate` skill.
 
 This supersedes ADR-003, which chose shell scripts for hooks. That file is deleted because nothing references it; git history is the archive.
 
@@ -44,7 +44,7 @@ This supersedes ADR-003, which chose shell scripts for hooks. That file is delet
 - Pro: One copy of each format in `_templates/TEMPLATES.md`; skills are short routers
 - Pro: Identical behaviour on every runtime that loads `SKILL.md`
 - Pro: No shell, no `jq`, nothing to keep portable
-- Con: Format drift is caught by `/blueprint-mode:validate` rather than prevented on write
+- Con: Format drift is caught by `validate` skill rather than prevented on write
 
 ### Option 3: Keep only the auto-fix hook
 - Pro: Smallest change
@@ -60,7 +60,7 @@ This supersedes ADR-003, which chose shell scripts for hooks. That file is delet
 
 **Negative:**
 - Heading synonyms in hand-written decisions are flagged later, not fixed on write
-- Repos onboarded with 1.x keep the old mandatory checklist until `/blueprint-mode:onboard` is rerun
+- Repos onboarded with 1.x keep the old mandatory checklist until `onboard` skill is rerun
 - Boundaries vocabulary changed: `## Always Do` became `## Safe Without Asking` and now holds autonomy grants rather than obligations; validation accepts the old heading and reports obligation-style bullets under it
 - Prompts that merely mention ADRs no longer receive injected guidance; the generated agent instructions carry the routing instead
 - The `blueprint-mode:*` subagent personas no longer exist

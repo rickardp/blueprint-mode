@@ -20,6 +20,8 @@ Blueprint Mode captures rationale for decisions rather than generating code from
 ## Requirements
 
 - Capture decision rationale, not implementation details
+- Use the same decision-writing workflow and status criteria for direct requests and earlier conversation
+- Load conversation selection and routing from `decide/references/capture.md` only when requested; route requirements, patterns, and progress to their existing workflows
 - Validate that code respects decisions (not that it matches specs)
 - Patterns are examples to follow, not templates to instantiate
 - Support multi-tool workflows (Claude + Cursor + Copilot)
@@ -35,7 +37,7 @@ Blueprint Mode inverts this: **Code exists → Capture decisions → Validate co
 
 | SDD Problem | Blueprint Mode Solution |
 |-------------|------------------------|
-| High friction to update specs | Lightweight decision capture via `/decide` |
+| High friction to update specs | Lightweight decision capture from natural-language requests |
 | Spec drift as code evolves | Validate code respects decisions, not matches specs |
 | Premature detail focus | Document only what matters (the WHY) |
 | Specs say *what*, not *why* | Rationale is the source of truth |
@@ -62,9 +64,9 @@ Senior developers juggle Claude (planning), Cursor (multi-file edits), and Copil
 
 | Milestone | Status |
 |-----------|--------|
-| `/decide` skill with input triage | Done |
+| `decide` skill with input triage | Done |
 | Draft → Active ADR workflow | Done |
-| `/capture` command for chat → docs | Done |
+| Conversation capture reference under `decide` for chat → docs | Done |
 | Maturity tracking in feature specs | Done |
 | Implementation state in feature specs | Done |
 

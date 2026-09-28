@@ -43,15 +43,15 @@ Traditional spec-driven development tries to solve the "code as truth" problem b
 1. **Interview** — Your AI assistant asks about your project, tech/design choices, and *why* you made them
 2. **Document** — Decisions become ADRs or UX decisions, patterns get captured, boundaries get set, and `DESIGN.md` carries cross-cutting UI rules
 3. **Develop** — AI follows your documented intent consistently while code remains canonical for what exists
-4. **Evolve** — Update decisions with `/blueprint-mode:decide` or `/blueprint-mode:supersede`
+4. **Evolve** — Tell the agent which decision to clarify, replace, or retire
 
 ## Quick Start
 
 ### Claude Code
 
 ```bash
-/plugin marketplace add rickardp/blueprint-mode
-/plugin install blueprint-mode
+claude plugin marketplace add rickardp/blueprint-mode
+claude plugin install blueprint-mode
 ```
 
 ### Codex
@@ -60,8 +60,8 @@ Traditional spec-driven development tries to solve the "code as truth" problem b
 codex plugin marketplace add rickardp/blueprint-mode
 ```
 
-Then enable `Blueprint Mode` from the Codex plugin directory. Codex exposes the same skills by
-name; where this README or a skill says `/blueprint-mode:name`, invoke the `name` skill.
+Then enable `Blueprint Mode` from the Codex plugin directory. In either runtime, ask naturally:
+“Set up Blueprint in this repo.”
 
 <details>
 <summary>Local development</summary>
@@ -102,23 +102,26 @@ so restart Codex after changing plugin metadata or skill files.
 
 </details>
 
-## Commands
+## Working with Blueprint
 
-| Command | Purpose |
-|---------|---------|
-| `/blueprint-mode:setup-repo` | Set up new repository with spec structure |
-| `/blueprint-mode:onboard` | Add spec structure to existing codebase (code/architecture tree only) |
-| `/blueprint-mode:onboard-design` | Opt in to design intent capture — scaffolds `design/ux-decisions/`, can scaffold `DESIGN.md`, and can optionally surface candidate UX decisions from existing UI for confirmation |
-| `/blueprint-mode:require` | Add functional or non-functional requirements |
-| `/blueprint-mode:decide` | Record decisions — triages tech (ADRs), UX decisions, and cross-cutting `DESIGN.md` rules |
-| `/blueprint-mode:good-pattern` | Capture approved patterns (any subject — code, schema, UI) |
-| `/blueprint-mode:bad-pattern` | Document anti-patterns (any subject — code, schema, UI) |
-| `/blueprint-mode:capture` | Persist decisions, requirements, and progress from the current conversation |
-| `/blueprint-mode:supersede` | Replace previous decisions with new ones (ADR or UX decision) |
-| `/blueprint-mode:list-adrs` | List all ADRs with status and summaries |
-| `/blueprint-mode:status` | Show overview of project's Blueprint structure plus adjacent `DESIGN.md` context |
-| `/blueprint-mode:validate` | Check code against documented patterns, decisions, and design |
-| `/blueprint-mode:help` | Explain Blueprint features and available commands |
+Describe the outcome you want. The agent selects the relevant skill; you do not need to know skill
+names or invocation syntax. Selecting a skill does not authorize work beyond your request.
+
+| Ask naturally | Result |
+|---------------|--------|
+| “Set up Blueprint in this repo.” | Add or upgrade engineering documentation |
+| “Create a new TypeScript project with Blueprint.” | Scaffold a project and documentation |
+| “Set up design intent capture.” | Enable UX decisions and optional design context |
+| “Record our PostgreSQL choice because we need transactions.” | Capture a decision and its rationale |
+| “Replace ADR-012 with this new approach.” | Assess and record a replacement |
+| “Users must be able to export their data.” | Record a requirement |
+| “Save this implementation as an example to follow.” | Capture a good pattern |
+| “Document why we should avoid this pattern.” | Capture an anti-pattern |
+| “Save the decisions from this conversation.” | Persist agreed intent and progress |
+| “Show our active architecture decisions.” | List relevant ADRs |
+| “What has Blueprint documented?” | Summarize documentation status |
+| “Check these changes against our decisions.” | Validate consistency |
+| “How does Blueprint work?” | Explain the workflow |
 
 The plugin is Markdown only: short `SKILL.md` routers plus one shared templates file, packaged
 for both Claude Code and Codex from the same `skills/` directory. There are no hooks, shell
@@ -126,6 +129,13 @@ scripts, or dependencies. Skills are written for current models: they state the 
 only for rationale they cannot find, and the generated `CLAUDE.md` routes an agent to the right
 document when a change touches it rather than demanding every file be read before every edit
 (see [ADR-006](docs/adrs/006-skills-and-repo-files-only.md)).
+
+### Changes in 2.1.1
+
+Describe what you want in ordinary language; all skills support automatic selection. Requests to save
+conversation intent use the same decision-writing workflow as direct requests, with conversation
+scanning loaded only when needed. Requirements, patterns, and progress use their existing workflows.
+Skill selection does not expand the user’s request, and new-project setup commits only when authorized.
 
 ### Reading architecture decisions
 
@@ -135,14 +145,14 @@ follows it after checking status. Unclear applicability or proposed features and
 may conflict or extend the decision's scope call for reading the full motivation, options, and
 consequences before distinguishing a clarification from a conflict. Agents discover relevant
 decisions through feature links, code references, and searches of applicability, including
-repository-wide choices. Older ADRs require full reads until `/blueprint-mode:onboard` reorganizes
+repository-wide choices. Older ADRs require full reads until onboarding reorganizes
 them without changing their meaning; unknown scope stays explicit.
 
 ### Upgrading to 2.1.0
 
-Run `/blueprint-mode:onboard` in each repository to migrate ADRs to the Decision-first layout and
-refresh agent instructions. Existing rationale, status, and meaning are preserved; uncertain scope
-is reported rather than inferred.
+In each repository, ask “Upgrade this repo’s Blueprint documentation.” This migrates ADRs to the
+Decision-first layout and refreshes agent instructions. Existing rationale, status, and meaning are
+preserved; uncertain scope is reported rather than inferred.
 
 If `docs/specs/tech-stack.md` exists, onboarding verifies its content against the target repo’s
 maintained documentation and checks incoming references. It suggests removal only when the file is
@@ -152,32 +162,28 @@ raised to the user instead. The file and its references remain intact until remo
 ### Upgrading from 1.x
 
 1. Reinstall the plugin (Codex loads a cached copy, so restart it).
-2. Rerun `/blueprint-mode:onboard`. It replaces the 1.x "Pre-Edit Checklist" in `CLAUDE.md` with
-   conditional routing and inlined limits, and adds `maturity` and Implementation State to older
+2. Ask “Upgrade this repo’s Blueprint documentation.” It replaces the 1.x "Pre-Edit Checklist" in
+   `CLAUDE.md` with conditional routing and inlined limits, and adds `maturity` and Implementation State to older
    feature specs.
 3. In `boundaries.md`, `## Always Do` is now `## Safe Without Asking` and holds autonomy grants,
    not obligations. Drop "read X before Y" rules (routing now handles that), move "run lint
    before commit" style rules to the Commands section of `CLAUDE.md`, and keep what is genuinely
-   safe to do unasked. `/blueprint-mode:validate` accepts the old heading and reports obligation-style
+   safe to do unasked. Validation accepts the old heading and reports obligation-style
    bullets under it.
 4. Removed with no replacement: the prompt hooks that injected rules when a prompt mentioned a
-   skill or the word "ADR", the write hook that rewrote heading synonyms (`/blueprint-mode:validate`
+   skill or the word "ADR", the write hook that rewrote heading synonyms (validation
    reports them now), and the `blueprint-mode:*` subagent personas.
 
 ## Onboarding an existing codebase
 
-```
-/blueprint-mode:onboard
-````
+> Set up Blueprint in this existing repository.
 
 Also, the onboarding pushes the limits for what a skill can really do, so on more complex cases it may be worth running the onboarding multiple times (it will fill in gaps if it skipped over some files in the first run).
 
 
 ## Setting up a new repo
 
-```
-/blueprint-mode:setup-repo
-````
+> Create a new project with Blueprint, using [stack] because [reasons].
 
 Note that this functionality is in its early stages.
 
@@ -204,7 +210,7 @@ project/
 │   │   └── [name].[ext]           # Approved examples
 │   └── bad/
 │       └── anti-patterns.md       # Anti-patterns to avoid
-├── design/                        # DESIGN / UX TREE (OPT-IN — created by /blueprint-mode:onboard-design)
+├── design/                        # DESIGN / UX TREE (OPT-IN — enabled by request)
 │   └── ux-decisions/
 │       └── NNN-[slug].md          # UX decisions (UX-NNN), independent numbering
 └── CLAUDE.md                      # AI agent instructions
@@ -212,11 +218,11 @@ project/
 
 **Tree separation is strict.** UX decisions are NOT ADRs — they live in their own tree with independent numbering even though the document shape is similar.
 
-**The design tree is opt-in.** `/blueprint-mode:onboard` only sets up the code/architecture tree. To capture UX decisions, run `/blueprint-mode:onboard-design` separately — it scaffolds the directories and can optionally surface a small number of candidate UX choices found in existing UI/code for the user, developer, or designer to confirm. Existing code is only a prompt for the conversation; Blueprint captures the why only when a human states it. Anything not covered there is captured later, on demand, via `/blueprint-mode:decide`.
+**The design tree is opt-in.** Repository onboarding only sets up the code/architecture tree. To capture UX decisions, ask to set up design intent capture separately — it scaffolds the directories and can optionally surface a small number of candidate UX choices found in existing UI/code for the user, developer, or designer to confirm. Existing code is only a prompt for the conversation; Blueprint captures the why only when a human states it. Anything not covered there is captured later, on demand, by asking to record a decision.
 
 **Deliberate vs coincidental UI.** The repo gives agents the same "is this deliberate?" coverage that ADRs give for architecture. Three layers answer the question for UI: `DESIGN.md` (cross-cutting design rules), `design/ux-decisions/` (per-decision rationale), and `// UX-TBD: [what's unclear]` comments to flag UI that has no governing decision yet — without inventing rationale. Documented UX decisions mean "this was intentional." Undocumented UI code is just implementation state; agents should not infer design rationale from it.
 
-**`DESIGN.md` is the top-level design context, not part of the Blueprint structure.** A short living `DESIGN.md` at the repo root (Google Stitch / awesome-design-md format) holds cross-cutting design rules and prohibitions ("never use more than 3 colours on a screen"). It's a community convention Blueprint stays *compatible with* rather than owning — `/blueprint-mode:onboard-design` can scaffold a minimal stub when the user wants one, agents read it on every UI generation task, and authoring stays conversational. Blueprint avoids duplicating information that belongs in `DESIGN.md`: cross-cutting rules go there, per-decision rationale goes in `design/ux-decisions/`.
+**`DESIGN.md` is the top-level design context, not part of the Blueprint structure.** A short living `DESIGN.md` at the repo root (Google Stitch / awesome-design-md format) holds cross-cutting design rules and prohibitions ("never use more than 3 colours on a screen"). It's a community convention Blueprint stays *compatible with* rather than owning — Design onboarding can scaffold a minimal stub when the user wants one, agents read it on every UI generation task, and authoring stays conversational. Blueprint avoids duplicating information that belongs in `DESIGN.md`: cross-cutting rules go there, per-decision rationale goes in `design/ux-decisions/`.
 
 ## Comparison
 

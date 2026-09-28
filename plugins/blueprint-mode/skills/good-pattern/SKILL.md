@@ -1,7 +1,6 @@
 ---
 name: good-pattern
 description: Save code, schema, UI, or a script as an approved example in patterns/good. Use when the user points at code and says it is the way to do it.
-argument-hint: "[file path or description]"
 allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 

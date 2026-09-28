@@ -9,7 +9,7 @@ date: 2026-01-31
 
 Use the **Claude Code Plugin System** to distribute Blueprint to Claude Code users.
 
-**Applies to:** Claude Code installation, marketplace distribution, and native skill commands.
+**Applies to:** Claude Code installation, marketplace distribution, and native skills.
 
 **Constraints:** Integrate with Claude Code's plugin and skills workflow without additional package managers, build systems, or runtime dependencies beyond Claude Code. Keep skills in plain Markdown.
 
@@ -21,13 +21,13 @@ Blueprint Mode needs a distribution mechanism that allows users to install and u
 
 We chose **Claude Code Plugin System** because the team is already using Claude Code and the plugin system provides native integration with skills (commands).
 
-The plugin marketplace enables one-command installation (`/plugin marketplace add rickardp/blueprint-mode`). Skills are plain Markdown, so the same files load in other runtimes (see ADR-005).
+The plugin marketplace enables one-command installation (`claude plugin marketplace add rickardp/blueprint-mode`). Skills are plain Markdown, so the same files load in other runtimes (see ADR-005).
 
 ## Options Considered
 
 ### Option 1: Claude Code Plugin System
 - Pro: Native integration with Claude Code
-- Pro: Simple installation via `/plugin marketplace add`
+- Pro: Simple installation via `claude plugin marketplace add`
 - Pro: Skills system for command expansion
 - Con: Tied to Claude Code ecosystem
 
@@ -48,7 +48,7 @@ The plugin marketplace enables one-command installation (`/plugin marketplace ad
 
 **Positive:**
 - Seamless integration with Claude Code workflow
-- Skills appear as native commands (`/blueprint-mode:decide`, etc.)
+- Skills integrate with the native Claude Code workflow
 - No runtime dependencies beyond Claude Code
 
 **Negative:**

@@ -1,13 +1,12 @@
 ---
 name: onboard
-description: Create the Blueprint code/architecture tree for an existing repository, or upgrade one set up by an earlier Blueprint version. Safe to rerun; later runs fill gaps.
-disable-model-invocation: true
+description: Create the Blueprint code/architecture tree for an existing repository, or upgrade one set up by an earlier Blueprint version. Use when the user asks to add Blueprint to an existing repo or upgrade its documentation. Safe to rerun; later runs fill gaps.
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash
 ---
 
 # Onboard Repository
 
-Create the full structure in one pass; the invocation is the scope. Formats and working style are in `../_templates/TEMPLATES.md` (relative to this skill's directory): `working-style`, `agent-file-detection`, `adr-reading`, `adr-template`, `product-spec`, `boundaries`, `bad-patterns`, `agent-instructions`.
+When the user asks to add or upgrade Blueprint, complete the requested setup or migration in one pass. A question about Blueprint alone does not authorize scaffolding. Formats and working style are in `../_templates/TEMPLATES.md` (relative to this skill's directory): `working-style`, `agent-file-detection`, `adr-reading`, `adr-template`, `product-spec`, `boundaries`, `bad-patterns`, `agent-instructions`.
 
 ## Steps
 
@@ -23,7 +22,7 @@ Create the full structure in one pass; the invocation is the scope. Formats and 
 6. When the structure already exists: create only what is missing, refine Draft ADRs whose rationale is now known, add `maturity` and Implementation State to feature specs that lack them, and migrate a 1.x `boundaries.md` as the `boundaries` template describes. Refresh the scoped-boundaries routing line per `agent-instructions` after updating boundaries, including in 2.x agent files.
 7. Refresh ADR routing per `agent-instructions`, including on reruns. Read existing ADRs fully before moving their operational choice, applicability, constraints, and exceptions into the leading Decision section. Preserve status and meaning; retain motivation and options in their sections. Mark uncertain scope `TBD` and report it rather than guessing.
 8. If `docs/specs/tech-stack.md` exists, read it and verify whether all its information is already covered accurately by the target repo’s ADRs, README, agent instructions, or other maintained docs. Check incoming references too. If fully redundant, suggest removing it and updating its references, citing where the content is covered. Otherwise, raise the unique, conflicting, or uncertain content to the user with its location and why removal is not yet justified. Leave the file and references intact unless the user authorizes removal.
-9. Do not create `design/` or `DESIGN.md`. If the repo has UI code, mention `/blueprint-mode:onboard-design` in the report.
+9. Do not create `design/` or `DESIGN.md`. If the repo has UI code, mention that design intent capture can be enabled by asking for it.
 
 ## Output
 
@@ -34,5 +33,5 @@ Created Blueprint structure:
 - patterns/
 - CLAUDE.md (updated; replaced 1.x checklist)
 
-Rerun /blueprint-mode:onboard to refine Draft ADRs. UI detected: run /blueprint-mode:onboard-design to capture design intent.
+Ask to refine Draft ADRs when their rationale is known. If UI was detected, mention that design intent capture can be enabled.
 ```

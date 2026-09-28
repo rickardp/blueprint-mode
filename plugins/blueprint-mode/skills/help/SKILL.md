@@ -1,7 +1,6 @@
 ---
 name: help
-description: Explain Blueprint Mode and its commands. Use when the user asks how Blueprint works, which command to use, or where a kind of document belongs.
-argument-hint: "[topic: commands|workflow|design|formats]"
+description: Explain Blueprint Mode and its workflows. Use when the user asks how Blueprint works, how to get started, or where a kind of document belongs.
 allowed-tools: Read, Glob
 ---
 
@@ -23,29 +22,33 @@ Code shows what a system does. Blueprint records why, so agents and people can t
 | UX decisions | `design/ux-decisions/` | UX choices with rationale (opt-in tree) |
 | Design context | `DESIGN.md` | Cross-cutting design rules (community format) |
 
-## Commands
+## Natural-language requests
 
-| Command | Use when |
-|---------|----------|
-| `/blueprint-mode:setup-repo` | Starting a new project |
-| `/blueprint-mode:onboard` | Adding Blueprint to an existing codebase, or upgrading a 1.x setup |
-| `/blueprint-mode:onboard-design` | Opting in to UX decisions and `DESIGN.md` |
-| `/blueprint-mode:decide [topic] because [reason]` | Recording a tech or UX decision |
-| `/blueprint-mode:supersede ADR-NNN` | Replacing or retiring a decision |
-| `/blueprint-mode:require [description]` | Adding a functional or non-functional requirement |
-| `/blueprint-mode:good-pattern [path]` | Saving code as an example to follow |
-| `/blueprint-mode:bad-pattern [description]` | Documenting something to avoid |
-| `/blueprint-mode:capture` | Saving what the conversation decided |
-| `/blueprint-mode:status`, `/blueprint-mode:list-adrs` | Seeing what is documented |
-| `/blueprint-mode:validate` | Checking code and docs against documented intent |
+Users describe the outcome; the agent selects the skill. Explain workflows without requiring skill names or command syntax. Skill selection does not authorize additional work.
+
+| Ask naturally | Result |
+|---------------|--------|
+| “Set up Blueprint in this repo.” | Add or upgrade engineering documentation |
+| “Create a new TypeScript project with Blueprint.” | Scaffold a project and documentation |
+| “Set up design intent capture.” | Enable UX decisions and optional design context |
+| “Record our PostgreSQL choice because we need transactions.” | Capture a decision and its rationale |
+| “Replace ADR-012 with this new approach.” | Assess and record a replacement |
+| “Users must be able to export their data.” | Record a requirement |
+| “Save this implementation as an example to follow.” | Capture a good pattern |
+| “Document why we should avoid this pattern.” | Capture an anti-pattern |
+| “Save the decisions from this conversation.” | Persist agreed intent and progress |
+| “Show our active architecture decisions.” | List relevant ADRs |
+| “What has Blueprint documented?” | Summarize documentation status |
+| “Check these changes against our decisions.” | Validate consistency |
+| “How does Blueprint work?” | Explain the workflow |
 
 ## Workflow
 
-Set up once with `onboard` or `setup-repo`. Record decisions as they happen with `decide`, requirements with `require`, corrections with `good-pattern` and `bad-pattern`. Run `capture` at the end of a session and `validate` before a release or after large changes. Change a decision with `supersede`; superseded decisions with no code references are deleted because git is the archive.
+Ask to set up or upgrade Blueprint once. State decisions and reasons as they arise, and ask to record requirements or patterns. Ask to save agreed intent from a conversation or check changes against documented decisions. Replacing a decision preserves its history in git; unresolved conflicts remain explicit.
 
 ## Design
 
-The design tree is separate from the code tree so design reviewers can own `design/**`. It only exists after `/blueprint-mode:onboard-design`. A cross-cutting rule ("never more than three colours on a screen") goes in `DESIGN.md`; one choice among alternatives ("modal over page for destructive confirmation") is a UX decision. Undocumented UI code is not evidence of intent; agents flag unclear UI with `// UX-TBD:` rather than inventing a reason.
+The design tree is separate from the code tree so design reviewers can own `design/**`. It exists only when the user has requested design intent capture. A cross-cutting rule ("never more than three colours on a screen") goes in `DESIGN.md`; one choice among alternatives ("modal over page for destructive confirmation") is a UX decision. Undocumented UI code is not evidence of intent; agents flag unclear UI with `// UX-TBD:` rather than inventing a reason.
 
 ## Where does X go
 

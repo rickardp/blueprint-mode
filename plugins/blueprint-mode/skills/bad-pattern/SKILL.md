@@ -1,7 +1,6 @@
 ---
 name: bad-pattern
 description: Document something to avoid, with the correct alternative, in patterns/bad/anti-patterns.md. Use when the user says "don't do X" or corrects a recurring mistake.
-argument-hint: "[what to avoid] - [correct approach]"
 allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 

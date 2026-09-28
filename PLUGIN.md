@@ -16,12 +16,13 @@ blueprint-mode/
 │       ├── setup-repo/SKILL.md
 │       ├── onboard/SKILL.md
 │       ├── onboard-design/SKILL.md
-│       ├── decide/SKILL.md
+│       ├── decide/
+│       │   ├── SKILL.md
+│       │   └── references/capture.md
 │       ├── supersede/SKILL.md
 │       ├── require/SKILL.md
 │       ├── good-pattern/SKILL.md
 │       ├── bad-pattern/SKILL.md
-│       ├── capture/SKILL.md
 │       ├── status/SKILL.md
 │       ├── list-adrs/SKILL.md
 │       ├── validate/SKILL.md
@@ -36,10 +37,8 @@ The plugin is Markdown only. There are no hooks, agents, scripts, or dependencie
 
 ```markdown
 ---
-name: skill-name                 # bare; Claude Code exposes it as /blueprint-mode:skill-name
+name: skill-name                 # internal identifier; users describe their intent
 description: What it does and when to use it, in one or two sentences.
-argument-hint: "[shape of the argument]"
-disable-model-invocation: true   # only for skills that write many files or change history
 allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 
@@ -59,7 +58,7 @@ The exact shape of the final report.
 Rules, from `docs/specs/boundaries.md`:
 
 - Under 80 lines. The skill is a router; the format lives in the templates file.
-- State the scope once. Ask only for content that cannot be found, accept "skip", write `TBD`.
+- The user’s request defines scope; automatic skill selection does not expand authorization. Ask only for missing content, accept "skip", write `TBD`.
 - No plan-mode checkpoints, no confirmation before creating files, no MUST or CRITICAL language.
 - The description says when the skill should be used, precisely enough that it does not fire on tangential prompts.
 
@@ -67,8 +66,8 @@ Rules, from `docs/specs/boundaries.md`:
 
 ```bash
 # Claude Code
-/plugin marketplace add rickardp/blueprint-mode
-/plugin install blueprint-mode
+claude plugin marketplace add rickardp/blueprint-mode
+claude plugin install blueprint-mode
 
 # Claude Code, local development
 claude --plugin-dir ./plugins/blueprint-mode
@@ -94,13 +93,12 @@ codex plugin marketplace add ./
 | setup-repo | Scaffold a new project with the Blueprint structure |
 | onboard | Add the Blueprint code tree to an existing codebase |
 | onboard-design | Opt in to the design tree and `DESIGN.md` |
-| decide | Record a decision as an ADR, UX decision, or `DESIGN.md` rule |
+| decide | Record a decision or capture agreed intent from a conversation |
 | supersede | Replace or deprecate a decision |
 | require | Add a functional or non-functional requirement |
 | good-pattern | Save an approved example |
 | bad-pattern | Document an anti-pattern |
-| capture | Persist what the conversation decided |
 | status | Show what is documented |
 | list-adrs | List ADRs by status |
 | validate | Check code and docs against documented intent |
-| help | Explain Blueprint and its commands |
+| help | Explain Blueprint and its workflows |

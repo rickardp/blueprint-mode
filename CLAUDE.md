@@ -13,7 +13,7 @@ Blueprint Mode is a Claude Code and Codex plugin that makes a repo carry its own
 
 ## Autonomy and limits
 
-Safe without asking: edit skills, templates, and docs; record decisions the user states; rename decision files when a retitle makes the slug stale; run `/blueprint-mode:validate` on what you changed.
+Safe without asking: edit skills, templates, and docs; record decisions the user states; rename decision files when a retitle makes the slug stale; run `validate` skill on what you changed.
 Ask first: renaming or removing a skill, changing a file format that users' repos already contain, changing the boundaries vocabulary, editing a manifest beyond a version bump.
 Never: add a runtime, shell script, hook, build step, or external service; duplicate a template format into a skill. If a request would violate one of these, say which and propose an alternative.
 
@@ -34,7 +34,7 @@ When code or a skill implements a documented decision, add a one-line reference 
 
 ## Recording new intent
 
-When the user states a decision with a reason or corrects a pattern, offer to record it with `/blueprint-mode:decide`, `/blueprint-mode:require`, `/blueprint-mode:good-pattern`, or `/blueprint-mode:bad-pattern`. Superseded decisions with no references may be deleted; git history is the archive.
+When the user states a decision with a reason or corrects a pattern, offer to record it with `decide` skill, `require` skill, `good-pattern` skill, or `bad-pattern` skill. Superseded decisions with no references may be deleted; git history is the archive.
 
 ## Commands
 
