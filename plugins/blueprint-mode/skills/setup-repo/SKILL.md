@@ -8,7 +8,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash
 
 # Set Up New Repository
 
-Formats and working style are in `../_templates/TEMPLATES.md` (relative to this skill's directory): `working-style`, `agent-file-detection`, `adr-template`, `product-spec`, `tech-stack`, `boundaries`, `bad-patterns`, `agent-instructions`.
+Formats and working style are in `../_templates/TEMPLATES.md` (relative to this skill's directory): `working-style`, `agent-file-detection`, `adr-template`, `product-spec`, `boundaries`, `bad-patterns`, `agent-instructions`.
 
 ## Steps
 
@@ -17,7 +17,7 @@ Formats and working style are in `../_templates/TEMPLATES.md` (relative to this 
 3. Detect an existing agent instructions file per `agent-file-detection`; default to creating `CLAUDE.md`.
 4. Create:
    - `docs/adrs/` with one Active ADR per stack choice
-   - `docs/specs/product.md`, `tech-stack.md` (rows link their ADRs), `boundaries.md` from the template
+   - `docs/specs/product.md`, `boundaries.md` from the template
    - `docs/specs/features/` and `docs/specs/non-functional/` as empty directories
    - `patterns/good/.gitkeep`, `patterns/bad/anti-patterns.md` with the template header
    - Agent instructions from the `agent-instructions` template, without the design lines, with Autonomy and limits filled from `boundaries.md`

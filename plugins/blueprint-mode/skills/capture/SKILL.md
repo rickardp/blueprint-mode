@@ -8,7 +8,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit
 
 # Capture Conversation
 
-Formats are in `../_templates/TEMPLATES.md` (relative to this skill's directory). Respect the code tree vs design tree split in section `design-separation`.
+Formats are in `../_templates/TEMPLATES.md` (relative to this skill's directory). Respect the code tree vs design tree split in section `design-separation`. Use `adr-reading` for selection and change assessment and `adr-template` for ADR structure.
 
 ## Steps
 
@@ -20,8 +20,8 @@ Formats are in `../_templates/TEMPLATES.md` (relative to this skill's directory)
    - New feature: feature spec at `maturity: Exploring`
    - Refinement or progress: update the existing spec or decision, including its Implementation State; set a Draft to Active when its last TODO is resolved
    - Pattern or anti-pattern: `patterns/`
-3. For each item, check its target directory for an existing document on the topic and update that instead of creating. Skip anything already documented or derivable from code.
-4. Write the creates and updates. In the report, show old and new text for any update that replaces existing rationale rather than adding to it.
+3. Select relevant ADRs per `adr-reading` and check the target directory for an existing document on the topic. Read the full existing decision before changing it; update clarifications in place, but handle changes to the choice, scope, or constraints through `/blueprint-mode:supersede` when authorized. An unrelated new decision gets its own file. Skip anything already documented or derivable from code.
+4. Write the creates and updates using their destination templates. For ADRs, keep Decision self-contained; preserve established scope, constraints, and exceptions, leaving unknown scope explicit. In the report, show old and new text for any update that replaces existing rationale rather than adding to it.
 5. If a UX decision or `DESIGN.md` rule was skipped because its destination does not exist, list it separately and point at `/blueprint-mode:onboard-design`. Omit that note when nothing was skipped.
 6. If a retitle makes a decision filename stale, rename the file and update references as the template describes.
 

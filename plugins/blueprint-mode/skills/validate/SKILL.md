@@ -7,7 +7,7 @@ allowed-tools: Read, Glob, Grep, Bash
 
 # Validate Blueprint Compliance
 
-Report only; never fix without being asked. Canonical formats are in `../_templates/TEMPLATES.md` (relative to this skill's directory).
+Report only; never fix without being asked. ADR selection and reading depth follow section `adr-reading`. Canonical formats are in `../_templates/TEMPLATES.md` (relative to this skill's directory).
 
 ## Scope
 
@@ -16,13 +16,13 @@ Use the argument if given. `changes` means uncommitted files plus the last commi
 ## Steps
 
 1. Inventory Blueprint files: `docs/specs/**/*.md`, `docs/adrs/*.md`, `patterns/**`, `DESIGN.md`, `design/ux-decisions/*.md`. If none exist, say so and point at `/blueprint-mode:onboard`.
-2. Read them and extract the rules to check: tech stack, boundaries, each decision's chosen and rejected options, anti-patterns, feature specs with module paths, `DESIGN.md` rules, UX decisions.
+2. For scoped checks, select relevant ADRs per `adr-reading` using the affected files and requirements, including cross-cutting decisions. Extract current choices and constraints from their status and Decision sections; read full ADRs for ambiguous applicability, potential conflicts or scope extensions, and legacy sections lacking operational context. For whole-repo or ADR-wide checks, read every in-scope ADR fully, including rationale, to check operational completeness. Read other applicable boundaries, patterns, specs, and design rules for the chosen scope.
 3. Run the checks below for every domain that applies.
 4. Report findings ranked by severity, then offer the follow-ups.
 
 ## Checks
 
-**Source code.** Dependency manifests versus declared tech stack. Grep for "Never Do" violations and for rejected alternatives named in Active decisions. In-scope changes that touch an "Ask First" item (Medium). Grep for documented anti-patterns. Note repeated conventions (three or more occurrences) that no good pattern captures.
+**Source code.** Compare dependency manifests against technologies chosen in Active ADRs. Grep for "Never Do" violations and deviations from Active decisions. Treat matches to rejected alternatives as candidates; read the full ADR before classifying a conflict, since a rejected option may apply outside its original scope. In-scope changes that touch an "Ask First" item (Medium). Grep for documented anti-patterns. Note repeated conventions (three or more occurrences) that no good pattern captures.
 
 **Features.** Each spec's `module` path exists; Active features have code and tests; maturity matches reality; Implementation State is present and not stale; `related_adrs` still Active. Specs missing User Stories or Requirements, or carrying TBD markers (Low). `docs/specs/non-functional/` missing performance, security, scalability, or reliability (Low; Medium when CI or infrastructure config exists). Source directories with no spec are flagged as unspecified.
 
@@ -32,9 +32,9 @@ Use the argument if given. `changes` means uncommitted files plus the last commi
 
 **Vocabulary.** A legacy `## Always Do` heading in boundaries is read as `## Safe Without Asking`; obligation-style bullets under it ("read X before Y", "run Z before commit") are Low, with the destination the `boundaries` template gives for that kind of bullet. Do not recommend deleting a project requirement; it moves to scoped rules, the agent instructions, or an NFR. Non-canonical synonyms are Low: in decisions `Benefits`, `Trade-offs`, `Pros`, `Cons`, `References`, `status: Accepted`, and an `# ADR-` title under `design/ux-decisions/`; in feature specs `## Description`, `## Stories`, `status: Done|Complete|Todo`; in boundaries `# Boundaries`, `Do Always`, `Ask Before`, `Don't Do`, `Prohibited`; in anti-patterns `Wrong Way`, `Right Way`, `Better`, `**Level:**`.
 
-**Decision files.** Filename number matches the title number (High). Slug still describes the title (Low). Links and `superseded_by` values resolve (Medium).
+**Decision files.** For each ADR inspected in full, check that Decision is first and self-contained: applicability, constraints, and exceptions (Low when missing; unknown scope stays explicit). Flag operative constraints found only in rationale as incomplete Decision content; preserve their meaning when recommending a move. Selective reads do not establish completeness; report that check as skipped for those files. Filename number matches the title number (High). Slug still describes the title (Low). Links and `superseded_by` values resolve (Medium).
 
-**Content placement.** Requirements inside ADRs, architectural rationale inside feature specs, UX rationale under `docs/adrs/` unless its Context says it was filed there deliberately, tech rationale under `design/`, broad rules filed as UX decisions, or per-flow rationale inside `DESIGN.md` (Medium, with the correct destination).
+**Content placement.** Product requirements inside ADRs (architectural constraints belong in Decision), architectural rationale inside feature specs, UX rationale under `docs/adrs/` unless its Context says it was filed there deliberately, tech rationale under `design/`, broad rules filed as UX decisions, or per-flow rationale inside `DESIGN.md` (Medium, with the correct destination).
 
 **Design.** Only when `DESIGN.md` or `design/` exists. UI source against explicit `DESIGN.md` prohibitions (High) and against rejected alternatives in Active UX decisions. Count `UX-TBD` flags (Low, informational).
 
@@ -42,7 +42,7 @@ Use the argument if given. `changes` means uncommitted files plus the last commi
 
 ## Severity
 
-Critical: secrets, "Never Do" violations. High: tech stack mismatches, decision violations, stale agent instructions, design prohibition violations. Medium: misplaced content, broken decision links, undeclared dependencies, unapproved Ask First changes. Low: vocabulary drift, stale slugs, UX-TBD counts, missing spec sections.
+Critical: secrets, "Never Do" violations. High: mismatches with technologies chosen in Active ADRs, decision violations, stale agent instructions, design prohibition violations. Medium: misplaced content, broken decision links, undeclared dependencies, unapproved Ask First changes. Low: vocabulary drift, stale slugs, UX-TBD counts, missing spec sections.
 
 ## Output
 

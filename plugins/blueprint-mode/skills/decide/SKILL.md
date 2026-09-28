@@ -7,7 +7,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit
 
 # Record Decision
 
-Write the decision the user stated to the right place, with its rationale. Formats are in `../_templates/TEMPLATES.md` (relative to this skill's directory): `adr-template`, `ux-decision-template`, `design-separation`, `working-style`.
+Write the decision the user stated to the right place, with its rationale. Formats are in `../_templates/TEMPLATES.md` (relative to this skill's directory): `adr-reading`, `adr-template`, `ux-decision-template`, `design-separation`, `working-style`.
 
 ## Steps
 
@@ -18,9 +18,9 @@ Write the decision the user stated to the right place, with its rationale. Forma
    - Cross-cutting design rule or prohibition: one bullet in `DESIGN.md`, if present or the user agrees to scaffold it
    - A requirement with no decision in it: create the spec as `/blueprint-mode:require` would and say so
    Mixed input produces one file per concern.
-3. Check the target directory for an existing decision on the same topic.
-4. Gather what is still missing in one message: the rationale if none was given, whether a conflicting decision is being replaced, which reviewers own an ambiguous case when a design tree exists, and, when the input is clearly UX but `design/ux-decisions/` does not exist, whether to run `/blueprint-mode:onboard-design` first or file it as an ADR whose Context notes it holds UX rationale. Accept "skip": write a Draft with `<!-- TODO: -->` markers. When the input is plainly architectural and the repo has neither `design/` nor `DESIGN.md`, do not mention design at all.
-5. Write the file. The number is one past the highest in the target directory and the slug describes the title. A replacement follows `/blueprint-mode:supersede`.
+3. Select relevant ADRs per `adr-reading`; check the target tree for an existing decision on the topic. Read the full existing decision before classifying an update as clarification, compatible extension, or conflict. Clarify in place only when the choice and its established scope and constraints remain unchanged; assess supersession when they change.
+4. Gather what is still missing in one message: the rationale if none was given, whether a conflicting decision is being replaced if the user has not already resolved that, which reviewers own an ambiguous case when a design tree exists, and, when the input is clearly UX but `design/ux-decisions/` does not exist, whether to run `/blueprint-mode:onboard-design` first or file it as an ADR whose Context notes it holds UX rationale. Accept "skip": write a Draft with `<!-- TODO: -->` markers. When the input is plainly architectural and the repo has neither `design/` nor `DESIGN.md`, do not mention design at all.
+5. Write to the selected destination using its template. For ADRs, keep Decision self-contained with established scope and constraints; keep motivation and alternatives in the rationale sections. Do not invent scope or constraints. New decisions use one past the highest number in their directory; the slug describes the title. A replacement follows `/blueprint-mode:supersede`.
 6. Report each file created or updated.
 
 ## Output

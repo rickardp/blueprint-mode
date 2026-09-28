@@ -127,6 +127,28 @@ only for rationale they cannot find, and the generated `CLAUDE.md` routes an age
 document when a change touches it rather than demanding every file be read before every edit
 (see [ADR-006](docs/adrs/006-skills-and-repo-files-only.md)).
 
+### Reading architecture decisions
+
+ADRs put the operational decision first: the choice, where it applies, constraints, and exceptions.
+Routine implementation retrieves only the prefix through Decision, stopping before Context, and
+follows it after checking status. Unclear applicability or proposed features and requirements that
+may conflict or extend the decision's scope call for reading the full motivation, options, and
+consequences before distinguishing a clarification from a conflict. Agents discover relevant
+decisions through feature links, code references, and searches of applicability, including
+repository-wide choices. Older ADRs require full reads until `/blueprint-mode:onboard` reorganizes
+them without changing their meaning; unknown scope stays explicit.
+
+### Upgrading to 2.1.0
+
+Run `/blueprint-mode:onboard` in each repository to migrate ADRs to the Decision-first layout and
+refresh agent instructions. Existing rationale, status, and meaning are preserved; uncertain scope
+is reported rather than inferred.
+
+If `docs/specs/tech-stack.md` exists, onboarding verifies its content against the target repo’s
+maintained documentation and checks incoming references. It suggests removal only when the file is
+fully redundant, showing where its content is covered. Unique, conflicting, or uncertain content is
+raised to the user instead. The file and its references remain intact until removal is authorized.
+
 ### Upgrading from 1.x
 
 1. Reinstall the plugin (Codex loads a cached copy, so restart it).
@@ -171,7 +193,6 @@ project/
 │   │   ├── product.md             # What, who, why
 │   │   ├── features/              # Feature specifications (discovered via globbing)
 │   │   │   └── [feature].md
-│   │   ├── tech-stack.md          # Technology choices
 │   │   ├── non-functional/        # NFRs by category (discovered via globbing)
 │   │   │   └── [category].md      # Performance, security, scalability, etc.
 │   │   └── boundaries.md          # Safe Without Asking / Ask First / Never Do

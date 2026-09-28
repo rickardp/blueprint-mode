@@ -5,6 +5,21 @@ date: 2026-09-13
 
 # ADR-006: Skills and Repo Files Only, No Hooks or Injected Personas
 
+## Decision
+
+Ship **skills and repo files only**, without hooks or injected subagent personas.
+
+**Applies to:** Repository-wide plugin implementation, `plugins/blueprint-mode/skills/`, shared templates, generated agent instructions, and validation.
+
+**Constraints:**
+- Keep the plugin Markdown only: `SKILL.md` files, one shared `TEMPLATES.md`, and the documents skills write. Add no runtime, shell, or tool dependencies.
+- Skills state their scope once, ask only for missing content, and reference shared template sections rather than duplicating formats.
+- Generated instructions route conditionally and grant autonomy through `Safe Without Asking`; do not require reading every document before every edit.
+- Report vocabulary drift through `/blueprint-mode:validate`, rather than rewriting files with hooks.
+- Use `Safe Without Asking` for autonomy grants, not obligations; validation accepts legacy `Always Do` headings and reports obligation-style bullets.
+
+**Exceptions:** Existing 1.x repositories retain their legacy instructions until onboarding is rerun; validation supports those legacy headings.
+
 ## Context
 
 Blueprint Mode 1.x shipped two hooks. A `UserPromptSubmit` hook injected mandatory execution rules and a 200 to 380 line format persona whenever a prompt mentioned a Blueprint skill, and injected a reference sheet whenever a prompt contained words like "adr" or "blueprint". A `PostToolUse` hook rewrote files after every Write to normalize heading synonyms. The generated `CLAUDE.md` told agents to read boundaries, feature specs, and patterns before every edit.
@@ -12,6 +27,10 @@ Blueprint Mode 1.x shipped two hooks. A `UserPromptSubmit` hook injected mandato
 That design targeted models that needed to be pushed to act, to follow a format, and to avoid asking scope questions. Current models (Claude Fable and Opus 5, GPT-6 Astra) are post-trained to test their own work, handle ambiguity, and stop for approval only on real safety signals. OpenAI's guidance for GPT-6 Astra and Anthropic's for the Claude 5 family both say the same thing: precise triggers, progressive disclosure, conditional file routing instead of mandatory pre-reads, explicit autonomy grants, and the full scope stated once. Against that, the hooks were pure overhead: three copies of every format, a phrase blacklist, a plan-mode checkpoint next to a "create files now" rule, and a `jq` dependency plus a macOS-only `sed` flag in a plugin that calls itself zero-dependency.
 
 Codex already ran the plugin without hooks, since its manifest exposes only `skills/`, which proved the hook-free path works.
+
+We chose **skills and repo files only**. The plugin is now `SKILL.md` files, one shared `TEMPLATES.md`, and the documents it writes into the user's repo. Skills state the scope once, ask only about missing content, and point at the template section they need. The generated agent instructions route conditionally ("read the ADR when a change touches a documented choice") and grant autonomy explicitly through a "Safe Without Asking" boundary section. Vocabulary drift is reported by `/blueprint-mode:validate`.
+
+This supersedes ADR-003, which chose shell scripts for hooks. That file is deleted because nothing references it; git history is the archive.
 
 ## Options Considered
 
@@ -30,12 +49,6 @@ Codex already ran the plugin without hooks, since its manifest exposes only `ski
 ### Option 3: Keep only the auto-fix hook
 - Pro: Smallest change
 - Con: Still Claude-only, still shell portability work, and it only ran on Write, not Edit
-
-## Decision
-
-We chose **skills and repo files only**. The plugin is now `SKILL.md` files, one shared `TEMPLATES.md`, and the documents it writes into the user's repo. Skills state the scope once, ask only about missing content, and point at the template section they need. The generated agent instructions route conditionally ("read the ADR when a change touches a documented choice") and grant autonomy explicitly through a "Safe Without Asking" boundary section. Vocabulary drift is reported by `/blueprint-mode:validate`.
-
-This supersedes ADR-003, which chose shell scripts for hooks. That file is deleted because nothing references it; git history is the archive.
 
 ## Consequences
 
@@ -56,5 +69,4 @@ This supersedes ADR-003, which chose shell scripts for hooks. That file is delet
 
 - Supersedes ADR-003 (shell hooks), deleted in this change
 - [ADR-002](002-claude-code-plugin.md), [ADR-005](005-dual-runtime-plugin-packaging.md)
-- [docs/specs/tech-stack.md](../specs/tech-stack.md)
 - OpenAI, "Rethinking skills and prompts for GPT-6 Astra" (developers.openai.com/blog)

@@ -21,7 +21,7 @@ allowed-tools: Read, Glob, Grep
 ## Blueprint Status for [project]
 
 ### Specs
-- product.md, tech-stack.md, boundaries.md: present / missing
+- product.md, boundaries.md: present / missing
 - Features: N, NFRs: N
 
 ### ADRs

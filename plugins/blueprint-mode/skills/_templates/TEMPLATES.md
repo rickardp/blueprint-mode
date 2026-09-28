@@ -11,8 +11,8 @@ Shared file formats for every Blueprint skill. Skills point here instead of repe
 | product.md | `<!-- SECTION: product-spec -->` |
 | Feature specs | `<!-- SECTION: feature-specs -->` |
 | Non-functional requirements | `<!-- SECTION: nfr -->` |
-| tech-stack.md | `<!-- SECTION: tech-stack -->` |
 | boundaries.md | `<!-- SECTION: boundaries -->` |
+| ADR selection and reading | `<!-- SECTION: adr-reading -->` |
 | ADRs | `<!-- SECTION: adr-template -->` |
 | UX decisions | `<!-- SECTION: ux-decision-template -->` |
 | UX-TBD comment | `<!-- SECTION: ux-tbd-comment -->` |
@@ -31,7 +31,6 @@ Placeholders use `[SCREAMING_SNAKE_CASE]`: `[PROJECT_NAME]`, `[TODAY]` (YYYY-MM-
 docs/                       # Code / architecture tree (engineering reviewers)
 ├── specs/
 │   ├── product.md          # Vision, users, success metrics
-│   ├── tech-stack.md       # Technology choices, pointing at ADRs
 │   ├── boundaries.md       # Safe without asking / Ask first / Never
 │   ├── features/*.md       # Feature specs (discovered by globbing)
 │   └── non-functional/*.md # NFRs by category (discovered by globbing)
@@ -179,30 +178,13 @@ category: Performance | Security | Scalability | Reliability
 
 **Requirement:** [Measurable statement]
 **Rationale:** [Why this matters]
+
+## Open Questions
+
+- [Unresolved requirement or conflict, with the affected ADR]
 ```
 
----
-
-<!-- SECTION: tech-stack -->
-## docs/specs/tech-stack.md
-
-```markdown
-# Technology Stack
-
-| Component | Technology | ADR |
-|-----------|------------|-----|
-| Runtime | [CHOICE] | [ADR-NNN](../adrs/NNN-slug.md) |
-| Framework | [CHOICE] | |
-| Database | [CHOICE] | |
-
-## Commands
-
-```bash
-[package manager] install
-[package manager] test
-[package manager] lint
-```
-```
+Omit the Open Questions section when there are no unresolved items.
 
 ---
 
@@ -269,12 +251,37 @@ When adding, renaming, or removing scoped paths, refresh the compact routing lin
 
 ---
 
+<!-- SECTION: adr-reading -->
+## ADR Selection and Reading
+
+Discover candidates without loading every ADR body: follow feature specs' `related_adrs` and code references, then scan titles and Decision applicability for affected paths and concepts. Include repository-wide decisions; links and path matches are starting points, not exclusive filters. Use targeted searches across ADR bodies and related links when matches are missing or incomplete. No match alone does not establish that no decision applies.
+
+Use tools that return only the selected text, rather than reading the whole file and summarizing it. For discovery, return filenames, ADR titles, and `**Applies to:**` lines with a targeted search. For a candidate, read from the start of the file up to, but excluding, `## Context`: this includes status, title, and the complete operational Decision. Locate that heading with a line-number search and use a bounded read, or use this shell equivalent for one file:
+
+```bash
+awk '/^## Context[[:space:]]*$/{exit} {print}' docs/adrs/NNN-slug.md
+```
+
+If Context precedes Decision, the operational fields are missing or unresolved, or the structure does not provide a reliable stopping point, fall back to a full read. If a full read is needed after the prefix, retrieve the remainder from Context onward; do not reread an unchanged prefix already in context.
+
+Check frontmatter status before applying a decision. Follow `superseded_by` to the current decision; report broken replacement links. Drafts are unsettled and Deprecated decisions are not current authority. A reference to an old decision may identify migration work, not permission to follow it.
+
+- **Apply an established decision:** Use the bounded prefix read above to retrieve the complete Decision section with its applicability, constraints, and exceptions. Stop before Context and follow the decision without reopening its motivation. A list summary is for discovery, not implementation.
+- **Assess applicability or change:** If scope is unclear, or new features or rewritten requirements may conflict with or extend the decision's scope, read the full ADR, including Context, Options Considered, and Consequences, before classifying the change.
+- **Legacy or incomplete ADR:** Read the full file when Decision lacks enough operational context or contains unresolved scope. Do not interpret a missing exception or constraint field as permission.
+
+After a full read, distinguish a compatible extension (the decision still holds), a clarification (makes existing meaning explicit), and a conflict (changes the choice, applicability, constraints, or exceptions). Work outside the ADR's scope is not automatically a conflict. Preserve settled intent; motivation explains applicability but does not authorize overriding an Active decision. Raise an actual conflict with the affected rule and proposed change, asking only when the user's existing instruction does not resolve it. Leave material uncertainty explicit rather than inventing scope or rewriting intent.
+
+---
+
 <!-- SECTION: adr-template -->
 ## docs/adrs/NNN-[slug].md
 
 Status: Draft (emerging, TODOs allowed), Active (settled), Superseded (`superseded_by:` set to the new file's stem), Deprecated (`deprecated_date:` and `deprecated_reason:` set). When the last `<!-- TODO: -->` in a Draft is resolved, set `status: Active`. The next number is one past the highest in `docs/adrs/`.
 
 The slug describes the current title. If a retitle makes it stale, rename the file, then search for the old basename and its extensionless stem (`superseded_by` uses the stem) and update those references; leave number-only references such as `ADR-NNN` and `related_adrs` alone.
+
+Keep Decision self-contained and first after the title: the choice, applicability, implementation constraints, and exceptions. Use paths and concepts to make applicability searchable; identify repository-wide scope when stated. Put motivation in Context and trade-offs in Options Considered and Consequences. Move any operative constraint found there into Decision, leaving its explanation in the rationale. Record only established scope; use `TBD` for unknown applicability or exceptions, and `None` only when established. For existing ADRs, read the full file before reorganizing it, preserve status and meaning, and flag unresolved scope without guessing.
 
 Canonical vocabulary: frontmatter `status`, `**Positive:**` and `**Negative:**` under Consequences, and `## Related`. `/blueprint-mode:validate` flags synonyms such as Benefits, Trade-offs, References, or "Accepted".
 
@@ -286,19 +293,25 @@ date: [TODAY]
 
 # ADR-[NNN]: [CHOICE] as [CATEGORY]
 
+## Decision
+
+[CHOICE]
+
+**Applies to:** [AFFECTED_PATHS_AND_CONCEPTS_OR_REPOSITORY_WIDE_SCOPE]
+
+**Constraints:** [IMPLEMENTATION_RULES]
+
+**Exceptions:** [ESTABLISHED_EXCEPTIONS_OR_NONE]
+
 ## Context
 
-[What problem is being solved and under what constraints]
+[PROBLEM_CONSTRAINTS_AND_MOTIVATION_FOR_THE_CHOICE]
 
 ## Options Considered
 
-### Option 1: [Alternative]
-- Pro: [advantage]
-- Con: [disadvantage]
-
-## Decision
-
-We chose **[CHOICE]** because [primary motivation].
+### Option 1: [ALTERNATIVE]
+- Pro: [ADVANTAGE]
+- Con: [DISADVANTAGE]
 
 ## Consequences
 
@@ -310,7 +323,7 @@ We chose **[CHOICE]** because [primary motivation].
 
 ## Related
 
-- [docs/specs/tech-stack.md](../specs/tech-stack.md)
+[Links to related ADRs or specs, if any]
 ```
 
 A Draft ADR may contain only the Decision section plus `<!-- TODO: -->` markers for the rest.
@@ -322,7 +335,7 @@ Superseded and Deprecated ADRs with no code references are deleted. Git history 
 <!-- SECTION: ux-decision-template -->
 ## design/ux-decisions/NNN-[slug].md
 
-Same shape, status values, and rename rules as an ADR, with `# UX-[NNN]:` as the title prefix, `[CHOICE] for [Context]` as the title shape, independent numbering, and `## Related` pointing at other UX decisions or `DESIGN.md` rules. Never file one under `docs/adrs/`, and never title a file in this tree `ADR-`.
+Share ADR status values, rename rules, and rationale sections. Use the UX shape below; the ADR operational fields are not required for UX decisions. Use `# UX-[NNN]:` as the title prefix, `[CHOICE] for [Context]` as the title shape, independent numbering, and `## Related` pointing at other UX decisions or `DESIGN.md` rules. Never file one under `docs/adrs/`, and never title a file in this tree `ADR-`.
 
 ```markdown
 ---
@@ -457,7 +470,7 @@ Fill the single scoped-boundaries line with the paths under `Scoped Rules` in `b
 
 Code shows what the system does. These files record why, so deliberate choices can be told apart from expedient ones:
 
-- `docs/adrs/` records architecture decisions. Read the relevant ADR when a change touches a documented choice; feature specs list theirs in `related_adrs`. If code contradicts an Active decision, say so before following either.
+- Find `docs/adrs/` decisions via feature/code links and title and `**Applies to:**` searches, including global decisions. Read through Decision, stopping before Context; follow Active decisions and replacement links. Read fully for missing scope/constraints/exceptions, unclear applicability, or scope changes. Report code/ADR conflicts before following either.
 - `docs/specs/features/` holds feature specs. Read one when implementing or changing that feature.
 - `docs/specs/boundaries.md` has the full list of what is safe, what to ask about, and what is never done, including module-scoped rules.
 - Scoped boundaries apply to [SCOPED_PATHS]. Before editing those paths, read only the matching sections in `docs/specs/boundaries.md`.

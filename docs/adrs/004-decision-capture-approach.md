@@ -5,11 +5,31 @@ date: 2026-01-31
 
 # ADR-004: Decision Capture over Spec-Driven Development
 
+## Decision
+
+Use **Decision Capture (ADR-based)**: code exists, capture decisions, then validate consistency.
+
+**Applies to:** Repository-wide Blueprint documentation and workflows for capturing and validating architectural intent.
+
+**Constraints:** Capture human architectural choices and their rationale. Keep humans in control of architecture; code records implementation state rather than detailed specifications generating the code.
+
+**Exceptions:** No exceptions recorded.
+
 ## Context
 
 AI-assisted development has changed how code is written. Tools like Claude, Cursor, and Copilot can generate large amounts of code quickly, but this creates a problem: when code IS the spec, AI rewrites your source of truth at will.
 
 We needed to choose between traditional spec-driven development (detailed specifications that generate code) and a lighter-weight approach focused on capturing decisions.
+
+We chose **Decision Capture (ADR-based)** because rationale is stable while code is volatile.
+
+In an era of AI-assisted development:
+- Code is rewritten constantly by AI agents
+- Detailed specs require constant maintenance to stay current
+- But WHY decisions were made rarely changes
+- "We use PostgreSQL because the team knows it" survives any refactor
+
+Blueprint Mode inverts SDD: **Code exists -> Capture decisions -> Validate consistency**
 
 ## Options Considered
 
@@ -30,18 +50,6 @@ We needed to choose between traditional spec-driven development (detailed specif
 - Con: Less detailed than full specifications
 - Con: Requires discipline to capture decisions
 
-## Decision
-
-We chose **Decision Capture (ADR-based)** because rationale is stable while code is volatile.
-
-In an era of AI-assisted development:
-- Code is rewritten constantly by AI agents
-- Detailed specs require constant maintenance to stay current
-- But WHY decisions were made rarely changes
-- "We use PostgreSQL because the team knows it" survives any refactor
-
-Blueprint Mode inverts SDD: **Code exists -> Capture decisions -> Validate consistency**
-
 ## Consequences
 
 **Positive:**
@@ -59,4 +67,3 @@ Blueprint Mode inverts SDD: **Code exists -> Capture decisions -> Validate consi
 
 - Feature spec: [docs/specs/features/decision-capture.md](../specs/features/decision-capture.md)
 - Feature spec: [docs/specs/features/ai-agent-readability.md](../specs/features/ai-agent-readability.md)
-- Tech stack overview: [docs/specs/tech-stack.md](../specs/tech-stack.md)

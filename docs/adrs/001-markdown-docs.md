@@ -5,9 +5,23 @@ date: 2026-01-31
 
 # ADR-001: Markdown as Documentation Format
 
+## Decision
+
+Use **Markdown** for Blueprint documentation.
+
+**Applies to:** Repository-wide documentation and the ADRs, specs, patterns, and agent instructions Blueprint writes into user repositories.
+
+**Constraints:** Keep documentation alongside code in git, readable and editable as plain text without specialized tooling or a documentation build step.
+
+**Exceptions:** No exceptions recorded.
+
 ## Context
 
 Blueprint Mode needs a documentation format that AI agents can read efficiently across sessions, that developers can edit without specialized tooling, and that works seamlessly with git-based workflows.
+
+We chose **Markdown** because it's the universal format that AI agents, developers, and git all handle natively.
+
+Markdown files live alongside code, diff cleanly, and require zero tooling. AI agents parse prose naturally, making Markdown ideal for rationale-heavy documentation like ADRs.
 
 ## Options Considered
 
@@ -30,12 +44,6 @@ Blueprint Mode needs a documentation format that AI agents can read efficiently 
 - Con: Not in git, breaks single-source-of-truth principle
 - Con: AI agents cannot read without API integration
 
-## Decision
-
-We chose **Markdown** because it's the universal format that AI agents, developers, and git all handle natively.
-
-Markdown files live alongside code, diff cleanly, and require zero tooling. AI agents parse prose naturally, making Markdown ideal for rationale-heavy documentation like ADRs.
-
 ## Consequences
 
 **Positive:**
@@ -50,4 +58,4 @@ Markdown files live alongside code, diff cleanly, and require zero tooling. AI a
 
 ## Related
 
-- Tech stack overview: [docs/specs/tech-stack.md](../specs/tech-stack.md)
+None.
