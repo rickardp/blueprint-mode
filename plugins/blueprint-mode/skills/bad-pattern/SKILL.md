@@ -1,73 +1,23 @@
 ---
-name: blueprint:bad-pattern
-description: Document an anti-pattern to avoid (any subject — code, schema, UI, infra)
-argument-hint: "[description] - [correct approach]"
-allowed-tools:
-  - Glob
-  - Grep
-  - Read
-  - Write
-  - Edit
-  - EnterPlanMode
-  - ExitPlanMode
+name: bad-pattern
+description: Document something to avoid, with the correct alternative, in patterns/bad/anti-patterns.md. Use when the user says "don't do X" or corrects a recurring mistake.
+argument-hint: "[what to avoid] - [correct approach]"
+allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 
 # Document Anti-Pattern
 
-**COMMAND:** Document something to avoid and the correct alternative. Anti-patterns are tree-agnostic — file all entries in `patterns/bad/anti-patterns.md` regardless of subject (code, database model, UI, infra).
+Format: `../_templates/TEMPLATES.md` (relative to this skill's directory), section `bad-patterns`. All anti-patterns, any subject, go in `patterns/bad/anti-patterns.md`.
 
-## Execute
+## Steps
 
-1. **Parse** argument for anti-pattern and correct approach
-2. **Create** patterns/bad/ if needed
-3. **Add** entry to patterns/bad/anti-patterns.md
-4. **Report** what was documented
-
-## Input Handling
-
-| Input | Action |
-|-------|--------|
-| `/bad-pattern any type - use unknown` | Document with both bad and good |
-| `/bad-pattern inline SQL` | Ask for correct approach |
-| `/bad-pattern modal traps focus on close - return focus to trigger` | UI anti-pattern, same file |
-| `/bad-pattern` | Ask what to document |
-
-## Anti-Pattern Template
-
-Add to `patterns/bad/anti-patterns.md`:
-
-```markdown
-## [Category]: [Description]
-
-**Severity:** Critical | High | Medium | Low
-
-### Don't Do This
-```[language]
-[bad code]
-```
-
-**Problems:**
-- [Issue]
-
-### Do This Instead
-```[language]
-[good code]
-```
-
-**Why:** [Explanation]
-```
-
-## Severity Guide
-
-- **Critical**: Security, data loss, accessibility violations (WCAG failures), destructive actions without confirmation
-- **High**: Performance, maintenance burden, broken interaction patterns
-- **Medium**: Code smell, inconsistent visual language
-- **Low**: Style preference
+1. Extract the anti-pattern and the correct approach from the argument and the conversation. Ask for the alternative only if none was given.
+2. Create `patterns/bad/anti-patterns.md` from the template header if it does not exist.
+3. Append a section with category, severity, the bad example, the problems, the good example, and why. Use real code from the repo when it exists.
+4. Report.
 
 ## Output
 
 ```
 Anti-pattern documented in patterns/bad/anti-patterns.md
 ```
-
-If details missing, use TBD markers.

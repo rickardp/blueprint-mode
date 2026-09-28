@@ -6,203 +6,101 @@ Documentation for developers and maintainers of the Blueprint Mode plugin.
 
 ```
 blueprint-mode/
-├── .claude-plugin/
-│   └── marketplace.json          # Claude marketplace definition
-├── .agents/
-│   └── plugins/
-│       └── marketplace.json      # Codex repo marketplace definition
-├── plugins/
-│   └── blueprint-mode/
-│       ├── .codex-plugin/
-│       │   └── plugin.json       # Codex plugin manifest
-│       ├── .claude-plugin/
-│       │   └── plugin.json       # Plugin manifest
-│       └── skills/
-│           ├── _templates/
-│           │   └── TEMPLATES.md  # Shared file templates
-│           ├── setup-repo/SKILL.md
-│           ├── onboard/SKILL.md
-│           ├── require/SKILL.md
-│           ├── decide/SKILL.md
-│           ├── good-pattern/SKILL.md
-│           ├── bad-pattern/SKILL.md
-│           ├── supersede/SKILL.md
-│           ├── status/SKILL.md
-│           ├── list-adrs/SKILL.md
-│           ├── validate/SKILL.md
-│           └── help/SKILL.md
+├── .claude-plugin/marketplace.json        # Claude marketplace definition
+├── .agents/plugins/marketplace.json       # Codex repo marketplace definition
+├── plugins/blueprint-mode/
+│   ├── .claude-plugin/plugin.json         # Claude plugin manifest
+│   ├── .codex-plugin/plugin.json          # Codex plugin manifest (points at skills/)
+│   └── skills/
+│       ├── _templates/TEMPLATES.md        # Every file format, one copy
+│       ├── setup-repo/SKILL.md
+│       ├── onboard/SKILL.md
+│       ├── onboard-design/SKILL.md
+│       ├── decide/SKILL.md
+│       ├── supersede/SKILL.md
+│       ├── require/SKILL.md
+│       ├── good-pattern/SKILL.md
+│       ├── bad-pattern/SKILL.md
+│       ├── capture/SKILL.md
+│       ├── status/SKILL.md
+│       ├── list-adrs/SKILL.md
+│       ├── validate/SKILL.md
+│       └── help/SKILL.md
 ├── PLUGIN.md
 └── README.md
 ```
 
-## Marketplace Manifest
-
-The `.claude-plugin/marketplace.json` defines the marketplace:
-
-```json
-{
-  "name": "blueprint-mode",
-  "owner": { "name": "rickardp" },
-  "plugins": [
-    {
-      "name": "blueprint-mode",
-      "source": "./plugins/blueprint-mode",
-      "description": "Spec-driven development with documented decision rationale"
-    }
-  ]
-}
-```
-
-Codex uses the repo-local `.agents/plugins/marketplace.json`:
-
-```json
-{
-  "name": "blueprint-mode",
-  "interface": { "displayName": "Blueprint Mode" },
-  "plugins": [
-    {
-      "name": "blueprint-mode",
-      "source": { "source": "local", "path": "./plugins/blueprint-mode" },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Coding"
-    }
-  ]
-}
-```
-
-Users install the published marketplace via:
-
-```bash
-codex plugin marketplace add rickardp/blueprint-mode
-```
-
-## Plugin Manifest
-
-Each plugin has `.claude-plugin/plugin.json`:
-
-```json
-{
-  "name": "blueprint-mode",
-  "description": "Spec-driven development with documented decision rationale",
-  "version": "1.0.0"
-}
-```
-
-Codex packaging lives alongside it at `.codex-plugin/plugin.json` and points at the
-existing `skills/` directory instead of introducing a second skill tree.
-
-The existing `plugins/blueprint-mode/agents/` directory is not currently wired into the
-Codex plugin package. Current Codex docs describe custom agents as project/user config
-under `.codex/agents/` or `~/.codex/agents/`, not as a documented plugin-bundled
-component, so these files remain Claude-oriented/shared reference material for now.
+The plugin is Markdown only. There are no hooks, agents, scripts, or dependencies ([ADR-006](docs/adrs/006-skills-and-repo-files-only.md)). Both runtimes load the same `skills/` directory ([ADR-005](docs/adrs/005-dual-runtime-plugin-packaging.md)).
 
 ## Skill File Format
 
-Each skill is a `SKILL.md` file with YAML frontmatter:
-
 ```markdown
 ---
-name: skill-name
-description: One-line description shown in skill discovery
+name: skill-name                 # bare; Claude Code exposes it as /blueprint-mode:skill-name
+description: What it does and when to use it, in one or two sentences.
+argument-hint: "[shape of the argument]"
+disable-model-invocation: true   # only for skills that write many files or change history
+allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 
 # Skill Title
 
-**Invoked by:** `/blueprint:skill-name` or natural language triggers
+One line of purpose, then which `../_templates/TEMPLATES.md` section holds the format.
 
-## Process
+## Steps
 
-[Step-by-step instructions for Claude to follow]
+1. Numbered, imperative steps.
 
-## Templates
+## Output
 
-[File templates to create]
+The exact shape of the final report.
 ```
+
+Rules, from `docs/specs/boundaries.md`:
+
+- Under 80 lines. The skill is a router; the format lives in the templates file.
+- State the scope once. Ask only for content that cannot be found, accept "skip", write `TBD`.
+- No plan-mode checkpoints, no confirmation before creating files, no MUST or CRITICAL language.
+- The description says when the skill should be used, precisely enough that it does not fire on tangential prompts.
 
 ## Installation
 
-### Option 1: Plugin Marketplace (Recommended)
-
 ```bash
-# Add the marketplace
+# Claude Code
 /plugin marketplace add rickardp/blueprint-mode
-
-# Install the plugin
 /plugin install blueprint-mode
-```
 
-### Option 2: Local Development
+# Claude Code, local development
+claude --plugin-dir ./plugins/blueprint-mode
 
-```bash
-git clone https://github.com/rickardp/blueprint-mode.git
-claude --plugin-dir ./blueprint-mode/plugins/blueprint-mode
-```
+# Codex
+codex plugin marketplace add rickardp/blueprint-mode
 
-### Codex Local Development
-
-For a local working copy, point Codex at the repo root:
-
-```bash
+# Codex, local development (restart Codex afterwards)
 codex plugin marketplace add ./
 ```
 
-Codex reads `.agents/plugins/marketplace.json`, copies the plugin from
-`./plugins/blueprint-mode`, and loads the installed copy from its plugin cache after a restart.
-
-## Verification
-
-After installation, Claude skills appear as:
-
-```
-/blueprint:setup-repo
-/blueprint:onboard
-/blueprint:require
-/blueprint:decide
-/blueprint:good-pattern
-/blueprint:bad-pattern
-/blueprint:supersede
-/blueprint:status
-/blueprint:list-adrs
-/blueprint:validate
-/blueprint:help
-```
-
-In Codex, the same bundled `skills/` directory is exposed through the plugin rather than
-through Claude slash commands.
-
 ## Updating Skills
 
-1. Edit the relevant `SKILL.md` file in `plugins/blueprint-mode/skills/`
-2. Test locally with `claude --plugin-dir ./plugins/blueprint-mode`
-3. Restart Codex to validate that the repo marketplace still loads the plugin cleanly
-4. Bump version in both `plugins/blueprint-mode/.claude-plugin/plugin.json` and `plugins/blueprint-mode/.codex-plugin/plugin.json`
-5. Commit and push changes
+1. Edit the `SKILL.md`, or the template section it points at.
+2. Test with `claude --plugin-dir ./plugins/blueprint-mode`; restart Codex and confirm the repo marketplace still loads.
+3. Bump the version in `plugins/blueprint-mode/.claude-plugin/plugin.json`, `plugins/blueprint-mode/.codex-plugin/plugin.json`, and `.claude-plugin/marketplace.json`.
+4. Commit and push.
 
 ## Skills Reference
 
-| Skill | File | Purpose |
-|-------|------|---------|
-| setup-repo | [SKILL.md](plugins/blueprint-mode/skills/setup-repo/SKILL.md) | Set up new repository with spec structure |
-| onboard | [SKILL.md](plugins/blueprint-mode/skills/onboard/SKILL.md) | Add spec structure to existing codebase |
-| require | [SKILL.md](plugins/blueprint-mode/skills/require/SKILL.md) | Add functional or non-functional requirements |
-| decide | [SKILL.md](plugins/blueprint-mode/skills/decide/SKILL.md) | Record technology/architecture decisions |
-| good-pattern | [SKILL.md](plugins/blueprint-mode/skills/good-pattern/SKILL.md) | Capture approved code patterns |
-| bad-pattern | [SKILL.md](plugins/blueprint-mode/skills/bad-pattern/SKILL.md) | Document anti-patterns to avoid |
-| supersede | [SKILL.md](plugins/blueprint-mode/skills/supersede/SKILL.md) | Replace or deprecate previous decisions |
-| status | [SKILL.md](plugins/blueprint-mode/skills/status/SKILL.md) | Show overview of Blueprint structure |
-| list-adrs | [SKILL.md](plugins/blueprint-mode/skills/list-adrs/SKILL.md) | List all ADRs with status and summaries |
-| validate | [SKILL.md](plugins/blueprint-mode/skills/validate/SKILL.md) | Check codebase against patterns and ADRs |
-| help | [SKILL.md](plugins/blueprint-mode/skills/help/SKILL.md) | Explain Blueprint features and commands |
-
-## Shared Templates
-
-The `_templates/TEMPLATES.md` file contains shared file templates used by multiple skills:
-- Product spec, tech stack, boundaries templates
-- ADR discovery (via globbing) and individual ADR templates
-- Pattern file templates
-- CLAUDE.md template with code comment guidelines
-
-Skills reference these templates rather than duplicating them. When updating a template, changes apply to all skills that use it.
+| Skill | Purpose |
+|-------|---------|
+| setup-repo | Scaffold a new project with the Blueprint structure |
+| onboard | Add the Blueprint code tree to an existing codebase |
+| onboard-design | Opt in to the design tree and `DESIGN.md` |
+| decide | Record a decision as an ADR, UX decision, or `DESIGN.md` rule |
+| supersede | Replace or deprecate a decision |
+| require | Add a functional or non-functional requirement |
+| good-pattern | Save an approved example |
+| bad-pattern | Document an anti-pattern |
+| capture | Persist what the conversation decided |
+| status | Show what is documented |
+| list-adrs | List ADRs by status |
+| validate | Check code and docs against documented intent |
+| help | Explain Blueprint and its commands |

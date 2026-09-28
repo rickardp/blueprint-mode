@@ -5,16 +5,29 @@ date: 2026-01-31
 
 # ADR-002: Claude Code Plugin System as Distribution Mechanism
 
+## Decision
+
+Use the **Claude Code Plugin System** to distribute Blueprint to Claude Code users.
+
+**Applies to:** Claude Code installation, marketplace distribution, and native skill commands.
+
+**Constraints:** Integrate with Claude Code's plugin and skills workflow without additional package managers, build systems, or runtime dependencies beyond Claude Code. Keep skills in plain Markdown.
+
+**Exceptions:** Codex distribution follows ADR-005; this decision does not require Claude Code for the Codex workflow.
+
 ## Context
 
 Blueprint Mode needs a distribution mechanism that allows users to install and use the tool easily, integrates with Claude Code's existing workflow, and doesn't require external package managers or build systems.
+
+We chose **Claude Code Plugin System** because the team is already using Claude Code and the plugin system provides native integration with skills (commands).
+
+The plugin marketplace enables one-command installation (`/plugin marketplace add rickardp/blueprint-mode`). Skills are plain Markdown, so the same files load in other runtimes (see ADR-005).
 
 ## Options Considered
 
 ### Option 1: Claude Code Plugin System
 - Pro: Native integration with Claude Code
 - Pro: Simple installation via `/plugin marketplace add`
-- Pro: Hooks system for context injection
 - Pro: Skills system for command expansion
 - Con: Tied to Claude Code ecosystem
 
@@ -22,7 +35,7 @@ Blueprint Mode needs a distribution mechanism that allows users to install and u
 - Pro: Familiar distribution model
 - Pro: Broader ecosystem reach
 - Con: Requires Node.js runtime
-- Con: Doesn't integrate with Claude Code's skill/hook system
+- Con: Doesn't integrate with Claude Code's skill system
 - Con: Additional complexity for users
 
 ### Option 3: Standalone CLI tool
@@ -31,18 +44,11 @@ Blueprint Mode needs a distribution mechanism that allows users to install and u
 - Con: Requires separate installation and invocation
 - Con: No integration with AI assistant context
 
-## Decision
-
-We chose **Claude Code Plugin System** because the team is already using Claude Code and the plugin system provides native integration with skills (commands) and hooks (context injection).
-
-The plugin marketplace enables one-command installation (`/plugin marketplace add rickardp/blueprint-mode`), and the hooks system allows Blueprint documentation to be automatically injected into Claude's context.
-
 ## Consequences
 
 **Positive:**
 - Seamless integration with Claude Code workflow
-- Skills appear as native commands (`/blueprint:decide`, etc.)
-- Hooks inject context automatically on prompts
+- Skills appear as native commands (`/blueprint-mode:decide`, etc.)
 - No runtime dependencies beyond Claude Code
 
 **Negative:**
@@ -52,5 +58,4 @@ The plugin marketplace enables one-command installation (`/plugin marketplace ad
 
 ## Related
 
-- Tech stack overview: [docs/specs/tech-stack.md](../specs/tech-stack.md)
-- See also: [ADR-005: Dual Claude Code and Codex Plugin Packaging](005-dual-runtime-plugin-packaging.md)
+- See also: [ADR-005: Dual Claude Code and Codex Plugin Packaging](005-dual-runtime-plugin-packaging.md), [ADR-006: Skills and Repo Files Only](006-skills-and-repo-files-only.md)

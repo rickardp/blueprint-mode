@@ -2,7 +2,7 @@
 status: Active
 maturity: Stable
 module: plugins/blueprint-mode/
-related_adrs: []
+related_adrs: [4, 6]
 ---
 
 # AI-Agent Readability
@@ -24,6 +24,13 @@ Blueprint Mode optimizes documentation for AI agent consumption over human histo
 - Simplified status flow: Draft → Active → Superseded/Deprecated
 - Clear terminology: "Active" (not Adopted), "Deprecated" (not Retired)
 - Docs folder reflects current state only
+- Discover relevant ADRs through references, titles, applicability, and broader body searches when needed, including cross-cutting decisions
+- Keep the ADR Decision section first and self-contained: choice, applicability, constraints, and exceptions; retain motivation and alternatives separately
+- Routine implementation retrieves only the prefix through Decision, stopping before Context, and follows it without reopening rationale; tool output excludes the unread rationale
+- Unclear applicability, possible conflicts, scope extensions, and legacy or incomplete operational sections require a full ADR read
+- Distinguish compatible extensions, clarifications, and conflicts before proposing changes to settled decisions; work outside scope is not automatically a conflict
+- Onboarding preserves existing meaning and status while reorganizing ADRs, and leaves unknown scope explicit
+- Scoped validation selects relevant ADRs; completeness checks require full reads and are reported as skipped when only Decision was read
 
 ## Rationale
 
@@ -87,9 +94,28 @@ This works for teams with PR-based workflows. Teams requiring formal audit trail
 | Git-as-archive deletion policy | Done |
 | PR reviews as advice | Done |
 | Maturity field in feature specs | Done |
+| Shared ADR selection and reading convention | Done |
+| Operational Decision template and skill routing | Done |
+| Legacy ADR migration guidance and scoped validation | Done |
 
 **Open questions:**
 - None
+
+## Acceptance Scenarios
+
+Use these cases to review retrieval and classification behavior; agent-run evaluation remains separate from this specification.
+
+| Case | Expected reading and behavior |
+|------|-------------------------------|
+| Implement within a clear Active ADR | Tool output contains status and complete Decision but excludes Context and later sections; follow the rule without reconsidering alternatives |
+| Use an explicit exception | Read complete Decision; apply the exception only within its stated conditions |
+| Add an unrelated feature | Search applicability and cross-cutting decisions; do not label the feature conflicting merely because one ADR does not cover it |
+| Extend a feature beyond an unclear scope | Read full ADR; classify from established intent, leaving unresolved scope explicit |
+| Rewrite a requirement to contradict an Active constraint | Read full ADR; identify the affected rule and raise the conflict unless the user already authorized its replacement |
+| Clarify wording without changing established intent | Read full ADR; update in place rather than superseding |
+| Follow a reference to a Superseded ADR | Follow the replacement link and assess the current decision; report a broken link |
+| Use a legacy ADR with constraints in Consequences | Read full ADR; onboarding moves operative constraints into Decision without changing meaning |
+| Validate a small change governed by a repository-wide rule | Include the global ADR despite no direct code reference; do not load unrelated ADR bodies |
 
 ## References
 
