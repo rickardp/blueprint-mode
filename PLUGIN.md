@@ -94,7 +94,7 @@ codex plugin marketplace add ./
 | onboard | Add the Blueprint code tree to an existing codebase |
 | onboard-design | Opt in to the design tree and `DESIGN.md` |
 | decide | Record a decision or capture agreed intent from a conversation |
-| supersede | Replace or deprecate a decision |
+| supersede | Rewrite or retire a decision; separate replacement records only when explicitly requested |
 | require | Add a functional or non-functional requirement |
 | good-pattern | Save an approved example |
 | bad-pattern | Document an anti-pattern |

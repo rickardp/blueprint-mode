@@ -113,7 +113,7 @@ names or invocation syntax. Selecting a skill does not authorize work beyond you
 | “Create a new TypeScript project with Blueprint.” | Scaffold a project and documentation |
 | “Set up design intent capture.” | Enable UX decisions and optional design context |
 | “Record our PostgreSQL choice because we need transactions.” | Capture a decision and its rationale |
-| “Replace ADR-012 with this new approach.” | Assess and record a replacement |
+| “Replace ADR-012 with this new approach.” | Rewrite ADR-012; explain the previous option and why it changed |
 | “Users must be able to export their data.” | Record a requirement |
 | “Save this implementation as an example to follow.” | Capture a good pattern |
 | “Document why we should avoid this pattern.” | Capture an anti-pattern |
@@ -129,6 +129,13 @@ scripts, or dependencies. Skills are written for current models: they state the 
 only for rationale they cannot find, and the generated `CLAUDE.md` routes an agent to the right
 document when a change touches it rather than demanding every file be read before every edit
 (see [ADR-006](docs/adrs/006-skills-and-repo-files-only.md)).
+
+### Changes in 2.1.2
+
+Changed decisions are rewritten in place, keeping their number. `Options Considered` explains the
+previously used option and why it changed. Retired records are removed after reference cleanup;
+historical links do not keep obsolete files alive. Git history is the archive. Validation checks
+the complete decision format and lifecycle, including temporary retention blockers.
 
 ### Changes in 2.1.1
 

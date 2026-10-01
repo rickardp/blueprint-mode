@@ -15,6 +15,7 @@ Shared file formats for every Blueprint skill. Skills point here instead of repe
 | ADR selection and reading | `<!-- SECTION: adr-reading -->` |
 | ADRs | `<!-- SECTION: adr-template -->` |
 | UX decisions | `<!-- SECTION: ux-decision-template -->` |
+| Decision retirement and numbering | `<!-- SECTION: decision-lifecycle -->` |
 | UX-TBD comment | `<!-- SECTION: ux-tbd-comment -->` |
 | Good patterns | `<!-- SECTION: good-patterns -->` |
 | Anti-patterns | `<!-- SECTION: bad-patterns -->` |
@@ -277,11 +278,11 @@ After a full read, distinguish a compatible extension (the decision still holds)
 <!-- SECTION: adr-template -->
 ## docs/adrs/NNN-[slug].md
 
-Status: Draft (emerging, TODOs allowed), Active (settled), Superseded (`superseded_by:` set to the new file's stem), Deprecated (`deprecated_date:` and `deprecated_reason:` set). When the last `<!-- TODO: -->` in a Draft is resolved, set `status: Active`. The next number is one past the highest in `docs/adrs/`.
+Status: Draft (emerging, TODOs allowed), Active (settled), Superseded (`superseded_by:` set to the new file's stem), Deprecated (`deprecated_date:` and `deprecated_reason:` set). Superseded and Deprecated files are temporary exceptions under `decision-lifecycle`, not an archive. When the last `<!-- TODO: -->` in a Draft is resolved, set `status: Active`. Allocate numbers per `decision-lifecycle`.
 
 The slug describes the current title. If a retitle makes it stale, rename the file, then search for the old basename and its extensionless stem (`superseded_by` uses the stem) and update those references; leave number-only references such as `ADR-NNN` and `related_adrs` alone.
 
-Keep Decision self-contained and first after the title: the choice, applicability, implementation constraints, and exceptions. Use paths and concepts to make applicability searchable; identify repository-wide scope when stated. Put motivation in Context and trade-offs in Options Considered and Consequences. Move any operative constraint found there into Decision, leaving its explanation in the rationale. Record only established scope; use `TBD` for unknown applicability or exceptions, and `None` only when established. For existing ADRs, read the full file before reorganizing it, preserve status and meaning, and flag unresolved scope without guessing.
+Keep Decision self-contained and first after the title: the choice, applicability, implementation constraints, and exceptions. Use paths and concepts to make applicability searchable; identify repository-wide scope when stated. Put motivation in Context and trade-offs in Options Considered and Consequences. When changing a choice, note the previously used option and why it was changed under Options Considered; use only established rationale, leaving missing reasons explicit. Move any operative constraint found there into Decision, leaving its explanation in the rationale. Record only established scope; use `TBD` for unknown applicability or exceptions, and `None` only when established. For existing ADRs, read the full file before reorganizing it, preserve status and meaning unless the user authorized changing the decision, and flag unresolved scope without guessing.
 
 Canonical vocabulary: frontmatter `status`, `**Positive:**` and `**Negative:**` under Consequences, and `## Related`. `validate` skill flags synonyms such as Benefits, Trade-offs, References, or "Accepted".
 
@@ -328,14 +329,14 @@ date: [TODAY]
 
 A Draft ADR may contain only the Decision section plus `<!-- TODO: -->` markers for the rest.
 
-Superseded and Deprecated ADRs with no code references are deleted. Git history is the archive.
+Use `decision-lifecycle` when replacing or retiring an ADR.
 
 ---
 
 <!-- SECTION: ux-decision-template -->
 ## design/ux-decisions/NNN-[slug].md
 
-Share ADR status values, rename rules, and rationale sections. Use the UX shape below; the ADR operational fields are not required for UX decisions. Use `# UX-[NNN]:` as the title prefix, `[CHOICE] for [Context]` as the title shape, independent numbering, and `## Related` pointing at other UX decisions or `DESIGN.md` rules. Never file one under `docs/adrs/`, and never title a file in this tree `ADR-`.
+Share ADR status values, rename rules, rationale sections, and `decision-lifecycle`. Use the UX shape below; the ADR operational fields are not required for UX decisions. Use `# UX-[NNN]:` as the title prefix, `[CHOICE] for [Context]` as the title shape, independent numbering, and `## Related` pointing at other UX decisions or `DESIGN.md` rules. Never file one under `docs/adrs/`, and never title a file in this tree `ADR-`.
 
 ```markdown
 ---
@@ -371,6 +372,26 @@ We chose **[CHOICE]** because [primary motivation].
 
 - [UX-NNN or DESIGN.md rule]
 ```
+
+---
+
+<!-- SECTION: decision-lifecycle -->
+## Decision Retirement and Numbering
+
+Decision trees hold current intent, not a museum of old decisions. When a choice, scope, or constraint changes, rewrite the existing ADR or UX decision in place, preserving its number and updating its rationale. Rename a stale slug and update references when needed. Do not create a new numbered decision or a supersession chain merely because the choice changed; git records the previous contents. A separate new record is for an independent decision or an explicitly requested replacement record. Keep a concise note under Options Considered identifying the previously used option and why it was changed; it explains the current choice without retaining obsolete Decision sections or full historical snapshots.
+
+When a decision is fully retired, or the user explicitly requests a separate replacement record, delete the obsolete file; git history is the archive. Matching status fields and reciprocal links alone do not establish completed supersession.
+
+Search for the old identifier (`ADR-NNN` or `UX-NNN`), filename, extensionless stem, and number in `related_adrs`. Classify references by purpose:
+
+- Current guidance in code, specs, patterns, agent instructions, or another decision: update it to the applicable Active decision. Do not redirect blindly when scope differs; keep an unresolved migration dependency explicit.
+- Historical references, including Context, `Supersedes`, and predecessor replacement pointers: use plain historical text or a git permalink to the archived file. They do not justify keeping an obsolete file. Clean up obsolete predecessors in the affected chain; do not preserve a chain solely to keep its links resolving.
+
+Retain an old file only while a concrete unresolved migration still needs its contents, or while deleting it would lose content not preserved in git. State the dependency or preservation blocker and the condition for deletion in the result. A historical pointer or unused code comment is not a migration dependency. Never archive obsolete files in another working-tree directory.
+
+Check preservation before changing status: locate the latest commit containing the file and compare its contents with the working copy, including staged edits. A commit touching the path alone does not prove it preserves the current contents. If only retirement metadata or historical links were changed during this operation, the previously verified contents remain safely archived. Preserve uncommitted substantive content; do not create a commit without authorization just to make deletion possible. When deleting, remove live file links and obsolete frontmatter pointers to that path; record historical supersession in Related as plain text (for example, `Supersedes: ADR-032; see git history`) or a git permalink.
+
+Allocate one past the highest number used in that tree, considering both live files and deleted files in available git history. Do not reuse retired numbers or require contiguous numbering. Report when unavailable history prevents establishing the next unused number.
 
 ---
 
@@ -496,7 +517,7 @@ When code implements a documented decision, add a one-line reference and leave t
 
 ## Recording new intent
 
-When the user states a decision with a reason, corrects a pattern, or names something to avoid, offer to record it. With the Blueprint plugin, use `decide` skill, `require` skill, `good-pattern` skill, or `bad-pattern` skill. Without it, copy the shape of an existing file in the target directory; if the directory is empty, the formats are at https://github.com/rickardp/blueprint-mode/blob/main/plugins/blueprint-mode/skills/_templates/TEMPLATES.md. The next decision number is one past the highest in its directory.
+When the user states a decision with a reason, corrects a pattern, or names something to avoid, offer to record it. With the Blueprint plugin, use `decide` skill, `require` skill, `good-pattern` skill, or `bad-pattern` skill. Without it, copy the shape of an existing file in the target directory; if the directory is empty, the formats are at https://github.com/rickardp/blueprint-mode/blob/main/plugins/blueprint-mode/skills/_templates/TEMPLATES.md. Rewrite changed decisions in place, preserving their number; note the previously used option and why it changed under Options Considered. Git history archives previous contents and retired decisions. The next new decision number is one past the highest ever used in that tree, including deleted files in git history.
 
 ## Commands
 

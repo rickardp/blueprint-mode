@@ -32,7 +32,7 @@ Users describe the outcome; the agent selects the skill. Explain workflows witho
 | “Create a new TypeScript project with Blueprint.” | Scaffold a project and documentation |
 | “Set up design intent capture.” | Enable UX decisions and optional design context |
 | “Record our PostgreSQL choice because we need transactions.” | Capture a decision and its rationale |
-| “Replace ADR-012 with this new approach.” | Assess and record a replacement |
+| “Replace ADR-012 with this new approach.” | Rewrite ADR-012; explain the previous option and why it changed |
 | “Users must be able to export their data.” | Record a requirement |
 | “Save this implementation as an example to follow.” | Capture a good pattern |
 | “Document why we should avoid this pattern.” | Capture an anti-pattern |
@@ -44,7 +44,7 @@ Users describe the outcome; the agent selects the skill. Explain workflows witho
 
 ## Workflow
 
-Ask to set up or upgrade Blueprint once. State decisions and reasons as they arise, and ask to record requirements or patterns. Ask to save agreed intent from a conversation or check changes against documented decisions. Replacing a decision preserves its history in git; unresolved conflicts remain explicit.
+Ask to set up or upgrade Blueprint once. State decisions and reasons as they arise, and ask to record requirements or patterns. Ask to save agreed intent from a conversation or check changes against documented decisions. Changed decisions are rewritten in place with their number preserved; Options Considered explains the previous option and why it changed. Git preserves earlier contents and retired decisions; unresolved conflicts remain explicit.
 
 ## Design
 

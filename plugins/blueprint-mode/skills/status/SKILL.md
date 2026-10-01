@@ -38,4 +38,4 @@ allowed-tools: Read, Glob, Grep
 - CLAUDE.md / AGENTS.md: current | 1.x checklist (ask to upgrade Blueprint documentation) | missing
 ```
 
-Close with at most three next actions that matter: Draft decisions to finish, superseded decisions with no code references to delete, a 1.x agent instructions file to regenerate, or the setup skill to run.
+Close with at most three next actions that matter: Draft decisions to finish, obsolete decisions to clean up per `../_templates/TEMPLATES.md` section `decision-lifecycle`, a 1.x agent instructions file to regenerate, or the setup skill to run. Superseded and Deprecated counts describe temporary retained files, not a historical archive.

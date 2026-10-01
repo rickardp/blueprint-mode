@@ -1,30 +1,25 @@
 ---
 name: supersede
-description: Replace or deprecate an existing ADR or UX decision. Use when the user is changing a documented choice or retiring one.
+description: Rewrite or retire an existing ADR or UX decision. Use when the user changes a documented choice, asks for an explicit replacement record, or retires a decision.
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash
 ---
 
-# Supersede or Deprecate a Decision
+# Change or Retire a Decision
 
-Replacements stay in the same tree as the original: ADRs replace ADRs in `docs/adrs/`, UX decisions replace UX decisions in `design/ux-decisions/`. Formats: `../_templates/TEMPLATES.md` (relative to this skill's directory), sections `adr-reading`, `adr-template`, and `ux-decision-template`.
+Rewrite an existing decision in place when its choice changes; git preserves the previous choice. Formats and cleanup: `../_templates/TEMPLATES.md` (relative to this skill's directory), sections `adr-reading`, `adr-template`, `ux-decision-template`, and `decision-lifecycle`.
 
 ## Steps
 
 1. Find the decision. `ADR-NNN` searches `docs/adrs/`, `UX-NNN` searches `design/ux-decisions/`, a bare number searches both and asks if found in both. If nothing matches, say so and suggest recording a decision and its rationale.
-2. Read the full existing decision, including motivation and options. For ADRs, use `adr-reading` to distinguish a clarification or compatible extension from a changed choice, scope, or constraint. If only a clarification is requested, update in place, refresh references if retitled, report it, and stop; for an independent extension, record it as `decide` skill would, leave this decision Active, report it, and stop. Determine intent from what the user said. "Switching to X" or "replace with X" is a replacement; "removing", "no longer needed" is a deprecation. Ask once, in the same message as any missing rationale, if unclear.
-3. Replacement:
-   - Create the new decision with the next number in the same tree. For an ADR, use a self-contained Decision section with the new applicability, constraints, and exceptions; carry forward only rules that still apply. Its Context references the old decision; its Related section has `Supersedes: [ADR-OLD](./OLD-file.md)`. Add a `## Migration` section when the user gave migration notes.
-   - Set the old file's frontmatter to `status: Superseded` and `superseded_by: NNN-new-slug`.
-4. Deprecation:
-   - Set frontmatter to `status: Deprecated`, `deprecated_date: [TODAY]`, `deprecated_reason: [reason]` (default "No longer needed"), and add a `> **Deprecated on [TODAY]:** [reason]` note under the title.
-   - Locate code that implements the retired decision and list it in the report.
-5. Search the repo for references to the old decision: `ADR-NNN`, `UX-NNN`, its filename, its extensionless stem, and the bare number inside feature specs' `related_adrs` lists. Discount the ones this skill just wrote or is about to remove: the old file's own title and frontmatter, and the replacement's Context and `Supersedes:` references to it.
-6. Delete the old file only when nothing else refers to it and git still has its current contents (`git log -1 -- <file>` names a commit and `git diff HEAD -- <file>` is empty). Then rewrite the Supersedes line as plain text (`Supersedes: ADR-OLD, deleted; see git history`) and say so. Keep the file and say why when code, specs, patterns, agent instructions, or another decision still refer to it, or when it is uncommitted or has uncommitted edits.
-7. If a retitle made a filename slug stale, rename the file and update references as the template describes.
+2. Read the full existing decision, including rationale. For ADRs, use `adr-reading` to assess the requested choice, scope, and constraints. Determine intent from the request: "switch to X" or "replace with X" changes the existing decision; it does not request a new numbered record. An independent decision uses `decide` and leaves this decision intact. Ask once for unresolved intent or rationale that cannot be found; use Draft TODOs when missing rationale is skipped.
+3. For a changed choice or clarification, rewrite the same decision using its complete template and keep its number. Update Decision and rationale to the new intent, carry forward constraints that still apply, and remove obsolete guidance. Note the previously used option and why it changed under Options Considered, as the template describes. Use the settled/Draft status rules; do not mark the previous contents Superseded or create a successor. If the title changes, rename the slug and update incoming references as the template describes. Report and stop.
+4. Only when the user explicitly requests a separate replacement record, create it in the same tree with a new unused number and clean up the old record per `decision-lifecycle`. For retirement without replacement, apply that same cleanup and list code still implementing the retired decision. Check archival safety before editing or deleting old contents.
+5. Search and classify references per `decision-lifecycle`, including predecessors in an affected supersession chain. Update current guidance to the applicable Active decision and historical references to git history; historical links do not justify retention. Clean up obsolete predecessors reached through that chain.
+6. For each retained file, report its concrete migration dependency or unarchived content and what will allow deletion. Do not commit merely to enable deletion.
 
 ## Output
 
 ```
-Created ADR-NEW at docs/adrs/NEW-slug.md
-ADR-OLD marked Superseded and deleted (no code references; git history keeps it)
+Updated ADR-NNN at docs/adrs/NNN-slug.md (same number; git preserves the previous choice)
+Deleted ADR-OLD (retired); historical references use git history
 ```

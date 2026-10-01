@@ -6,7 +6,7 @@ allowed-tools: Read, Glob, Grep
 
 # List ADRs
 
-Use `../_templates/TEMPLATES.md`, section `adr-reading`, for discovery and reading depth.
+Use `../_templates/TEMPLATES.md`, sections `adr-reading` and `decision-lifecycle`, for discovery, reading depth, and retirement rules.
 
 ## Steps
 
@@ -37,4 +37,4 @@ Use `../_templates/TEMPLATES.md`, section `adr-reading`, for discovery and readi
 |---|-------|------|--------|
 ```
 
-Mention Draft ADRs that need completion and superseded ones with no code references that could be deleted.
+Mention Draft ADRs that need completion and obsolete records needing lifecycle cleanup. Superseded and Deprecated groups show temporary retained files, not a historical archive; historical links alone do not justify retention.

@@ -34,7 +34,7 @@ When code or a skill implements a documented decision, add a one-line reference 
 
 ## Recording new intent
 
-When the user states a decision with a reason or corrects a pattern, offer to record it with `decide` skill, `require` skill, `good-pattern` skill, or `bad-pattern` skill. Superseded decisions with no references may be deleted; git history is the archive.
+When the user states a decision with a reason or corrects a pattern, offer to record it with `decide` skill, `require` skill, `good-pattern` skill, or `bad-pattern` skill. Rewrite changed decisions in place, keeping their number; git preserves prior choices and retired decisions. Follow `_templates/TEMPLATES.md` section `decision-lifecycle` under the plugin skills for reference cleanup and temporary retention.
 
 ## Commands
 

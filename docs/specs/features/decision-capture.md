@@ -20,6 +20,8 @@ Blueprint Mode captures rationale for decisions rather than generating code from
 ## Requirements
 
 - Capture decision rationale, not implementation details
+- Rewrite changed decisions in place, preserving their number; note the previously used option and why it changed under Options Considered
+- Remove retired records after reference cleanup; historical references alone do not justify retention, and git history preserves earlier contents
 - Use the same decision-writing workflow and status criteria for direct requests and earlier conversation
 - Load conversation selection and routing from `decide/references/capture.md` only when requested; route requirements, patterns, and progress to their existing workflows
 - Validate that code respects decisions (not that it matches specs)
