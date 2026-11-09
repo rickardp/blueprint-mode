@@ -2,7 +2,7 @@
 status: Active
 maturity: Stable
 module: plugins/blueprint-mode/
-related_adrs: [4, 6]
+related_adrs: [4, 6, 7]
 ---
 
 # AI-Agent Readability
@@ -25,10 +25,10 @@ Blueprint Mode optimizes documentation for AI agent consumption over human histo
 
 - Delete superseded/deprecated ADRs when no code references them (git is the archive)
 - Use PR reviews as the advice mechanism (no explicit Advice section in ADRs)
-- Simplified status flow: Draft → Active → Superseded/Deprecated
-- Clear terminology: "Active" (not Adopted), "Deprecated" (not Retired)
+- Status flow: Draft (human choice, incomplete) or Proposed (agent-originated, unaccepted) → Active; Superseded/Deprecated are temporary retention states. Only a human accepts a Proposed ADR (sets Active, typically the reviewer within the PR); Proposed and Draft are not authority
+- Clear terminology: "Active" (not Adopted or Accepted); "Deprecated" is the temporary status, and "retired" means deleted from the tree
 - Docs folder reflects current state only
-- Discover relevant ADRs through references, titles, applicability, and broader body searches when needed, including cross-cutting decisions
+- Discover relevant ADRs by scanning all titles first, then searching applicability, references, and broader bodies when needed, including cross-cutting decisions; before creating a new ADR, check deleted ADRs in git history
 - Keep the ADR Decision section first and self-contained: choice, applicability, constraints, and exceptions; retain motivation and alternatives separately
 - Routine implementation retrieves only the prefix through Decision, stopping before Context, and follows it without reopening rationale; tool output excludes the unread rationale
 - Unclear applicability, possible conflicts, scope extensions, and legacy or incomplete operational sections require a full ADR read
@@ -46,9 +46,10 @@ Traditional ADR philosophy (Nygard, Fowler, ThoughtWorks) treats ADRs as permane
 |---------------------|----------------|-----|
 | Never delete ADRs | Delete when no code references | Signal over noise for AI agents |
 | Advice section with names/dates | PR reviews capture it | Avoid duplication, use existing workflow |
-| Draft → Proposed → Adopted → Retired | Draft → Active → Superseded/Deprecated | PR merge = approval; simpler flow |
-| "Adopted" terminology | "Active" | Clearer for current validity |
-| "Retired" terminology | "Deprecated" | Standard software term |
+| Draft → Proposed → Adopted → Retired | Draft/Proposed → Active; Superseded/Deprecated temporary | Proposed marks only agent-originated choices; the reviewer sets Active within the PR, and PR merge = approval |
+| "Adopted" or "Accepted" terminology | "Active"; `Accepted` read as Active, not flagged | Clearer for current validity; existing Nygard/MADR repos work unchanged |
+| "Rejected" status | Rejected Proposed ADRs are deleted | Signal over noise; git history keeps them |
+| "Retired" status | "Deprecated" as a temporary status; retired records are deleted | Standard software term; git history is the archive |
 
 ### The Primary Consumer
 
@@ -82,8 +83,8 @@ Fowler recommends an explicit Advice section recording "who said what" with name
 
 Blueprint Mode relies on PR reviews instead:
 - Advice is captured in PR comments
-- Decisions are approved by merge
-- "PR merge = approved" principle
+- Decisions are approved by merge: the reviewer sets a Proposed ADR to Active within the PR, and merging approves the Active ADR
+- "PR merge = approved" principle; the merger is the decider, so ADRs carry no `decided_by` field
 - No duplication between PR and ADR
 
 This works for teams with PR-based workflows. Teams requiring formal audit trails may need the explicit section.
@@ -101,6 +102,7 @@ This works for teams with PR-based workflows. Teams requiring formal audit trail
 | Shared ADR selection and reading convention | Done |
 | Operational Decision template and skill routing | Done |
 | Legacy ADR migration guidance and scoped validation | Done |
+| Proposed status for agent-originated choices and title-first discovery | Done |
 
 **Open questions:**
 - None

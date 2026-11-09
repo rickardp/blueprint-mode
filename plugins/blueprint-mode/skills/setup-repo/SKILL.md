@@ -14,7 +14,7 @@ Formats and working style are in `../_templates/TEMPLATES.md` (relative to this 
 2. Infer sensible defaults for what is unspecified: the runtime's common framework, its standard test runner, and a database driver if a database was named. Rationale defaults to "Team preference". Add only dependencies that were requested or are the de facto standard.
 3. Detect an existing agent instructions file per `agent-file-detection`; default to creating `CLAUDE.md`.
 4. Create:
-   - `docs/adrs/` with one Active ADR per stack choice
+   - `docs/adrs/` with one Active ADR per stack choice; defaults the user accepted are accepted choices, never Proposed
    - `docs/specs/product.md`, `boundaries.md` from the template
    - `docs/specs/features/` and `docs/specs/non-functional/` as empty directories
    - `patterns/good/.gitkeep`, `patterns/bad/anti-patterns.md` with the template header
@@ -22,7 +22,7 @@ Formats and working style are in `../_templates/TEMPLATES.md` (relative to this 
    - A minimal test setup for the runtime and one passing example test
    - Standard project files for the runtime (manifest, ignore file)
 5. Initialize git if needed for the requested project. Make an initial commit only when the user requested or already authorized it; otherwise leave the changes uncommitted.
-6. Do not create `design/` or `DESIGN.md`. If the project has UI in scope, mention that design intent capture can be enabled by asking for it.
+6. Do not create `design/`, `DESIGN.md`, or `docs/specs/risk-owners.md`. If the project has UI in scope, mention that design intent capture can be enabled by asking for it.
 
 ## Output
 

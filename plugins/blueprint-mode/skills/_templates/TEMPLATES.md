@@ -17,6 +17,8 @@ Shared file formats for every Blueprint skill. Skills point here instead of repe
 | UX decisions | `<!-- SECTION: ux-decision-template -->` |
 | Decision retirement and numbering | `<!-- SECTION: decision-lifecycle -->` |
 | UX-TBD comment | `<!-- SECTION: ux-tbd-comment -->` |
+| ADR-TBD comment | `<!-- SECTION: adr-tbd-comment -->` |
+| risk-owners.md | `<!-- SECTION: risk-owners -->` |
 | Good patterns | `<!-- SECTION: good-patterns -->` |
 | Anti-patterns | `<!-- SECTION: bad-patterns -->` |
 | CLAUDE.md / AGENTS.md | `<!-- SECTION: agent-instructions -->` |
@@ -33,6 +35,7 @@ docs/                       # Code / architecture tree (engineering reviewers)
 ├── specs/
 │   ├── product.md          # Vision, users, success metrics
 │   ├── boundaries.md       # Safe without asking / Ask first / Never
+│   ├── risk-owners.md      # Optional: who may own an accepted risk
 │   ├── features/*.md       # Feature specs (discovered by globbing)
 │   └── non-functional/*.md # NFRs by category (discovered by globbing)
 └── adrs/NNN-[slug].md      # Architecture decisions (discovered by globbing)
@@ -255,9 +258,15 @@ When adding, renaming, or removing scoped paths, refresh the compact routing lin
 <!-- SECTION: adr-reading -->
 ## ADR Selection and Reading
 
-Discover candidates without loading every ADR body: follow feature specs' `related_adrs` and code references, then scan titles and Decision applicability for affected paths and concepts. Include repository-wide decisions; links and path matches are starting points, not exclusive filters. Use targeted searches across ADR bodies and related links when matches are missing or incomplete. No match alone does not establish that no decision applies.
+Discover candidates without loading every ADR body, in this order:
 
-Use tools that return only the selected text, rather than reading the whole file and summarizing it. For discovery, return filenames, ADR titles, and `**Applies to:**` lines with a targeted search. For a candidate, read from the start of the file up to, but excluding, `## Context`: this includes status, title, and the complete operational Decision. Locate that heading with a line-number search and use a bounded read, or use this shell equivalent for one file:
+1. Scan all ADR titles, for example `grep -h -m1 '^# ' docs/adrs/*.md`. Always do this; it finds concept-only and repository-wide decisions.
+2. Search `**Applies to:**` lines for the affected paths and concepts, and follow feature specs' `related_adrs` and code references.
+3. Prefix-read each candidate as described below.
+
+Links and path matches are starting points, not exclusive filters. Use targeted searches across ADR bodies when matches are missing or incomplete. No match alone does not establish that no decision applies.
+
+Use tools that return only the selected text, rather than reading the whole file and summarizing it. For a candidate, read from the start of the file up to, but excluding, `## Context`: this includes status, title, and the complete operational Decision. Locate that heading with a line-number search and use a bounded read, or use this shell equivalent for one file:
 
 ```bash
 awk '/^## Context[[:space:]]*$/{exit} {print}' docs/adrs/NNN-slug.md
@@ -265,26 +274,41 @@ awk '/^## Context[[:space:]]*$/{exit} {print}' docs/adrs/NNN-slug.md
 
 If Context precedes Decision, the operational fields are missing or unresolved, or the structure does not provide a reliable stopping point, fall back to a full read. If a full read is needed after the prefix, retrieve the remainder from Context onward; do not reread an unchanged prefix already in context.
 
-Check frontmatter status before applying a decision. Follow `superseded_by` to the current decision; report broken replacement links. Drafts are unsettled and Deprecated decisions are not current authority. A reference to an old decision may identify migration work, not permission to follow it.
+Check frontmatter status before applying a decision; `Accepted` counts as Active (see the terminology in `adr-template`). Follow `superseded_by` to the current decision; report broken replacement links. Proposed and Draft decisions are not authority: when one covers your change, follow it for consistency without extending its scope, and name it in your report. Deprecated decisions are not current authority. A reference to an old decision may identify migration work, not permission to follow it.
 
-- **Apply an established decision:** Use the bounded prefix read above to retrieve the complete Decision section with its applicability, constraints, and exceptions. Stop before Context and follow the decision without reopening its motivation. A list summary is for discovery, not implementation.
+- **Apply an established decision:** Use the bounded prefix read above to retrieve the complete Decision section with its applicability, constraints, and exceptions. Stop before Context and follow the decision without reopening its motivation. An `(accepted risk, see Risk)` pointer in Exceptions does not require reading Risk. When Decision names `**Enforced by:**`, run that check after in-scope changes; do not alter the check to make it pass without raising the conflict. A list summary is for discovery, not implementation.
 - **Assess applicability or change:** If scope is unclear, or new features or rewritten requirements may conflict with or extend the decision's scope, read the full ADR, including Context, Options Considered, and Consequences, before classifying the change.
 - **Legacy or incomplete ADR:** Read the full file when Decision lacks enough operational context or contains unresolved scope. Do not interpret a missing exception or constraint field as permission.
 
 After a full read, distinguish a compatible extension (the decision still holds), a clarification (makes existing meaning explicit), and a conflict (changes the choice, applicability, constraints, or exceptions). Work outside the ADR's scope is not automatically a conflict. Preserve settled intent; motivation explains applicability but does not authorize overriding an Active decision. Raise an actual conflict with the affected rule and proposed change, asking only when the user's existing instruction does not resolve it. Leave material uncertainty explicit rather than inventing scope or rewriting intent.
+
+Before creating a new ADR when the title scan and `**Applies to:**` search find nothing on the topic, check for a deleted one: `git log --diff-filter=D --name-only --format= -- docs/adrs/ | grep -i <topic>`. Skip a deleted path whose number still exists in a live file; that was a slug rename. For a real match, read it with `git show $(git log --diff-filter=D -1 --format=%h -- <path>)^:<path>` and summarize the retired choice and why it changed under Options Considered. If git history is unavailable, say the check was not done.
 
 ---
 
 <!-- SECTION: adr-template -->
 ## docs/adrs/NNN-[slug].md
 
-Status: Draft (emerging, TODOs allowed), Active (settled), Superseded (`superseded_by:` set to the new file's stem), Deprecated (`deprecated_date:` and `deprecated_reason:` set). Superseded and Deprecated files are temporary exceptions under `decision-lifecycle`, not an archive. When the last `<!-- TODO: -->` in a Draft is resolved, set `status: Active`. Allocate numbers per `decision-lifecycle`.
+**Terminology.** Blueprint ADRs deliberately differ from Nygard and MADR. This list is the single definition; use these meanings, not the conventions you already know:
+
+- `Active` is settled. Read `Accepted` (Nygard, MADR) as `Active`. Write `Active` when you create a record or change its decision; reorganizing or onboarding keeps the existing value.
+- `Draft`: a person made the choice; rationale or scope is incomplete and TODOs are allowed. When the last `<!-- TODO: -->` is resolved, set `Active`.
+- `Proposed`: only a choice an agent introduced on its own authority that no human has decided. A decision a person states, or approves when asked, is never Proposed. In a repo not yet onboarded, a `proposed` record was written by a person: read it as Draft.
+- ADRs are not immutable. A changed decision is rewritten in place under its number; do not write a new ADR that supersedes it. Git history is the archive.
+- There is no `Rejected` status. A rejected Proposed ADR is deleted, and a retired decision is deleted after reference cleanup. `Superseded` (`superseded_by:` set to the new file's stem) and `Deprecated` (`deprecated_date:` and `deprecated_reason:` set) are temporary states during that cleanup, never an archive (`decision-lifecycle`).
+- A Nygard `## Status` section counts as the status until onboarding moves it into frontmatter.
+- Decision comes first, before Context, so agents can stop reading at Context.
+- Sections are `Options Considered` and `Consequences` with `**Positive:**` and `**Negative:**`, not MADR's `Considered Options`, `Decision Outcome`, or `Pros and Cons of the Options`; `validate` skill flags those and other synonyms such as Benefits, Trade-offs, or References.
+
+Status reflects only the decision; a TODO in the Risk section never changes it. Allocate numbers per `decision-lifecycle`.
+
+What counts as Proposed: a datastore, queue, protocol, or data format, a convention other modules must follow, or a dependency that `boundaries.md` does not put under Ask First; not local helpers or libraries already in the manifest. Ask First items are asked, and the answer is Active or Draft. Choices onboard or setup-repo find in the code, and defaults a user confirms during setup, are Active or Draft. Agents write Proposed ADRs through `decide` skill. Acceptance: the reviewer sets `status: Active`, typically within the PR, and the merge approves it. An agent sets Active only when a human explicitly accepts in the conversation; a `validate` finding is not acceptance.
 
 The slug describes the current title. If a retitle makes it stale, rename the file, then search for the old basename and its extensionless stem (`superseded_by` uses the stem) and update those references; leave number-only references such as `ADR-NNN` and `related_adrs` alone.
 
-Keep Decision self-contained and first after the title: the choice, applicability, implementation constraints, and exceptions. Use paths and concepts to make applicability searchable; identify repository-wide scope when stated. Put motivation in Context and trade-offs in Options Considered and Consequences. When changing a choice, note the previously used option and why it was changed under Options Considered; use only established rationale, leaving missing reasons explicit. Move any operative constraint found there into Decision, leaving its explanation in the rationale. Record only established scope; use `TBD` for unknown applicability or exceptions, and `None` only when established. For existing ADRs, read the full file before reorganizing it, preserve status and meaning unless the user authorized changing the decision, and flag unresolved scope without guessing.
+Keep Decision self-contained and first after the title: the choice, applicability, implementation constraints, and exceptions. `**Applies to:**` names concrete paths or globs whenever the decision is tied to code locations, concepts for the rest, and says so explicitly when the scope is repository-wide. Put motivation in Context and trade-offs in Options Considered and Consequences. When changing a choice, note the previously used option and why it was changed under Options Considered; use only established rationale, leaving missing reasons explicit. Move any operative constraint found there into Decision, leaving its explanation in the rationale. Record only established scope; use `TBD` for unknown applicability or exceptions, and `None` only when established. For existing ADRs, read the full file before reorganizing it, preserve status and meaning unless the user authorized changing the decision, and flag unresolved scope without guessing.
 
-Canonical vocabulary: frontmatter `status`, `**Positive:**` and `**Negative:**` under Consequences, and `## Related`. `validate` skill flags synonyms such as Benefits, Trade-offs, References, or "Accepted".
+Optional parts are never required and are omitted when unused. `**Enforced by:**` names a check that fails when the constraint breaks (a test, lint rule, or dependency rule); add it only when the user names one or it evidently exists, never ask for it. Without it no automated check exists, and the decision still applies. `**Exceptions:**` may end with a pointer such as `(accepted risk, see Risk)`. `## Risk` is written only when `docs/specs/risk-owners.md` exists (see `risk-owners`); Risk owner comes from that roster and Review by is a date. `**Revisit when:**` is a condition or date that would reopen the decision.
 
 ```markdown
 ---
@@ -327,6 +351,24 @@ date: [TODAY]
 [Links to related ADRs or specs, if any]
 ```
 
+Optional parts, added only when they apply: `**Enforced by:**` as the last line of Decision, `## Risk` after Consequences and before Related, and `**Revisit when:**` as the last line of the file.
+
+```markdown
+**Enforced by:** [CHECK_THAT_FAILS_WHEN_THE_CONSTRAINT_BREAKS]
+
+## Risk
+
+**Accepted risk:** [RISK]
+
+**Why acceptable:** [REASON]
+
+**Risk owner:** [OWNER_FROM_RISK_OWNERS]
+
+**Review by:** [YYYY-MM-DD]
+
+**Revisit when:** [CONDITION_OR_DATE]
+```
+
 A Draft ADR may contain only the Decision section plus `<!-- TODO: -->` markers for the rest.
 
 Use `decision-lifecycle` when replacing or retiring an ADR.
@@ -336,7 +378,7 @@ Use `decision-lifecycle` when replacing or retiring an ADR.
 <!-- SECTION: ux-decision-template -->
 ## design/ux-decisions/NNN-[slug].md
 
-Share ADR status values, rename rules, rationale sections, and `decision-lifecycle`. Use the UX shape below; the ADR operational fields are not required for UX decisions. Use `# UX-[NNN]:` as the title prefix, `[CHOICE] for [Context]` as the title shape, independent numbering, and `## Related` pointing at other UX decisions or `DESIGN.md` rules. Never file one under `docs/adrs/`, and never title a file in this tree `ADR-`.
+Share the `adr-template` terminology and status values except Proposed, rename rules, rationale sections, and `decision-lifecycle`. Use the UX shape below; the ADR operational fields are not required for UX decisions. Use `# UX-[NNN]:` as the title prefix, `[CHOICE] for [Context]` as the title shape, independent numbering, and `## Related` pointing at other UX decisions or `DESIGN.md` rules. Never file one under `docs/adrs/`, and never title a file in this tree `ADR-`. Decision-first and prefix reads do not apply: Context leads, and UX decisions are read in full. The optional `## Risk` (before Related) and `**Revisit when:**` (last line) follow the ADR rules; `Enforced by` does not apply, and agent-made UI choices are flagged with `UX-TBD` instead of proposed.
 
 ```markdown
 ---
@@ -391,7 +433,11 @@ Retain an old file only while a concrete unresolved migration still needs its co
 
 Check preservation before changing status: locate the latest commit containing the file and compare its contents with the working copy, including staged edits. A commit touching the path alone does not prove it preserves the current contents. If only retirement metadata or historical links were changed during this operation, the previously verified contents remain safely archived. Preserve uncommitted substantive content; do not create a commit without authorization just to make deletion possible. When deleting, remove live file links and obsolete frontmatter pointers to that path; record historical supersession in Related as plain text (for example, `Supersedes: ADR-032; see git history`) or a git permalink.
 
-Allocate one past the highest number used in that tree, considering both live files and deleted files in available git history. Do not reuse retired numbers or require contiguous numbering. Report when unavailable history prevents establishing the next unused number.
+A rejected Proposed ADR is deleted without the retention and preservation steps above: delete the file and replace its `ADR-NNN` code comments with `ADR-TBD: [rejected choice], replacement pending`. List code still implementing the rejected choice; change it only when asked. Before deleting a pre-Blueprint `rejected` record, note its option and reason under Options Considered of the ADR holding the current choice.
+
+Rewriting a decision's choice or scope resets its Risk owner and Review by to `<!-- TODO: -->` unless the user reconfirms them in the same request. When a risk is closed (fixed or mitigated), delete the Risk section and add one Consequences line: `Risk accepted until [DATE]; closed because [REASON]`. Before deleting a record that has a Risk section, move the section to the record that now carries the choice or confirm the risk is closed, and report which.
+
+Allocate one past the highest number used in that tree, considering both live files and deleted files in available git history. Do not reuse retired numbers, including rejected Proposed ones, or require contiguous numbering. Report when unavailable history prevents establishing the next unused number. Two branches may allocate the same number; renumber the unmerged record, usually the Proposed one, and update its references.
 
 ---
 
@@ -406,6 +452,41 @@ When UI code has no governing UX decision and the intent is unclear, flag it ins
 ```
 
 It is a flag, not a decision. It resolves by capturing a UX decision and replacing it with `// UX-NNN: [note]`, by removing it when a designer says it does not matter, or by the code being rewritten. Skip it for trivial layout scaffolding.
+
+---
+
+<!-- SECTION: adr-tbd-comment -->
+## ADR-TBD Comment
+
+When an agent cannot make a reasonable architectural choice without human input, it asks. If it must leave a placeholder in code anyway, it flags the spot with the open question:
+
+```ts
+// ADR-TBD: retry policy for webhook delivery; fixed 3 attempts until decided
+```
+
+It is a flag, not a decision, and resolves to `// ADR-NNN: [note]` once a decision is recorded, or by removal. A choice the agent could reasonably make is recorded as a Proposed ADR instead (see `adr-template`).
+
+---
+
+<!-- SECTION: risk-owners -->
+## docs/specs/risk-owners.md
+
+Risk tracking is opt-in, and this file turns it on. Without it, write no Risk sections; downsides go under Consequences. Create it, with the default rows, only when the user explicitly asks to track risks or confirms the suggestion. Suggest it at most once, in one sentence, and only when clearly valuable: the user knowingly accepts a risk with a stated reason, or discusses compliance or audit evidence. A passing mention of risk or ordinary downsides is not enough. onboard and setup-repo never create it.
+
+```markdown
+# Risk Owners
+
+Risk sections in decisions may name only owners listed here. Agents change rows only when the user names the change. Default review interval: 12 months.
+
+| Owner | Owns | Approves via |
+|-------|------|--------------|
+| Architect | Technical, security, and operational risk | [team or handle] |
+| Product manager | Product, UX, and AI-impact risk | [team or handle] |
+```
+
+Owners may be roles, named people, or both. `Approves via` (optional) names whose PR approval counts as risk sign-off; when it is empty, the merge is the sign-off.
+
+With the roster present, a risk the user states (accepting a risk instead of fixing it, rejecting a finding, meeting a requirement another way) counts as stated: write the Risk section with the owner the Owns column indicates and a review date one interval out, name both as proposed in the report, and leave `<!-- TODO: -->` where the roster does not determine the owner and the user skips the question. The acceptance can itself be the decision. A risk an agent infers is only suggested and written after the user confirms. Agents never add risks on their own: in a Proposed ADR, describe the risk under Consequences and note that it could be recorded; accepting the ADR does not accept the risk.
 
 ---
 
@@ -444,7 +525,7 @@ Link only the decisions that genuinely motivate the pattern.
 
 The file starts with this header so that anyone, with or without the plugin, can add an entry:
 
-```markdown
+````markdown
 # Anti-Patterns
 
 Common mistakes to avoid in this codebase. Add a section per anti-pattern in this shape:
@@ -469,7 +550,7 @@ Common mistakes to avoid in this codebase. Add a section per anti-pattern in thi
 **Why:** [Explanation]
 
 ---
-```
+````
 
 Severity: Critical (security, data loss, accessibility failures), High (performance, maintenance burden), Medium (code smell, inconsistency), Low (style).
 
@@ -478,11 +559,11 @@ Severity: Critical (security, data loss, accessibility failures), High (performa
 <!-- SECTION: agent-instructions -->
 ## CLAUDE.md / AGENTS.md
 
-The generated file routes an agent to the right document at the right moment and carries the few rules that must be known before any work. It does not demand reading everything before every edit; that burns context and slows work. Keep it under 60 lines. Fill the bracketed parts from the repo at generation time. Include the design lines only when `DESIGN.md` or `design/` exists.
+The generated file routes an agent to the right document at the right moment and carries the few rules that must be known before any work. It does not demand reading everything before every edit; that burns context and slows work. Keep it under 60 lines. Fill the bracketed parts from the repo at generation time. Include the design lines only when `DESIGN.md` or `design/` exists, and the risk-owners line only when `docs/specs/risk-owners.md` exists; add that line when the roster is created.
 
 Fill the single scoped-boundaries line with the paths under `Scoped Rules` in `boundaries.md`, preserving their scope and listing each once. Omit empty or placeholder sections; omit the entire line if none remain. Include only paths in the line, not rule contents. Refresh this line when regenerating instructions, including on reruns.
 
-```markdown
+````markdown
 # Agent Instructions for [PROJECT_NAME]
 
 [One-paragraph project description]
@@ -491,13 +572,14 @@ Fill the single scoped-boundaries line with the paths under `Scoped Rules` in `b
 
 Code shows what the system does. These files record why, so deliberate choices can be told apart from expedient ones:
 
-- Find `docs/adrs/` decisions via feature/code links and title and `**Applies to:**` searches, including global decisions. Read through Decision, stopping before Context; follow Active decisions and replacement links. Read fully for missing scope/constraints/exceptions, unclear applicability, or scope changes. Report code/ADR conflicts before following either.
+- Find `docs/adrs/` decisions by scanning all ADR titles first, then searching `**Applies to:**` lines and following feature/code links. Read through Decision, stopping before Context; follow Active (or legacy `Accepted`) decisions and any temporary `superseded_by` pointer, and run any `**Enforced by:**` check after in-scope changes. Read fully for missing scope/constraints/exceptions, unclear applicability, or scope changes. Report code/ADR conflicts before following either.
 - `docs/specs/features/` holds feature specs. Read one when implementing or changing that feature.
 - `docs/specs/boundaries.md` has the full list of what is safe, what to ask about, and what is never done, including module-scoped rules.
 - Scoped boundaries apply to [SCOPED_PATHS]. Before editing those paths, read only the matching sections in `docs/specs/boundaries.md`.
 - `patterns/good/` holds examples to follow: [list the files present, e.g. `repository.ts`, `api-handler.ts`]. `patterns/bad/anti-patterns.md` lists what to avoid. Check them when writing similar code.
 - `DESIGN.md` holds cross-cutting design rules. Read it for any UI work.
 - `design/ux-decisions/` records UX decisions. Read the relevant one when changing the affected surface. UX rationale goes there, never under `docs/adrs/`.
+- `docs/specs/risk-owners.md` lists who may own an accepted risk. Write a Risk section (Accepted risk, Why acceptable, Risk owner from that list, Review by one interval out) only for a risk the user states; otherwise put downsides under Consequences.
 
 ## Autonomy and limits
 
@@ -513,15 +595,18 @@ When code implements a documented decision, add a one-line reference and leave t
 // ADR-NNN: [brief note]
 // UX-NNN: [brief note]
 // UX-TBD: [what is unclear]   <- UI with no governing decision; flag, do not invent a reason
+// ADR-TBD: [question]          <- placeholder for a choice that needs human input
 ```
 
 ## Recording new intent
 
-When the user states a decision with a reason, corrects a pattern, or names something to avoid, offer to record it. With the Blueprint plugin, use `decide` skill, `require` skill, `good-pattern` skill, or `bad-pattern` skill. Without it, copy the shape of an existing file in the target directory; if the directory is empty, the formats are at https://github.com/rickardp/blueprint-mode/blob/main/plugins/blueprint-mode/skills/_templates/TEMPLATES.md. Rewrite changed decisions in place, preserving their number; note the previously used option and why it changed under Options Considered. Git history archives previous contents and retired decisions. The next new decision number is one past the highest ever used in that tree, including deleted files in git history.
+When the user states a decision with a reason, corrects a pattern, or names something to avoid, offer to record it. With the Blueprint plugin, use `decide` skill, `require` skill, `good-pattern` skill, or `bad-pattern` skill. Without it, copy the shape of an existing file in the target directory; if the directory is empty, the formats are at https://github.com/rickardp/blueprint-mode/blob/main/plugins/blueprint-mode/skills/_templates/TEMPLATES.md. Rewrite changed decisions in place, preserving their number; note the previously used option and why it changed under Options Considered. These ADRs differ from Nygard and MADR: write `Active` (not `Accepted`), put Decision before Context, never write a superseding ADR or a `Rejected` status, delete retired records, and use `Proposed` only for choices you introduced. Git history archives previous contents and retired decisions. The next new decision number is one past the highest ever used in that tree, including deleted files in git history.
+
+When you make an architectural choice that later code will depend on (a datastore, queue, protocol, data format, or cross-module convention; not local helpers or libraries already in the manifest), that no ADR covers, and that is not an Ask first item (ask about those; a choice the user approves is theirs, Active or Draft), record it as a Proposed ADR (with the plugin, `decide` skill) and say so. Only a human accepts a Proposed ADR; a validate finding is not acceptance. Proposed and Draft ADRs are not authority; if one covers your change, follow it for consistency without extending it, and say so. If you cannot make a reasonable choice without human input, ask; if you must leave a placeholder, mark it `ADR-TBD`.
 
 ## Commands
 
 ```bash
 [test / lint / typecheck commands]
 ```
-```
+````

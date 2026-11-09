@@ -33,6 +33,7 @@ Users describe the outcome; the agent selects the skill. Explain workflows witho
 | “Set up design intent capture.” | Enable UX decisions and optional design context |
 | “Record our PostgreSQL choice because we need transactions.” | Capture a decision and its rationale |
 | “Replace ADR-012 with this new approach.” | Rewrite ADR-012; explain the previous option and why it changed |
+| “We accept this risk for ADR-012; track it.” | Add a Risk section with owner and review date (opt-in) |
 | “Users must be able to export their data.” | Record a requirement |
 | “Save this implementation as an example to follow.” | Capture a good pattern |
 | “Document why we should avoid this pattern.” | Capture an anti-pattern |
@@ -44,7 +45,11 @@ Users describe the outcome; the agent selects the skill. Explain workflows witho
 
 ## Workflow
 
-Ask to set up or upgrade Blueprint once. State decisions and reasons as they arise, and ask to record requirements or patterns. Ask to save agreed intent from a conversation or check changes against documented decisions. Changed decisions are rewritten in place with their number preserved; Options Considered explains the previous option and why it changed. Git preserves earlier contents and retired decisions; unresolved conflicts remain explicit.
+Ask to set up or upgrade Blueprint once. State decisions and reasons as they arise, and ask to record requirements or patterns. Ask to save agreed intent from a conversation or check changes against documented decisions. Changed decisions are rewritten in place with their number preserved; Options Considered explains the previous option and why it changed. Git preserves earlier contents and retired decisions; unresolved conflicts remain explicit. When an agent makes an architectural choice no ADR covers, it records it as Proposed; only a human accepts it (set it Active, for example in the PR) or rejects it (the file is deleted). Proposed and Draft ADRs are not authority.
+
+## Risk tracking
+
+Opt-in. Ask to track risks and Blueprint creates `docs/specs/risk-owners.md`, the roster of who may own an accepted risk; accepted risks then get a Risk section in their decision with an owner and review date. Without the roster, downsides stay under Consequences. Agents never add risks on their own.
 
 ## Design
 

@@ -114,6 +114,7 @@ names or invocation syntax. Selecting a skill does not authorize work beyond you
 | “Set up design intent capture.” | Enable UX decisions and optional design context |
 | “Record our PostgreSQL choice because we need transactions.” | Capture a decision and its rationale |
 | “Replace ADR-012 with this new approach.” | Rewrite ADR-012; explain the previous option and why it changed |
+| “We accept this risk for ADR-012; track it.” | Add a Risk section with owner and review date (opt-in) |
 | “Users must be able to export their data.” | Record a requirement |
 | “Save this implementation as an example to follow.” | Capture a good pattern |
 | “Document why we should avoid this pattern.” | Capture an anti-pattern |
@@ -129,6 +130,19 @@ scripts, or dependencies. Skills are written for current models: they state the 
 only for rationale they cannot find, and the generated `CLAUDE.md` routes an agent to the right
 document when a change touches it rather than demanding every file be read before every edit
 (see [ADR-006](docs/adrs/006-skills-and-repo-files-only.md)).
+
+### Changes in 2.2.0
+
+Agents no longer make architectural choices silently. When an agent introduces a choice later code
+will depend on, such as a datastore, protocol, or cross-module convention, it records it as a
+`Proposed` ADR; only a human accepts it by setting `Active`, typically within the PR. Where an agent
+cannot choose without human input, it asks or leaves an `ADR-TBD` comment. ADRs may name the check
+that enforces them (`Enforced by`) and a condition that reopens them (`Revisit when`). Risk tracking
+is opt-in: once `docs/specs/risk-owners.md` exists, accepted risks get a Risk section with an owner
+from that roster and a review date, which `validate` reports on without gating merges. ADR discovery
+starts with a title scan, and agents check deleted ADRs in git history before creating a new one.
+`status: Accepted` from Nygard or MADR repos is read as `Active` and no longer reported as drift; the
+ADR template spells out where Blueprint terminology differs from those conventions.
 
 ### Changes in 2.1.2
 
@@ -151,8 +165,8 @@ Routine implementation retrieves only the prefix through Decision, stopping befo
 follows it after checking status. Unclear applicability or proposed features and requirements that
 may conflict or extend the decision's scope call for reading the full motivation, options, and
 consequences before distinguishing a clarification from a conflict. Agents discover relevant
-decisions through feature links, code references, and searches of applicability, including
-repository-wide choices. Older ADRs require full reads until onboarding reorganizes
+decisions by scanning all ADR titles, then searching `Applies to` lines for affected paths and
+concepts, so repository-wide choices are not missed. Proposed and Draft ADRs are not authority. Older ADRs require full reads until onboarding reorganizes
 them without changing their meaning; unknown scope stays explicit.
 
 ### Upgrading to 2.1.0
@@ -208,7 +222,8 @@ project/
 │   │   │   └── [feature].md
 │   │   ├── non-functional/        # NFRs by category (discovered via globbing)
 │   │   │   └── [category].md      # Performance, security, scalability, etc.
-│   │   └── boundaries.md          # Safe Without Asking / Ask First / Never Do
+│   │   ├── boundaries.md          # Safe Without Asking / Ask First / Never Do
+│   │   └── risk-owners.md         # Who may own accepted risks (opt-in)
 │   └── adrs/
 │       ├── 001-runtime-choice.md
 │       └── ...                    # One ADR per motivated decision

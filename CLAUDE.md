@@ -4,7 +4,7 @@ Blueprint Mode is a Claude Code and Codex plugin that makes a repo carry its own
 
 ## Where intent lives
 
-- Find `docs/adrs/` decisions via feature/code links and title and `**Applies to:**` searches, including global decisions. Read through Decision, stopping before Context; follow Active decisions and replacement links. Read fully for missing scope/constraints/exceptions, unclear applicability, or scope changes. Report code/ADR conflicts before following either.
+- Find `docs/adrs/` decisions by scanning all ADR titles first, then searching `**Applies to:**` lines and following feature/code links. Read through Decision, stopping before Context; follow Active decisions and replacement links. Read fully for missing scope/constraints/exceptions, unclear applicability, or scope changes. Report code/ADR conflicts before following either.
 - ADR-006 covers the plugin’s no-hooks architecture and skill authoring conventions.
 - `docs/specs/features/` holds feature specs. Read one when changing that feature.
 - `docs/specs/boundaries.md` says what is safe without asking, what to ask about, and what is never done. Read it before changing the plugin surface, manifests, or file formats.
@@ -30,11 +30,12 @@ When code or a skill implements a documented decision, add a one-line reference 
 
 ```
 # ADR-006: skills point at templates instead of embedding formats
+# ADR-TBD: [question]   <- placeholder for a choice that needs human input
 ```
 
 ## Recording new intent
 
-When the user states a decision with a reason or corrects a pattern, offer to record it with `decide` skill, `require` skill, `good-pattern` skill, or `bad-pattern` skill. Rewrite changed decisions in place, keeping their number; git preserves prior choices and retired decisions. Follow `_templates/TEMPLATES.md` section `decision-lifecycle` under the plugin skills for reference cleanup and temporary retention.
+When the user states a decision with a reason or corrects a pattern, offer to record it with `decide` skill, `require` skill, `good-pattern` skill, or `bad-pattern` skill. When you make an architectural choice later work will depend on that no ADR covers and that is not an Ask first item, record it as a Proposed ADR with `decide` skill and say so; only a human accepts it. Proposed and Draft ADRs are not authority. These ADRs differ from Nygard and MADR: write `Active`, never a superseding ADR or a `Rejected` status. Rewrite changed decisions in place, keeping their number; git preserves prior choices and retired decisions. Follow `_templates/TEMPLATES.md` section `decision-lifecycle` under the plugin skills for reference cleanup and temporary retention.
 
 ## Commands
 
